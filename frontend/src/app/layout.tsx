@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "../context/ToastContext";
 import { AuthProvider } from "../context/AuthContext";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+  variable: "--font-mono",
   subsets: ["latin"],
 });
 
@@ -27,9 +27,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className="light h-full antialiased"
+      style={{ colorScheme: 'light' }}
     >
-      <body className="min-h-full flex flex-col">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+      </head>
+      <body className={`${outfit.variable} ${geistMono.variable} min-h-full flex flex-col font-sans`}>
         <ToastProvider>
           <AuthProvider>
             {children}
@@ -39,4 +43,5 @@ export default function RootLayout({
     </html>
   );
 }
+
 

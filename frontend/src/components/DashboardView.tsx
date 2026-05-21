@@ -6,24 +6,31 @@ import { formatCurrency } from '../lib/utils';
 import { MockLocation } from '../lib/constants';
 import { useToast } from '../context/ToastContext';
 import { 
-  Plus, DollarSign, Package, ShoppingBag, Eye, 
-  CheckCircle2, Clock, XCircle, AlertCircle, Calendar, PlusCircle,
-  Pencil, Trash2, Star, X, Upload
+  Plus, DollarSign, Package, ShoppingBag, 
+  CheckCircle2, Clock, Calendar, PlusCircle,
+  Pencil, Trash2, Star, X, Upload, AlertCircle
 } from 'lucide-react';
 
 interface DashboardViewProps {
   user: any;
   currentLocation: MockLocation;
+  initialShowAddForm?: boolean;
+  onCloseAddForm?: () => void;
 }
 
-export default function DashboardView({ user, currentLocation }: DashboardViewProps) {
+export default function DashboardView({ 
+  user, 
+  currentLocation,
+  initialShowAddForm,
+  onCloseAddForm
+}: DashboardViewProps) {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'stats' | 'requests' | 'listings' | 'rentals'>('stats');
   const [bookings, setBookings] = useState<any[]>([]);
   const [listings, setListings] = useState<any[]>([]);
   
   // Listing form state
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(initialShowAddForm || false);
   const [editingListingId, setEditingListingId] = useState<string | null>(null);
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
@@ -74,6 +81,18 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
       setFormAddress(currentLocation.address);
     }
   }, [currentLocation, editingListingId]);
+
+  // Trigger form opening when navigated from FAB
+  useEffect(() => {
+    if (initialShowAddForm) {
+      setEditingListingId(null);
+      setShowAddForm(true);
+      setActiveTab('listings');
+      if (onCloseAddForm) {
+        onCloseAddForm();
+      }
+    }
+  }, [initialShowAddForm]);
 
   const handleImageFile = (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
@@ -222,17 +241,17 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
   const pendingCount = bookings.filter(b => b.status === 'pending').length;
 
   return (
-    <div className="w-full py-6 animate-in fade-in duration-300">
+    <div className="w-full py-6 animate-in fade-in duration-300 relative z-10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Dashboard Header */}
-        <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 border-b border-border/40 pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-3xl font-black text-foreground tracking-tight">
-              {user.role === 'owner' ? 'Hosting Dashboard' : 'Renter Dashboard'}
+              {user.role === 'owner' ? 'Hosting Console' : 'Renter Console'}
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Logged in as <span className="font-semibold text-foreground">{user.name}</span> ({user.email})
+              Logged in as <span className="font-semibold text-primary">{user.name}</span> ({user.email})
             </p>
           </div>
           
@@ -242,7 +261,7 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                 setEditingListingId(null);
                 setShowAddForm(true);
               }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-accent hover:bg-accent/90 text-white text-xs font-bold rounded-2xl transition shadow-lg shadow-accent/20"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:brightness-110 text-white text-xs font-bold rounded-xl border border-primary/20 transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
             >
               <Plus className="h-4 w-4" />
               List an Item
@@ -250,30 +269,42 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
           )}
         </div>
 
-        {/* Dashboard Tabs */}
-        <div className="flex gap-4 border-b border-border/60 py-4 mb-6 text-xs sm:text-sm font-semibold overflow-x-auto no-scrollbar">
+        {/* Dashboard Tabs Segment Control */}
+        <div className="flex gap-1 bg-muted dark:bg-black/10 border border-border/40 p-1 rounded-xl my-6 w-fit overflow-x-auto hide-scrollbar">
           {user.role === 'owner' ? (
             <>
               <button
                 onClick={() => setActiveTab('stats')}
-                className={`pb-2 border-b-2 transition ${activeTab === 'stats' ? 'border-primary text-primary font-bold' : 'border-transparent text-muted-foreground'}`}
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
+                  activeTab === 'stats' 
+                    ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
+                    : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
+                }`}
               >
                 Overview
               </button>
               <button
                 onClick={() => setActiveTab('requests')}
-                className={`pb-2 border-b-2 transition flex items-center gap-1.5 ${activeTab === 'requests' ? 'border-primary text-primary font-bold' : 'border-transparent text-muted-foreground'}`}
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'requests' 
+                    ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
+                    : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
+                }`}
               >
                 Rental Requests
                 {pendingCount > 0 && (
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[9px] text-white">
+                  <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white">
                     {pendingCount}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActiveTab('listings')}
-                className={`pb-2 border-b-2 transition ${activeTab === 'listings' ? 'border-primary text-primary font-bold' : 'border-transparent text-muted-foreground'}`}
+                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
+                  activeTab === 'listings' 
+                    ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
+                    : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
+                }`}
               >
                 My Items ({listings.length})
               </button>
@@ -281,7 +312,11 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
           ) : (
             <button
               onClick={() => setActiveTab('rentals')}
-              className={`pb-2 border-b-2 transition ${activeTab === 'rentals' ? 'border-primary text-primary font-bold' : 'border-transparent text-muted-foreground'}`}
+              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
+                activeTab === 'rentals' 
+                  ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
+                  : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
+              }`}
             >
               My Rentals ({bookings.length})
             </button>
@@ -292,41 +327,47 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
         {activeTab === 'stats' && user.role === 'owner' && (
           <div className="flex flex-col gap-6">
             {/* Stat Cards */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-3xl border border-border bg-card p-6 shadow-sm flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+              {/* Total Revenue */}
+              <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
+                <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
                   <DollarSign className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Total Revenue</p>
-                  <p className="text-2xl font-black text-foreground">{formatCurrency(totalEarnings)}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Total Revenue</p>
+                  <p className="text-2xl font-black text-foreground mt-0.5">{formatCurrency(totalEarnings)}</p>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-border bg-card p-6 shadow-sm flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              {/* Active Listings */}
+              <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
+                <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
                   <Package className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Active Listings</p>
-                  <p className="text-2xl font-black text-foreground">{listings.length}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Active Listings</p>
+                  <p className="text-2xl font-black text-foreground mt-0.5">{listings.length}</p>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-border bg-card p-6 shadow-sm flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent">
+              {/* Total Bookings */}
+              <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
+                <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
                   <ShoppingBag className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Total Bookings</p>
-                  <p className="text-2xl font-black text-foreground">{bookings.length}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Total Bookings</p>
+                  <p className="text-2xl font-black text-foreground mt-0.5">{bookings.length}</p>
                 </div>
               </div>
             </div>
 
             {/* Quick Requests Snippet */}
-            <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-foreground border-b border-border/60 pb-3 mb-4">
+            <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-foreground border-b border-border/40 pb-3 mb-4">
                 Recent Booking Requests
               </h3>
               {bookings.length === 0 ? (
@@ -334,17 +375,17 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
               ) : (
                 <div className="flex flex-col gap-3">
                   {bookings.slice(0, 3).map((b) => (
-                    <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-2xl border border-border bg-muted/20 sm:flex-row sm:items-center">
+                    <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:bg-muted/40 sm:flex-row sm:items-center transition-all duration-200">
                       <div className="flex items-center gap-3">
                         <img 
                           src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
                           alt="" 
-                          className="h-10 w-10 rounded-lg object-cover font-semibold"
+                          className="h-10 w-10 rounded-lg object-cover border border-border/20"
                         />
                         <div>
                           <p className="text-xs font-bold text-foreground truncate max-w-[200px]">{b.listing?.title}</p>
                           <p className="text-[10px] text-muted-foreground">
-                            Renter: <span className="font-semibold">{b.renter?.name}</span>
+                            Renter: <span className="font-semibold text-foreground">{b.renter?.name}</span>
                           </p>
                         </div>
                       </div>
@@ -356,10 +397,10 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                         </div>
                         
                         {/* Status tag */}
-                        <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                          b.status === 'pending' ? 'bg-amber-500/10 text-amber-500' :
-                          b.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500' :
-                          b.status === 'completed' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'
+                        <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                          b.status === 'pending' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20' :
+                          b.status === 'approved' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20' :
+                          b.status === 'completed' ? 'bg-primary/10 text-primary border-primary/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
                         }`}>
                           {b.status}
                         </span>
@@ -374,19 +415,19 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
 
         {/* Requests Tab Content */}
         {activeTab === 'requests' && user.role === 'owner' && (
-          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-foreground border-b border-border/60 pb-3 mb-4">Manage Requests</h3>
+          <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-foreground border-b border-border/40 pb-3 mb-4">Manage Requests</h3>
             {bookings.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-8">No requests found for your items.</p>
             ) : (
               <div className="flex flex-col gap-4">
                 {bookings.map((b) => (
-                  <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-2xl border border-border bg-muted/20 md:flex-row md:items-center">
+                  <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:border-primary/25 hover:bg-muted/40 md:flex-row md:items-center transition-all duration-300">
                     <div className="flex items-center gap-4">
                       <img 
                         src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
                         alt="" 
-                        className="h-12 w-12 rounded-xl object-cover"
+                        className="h-12 w-12 rounded-lg object-cover border border-border/20"
                       />
                       <div>
                         <p className="text-sm font-bold text-foreground">{b.listing?.title}</p>
@@ -394,7 +435,7 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                           Renter: <span className="font-semibold text-foreground">{b.renter?.name}</span> ({b.renter?.email})
                         </p>
                         <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1">
-                          <Calendar className="h-3 w-3" />
+                          <Calendar className="h-3 w-3 text-primary" />
                           {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
                         </p>
                       </div>
@@ -411,13 +452,13 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                           <>
                             <button
                               onClick={() => handleUpdateStatus(b._id, 'approved')}
-                              className="px-3 py-1.5 bg-emerald-500 text-white text-[10px] font-extrabold rounded-lg hover:bg-emerald-600 transition"
+                              className="px-3 py-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
                             >
                               Approve
                             </button>
                             <button
                               onClick={() => handleUpdateStatus(b._id, 'cancelled')}
-                              className="px-3 py-1.5 bg-red-500 text-white text-[10px] font-extrabold rounded-lg hover:bg-red-600 transition"
+                              className="px-3 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
                             >
                               Decline
                             </button>
@@ -426,14 +467,14 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                         {b.status === 'approved' && (
                           <button
                             onClick={() => handleUpdateStatus(b._id, 'completed')}
-                            className="px-3 py-1.5 bg-primary text-white text-[10px] font-extrabold rounded-lg hover:bg-primary/95 transition"
+                            className="px-3 py-1.5 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
                           >
                             Mark Completed
                           </button>
                         )}
                         {b.status !== 'pending' && b.status !== 'approved' && (
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                            b.status === 'completed' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'
+                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                            b.status === 'completed' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
                           }`}>
                             {b.status}
                           </span>
@@ -449,31 +490,33 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
 
         {/* Listings Tab Content */}
         {activeTab === 'listings' && user.role === 'owner' && (
-          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-foreground border-b border-border/60 pb-3 mb-4">My Listed Items</h3>
+          <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-foreground border-b border-border/40 pb-3 mb-4">My Listed Items</h3>
             {listings.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-8">You haven't listed any items yet.</p>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {listings.map((item) => (
-                  <div key={item._id} className="rounded-2xl border border-border p-3 bg-muted/20 flex flex-col justify-between gap-3 hover:border-primary/30 transition-all duration-200">
+                  <div key={item._id} className="rounded-xl border border-border/30 p-3.5 bg-muted/20 hover:border-primary/35 hover:bg-muted/40 flex flex-col justify-between gap-3.5 transition-all duration-300 group shadow-sm">
                     <div className="flex gap-3">
-                      <img 
-                        src={item.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
-                        alt="" 
-                        className="h-16 w-16 rounded-xl object-cover shrink-0"
-                      />
+                      <div className="relative h-16 w-16 rounded-lg overflow-hidden border border-border/20 shrink-0">
+                        <img 
+                          src={item.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
+                          alt="" 
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </div>
                       <div className="flex flex-col justify-between overflow-hidden">
                         <div>
-                          <p className="text-xs font-bold text-foreground truncate">{item.title}</p>
+                          <p className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors duration-200">{item.title}</p>
                           <p className="text-[10px] text-muted-foreground mt-0.5">{item.category}</p>
                         </div>
-                        <p className="text-sm font-extrabold text-foreground mt-1">
-                          {formatCurrency(item.pricePerDay)}<span className="text-[10px] text-muted-foreground">/day</span>
+                        <p className="text-sm font-extrabold text-primary mt-1">
+                          {formatCurrency(item.pricePerDay)}<span className="text-[10px] text-muted-foreground font-bold">/day</span>
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-end gap-2 border-t border-border/40 pt-2 mt-1">
+                    <div className="flex items-center justify-end gap-2 border-t border-border/20 pt-2 mt-1">
                       <button
                         onClick={() => {
                           setEditingListingId(item._id);
@@ -486,14 +529,14 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                           setFormImage(item.images?.[0] || '');
                           setShowAddForm(true);
                         }}
-                        className="flex items-center gap-1 px-2.5 py-1.5 bg-secondary text-foreground hover:bg-secondary/80 text-[10px] font-bold rounded-lg transition"
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/40 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer"
                       >
-                        <Pencil className="h-3 w-3" />
+                        <Pencil className="h-3 w-3 text-primary" />
                         Edit
                       </button>
                       <button
                         onClick={() => handleDeleteListing(item._id)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white text-[10px] font-bold rounded-lg transition"
+                        className="flex items-center gap-1 px-2.5 py-1.5 bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 hover:border-rose-500/30 border border-rose-500/15 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer"
                       >
                         <Trash2 className="h-3 w-3" />
                         Delete
@@ -506,21 +549,21 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
           </div>
         )}
 
-        {/* rentals Tab Content */}
+        {/* Rentals Tab Content */}
         {activeTab === 'rentals' && user.role !== 'owner' && (
-          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-foreground border-b border-border/60 pb-3 mb-4">Rental History</h3>
+          <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-foreground border-b border-border/40 pb-3 mb-4">Rental History</h3>
             {bookings.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-8">You have not booked any rentals yet.</p>
             ) : (
               <div className="flex flex-col gap-4">
                 {bookings.map((b) => (
-                  <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-2xl border border-border bg-muted/20 md:flex-row md:items-center">
+                  <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:border-primary/25 hover:bg-muted/40 md:flex-row md:items-center transition-all duration-300">
                     <div className="flex items-center gap-4">
                       <img 
                         src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
                         alt="" 
-                        className="h-12 w-12 rounded-xl object-cover"
+                        className="h-12 w-12 rounded-lg object-cover border border-border/20"
                       />
                       <div>
                         <p className="text-sm font-bold text-foreground">{b.listing?.title}</p>
@@ -528,7 +571,7 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                           Owner: <span className="font-semibold text-foreground">{b.owner?.name}</span> ({b.owner?.email})
                         </p>
                         <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1">
-                          <Calendar className="h-3 w-3" />
+                          <Calendar className="h-3 w-3 text-primary" />
                           {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
                         </p>
                       </div>
@@ -544,7 +587,7 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                         {b.status === 'pending' && (
                           <button
                             onClick={() => handleUpdateStatus(b._id, 'cancelled')}
-                            className="px-3 py-1.5 bg-red-500 text-white text-[10px] font-extrabold rounded-lg hover:bg-red-600 transition"
+                            className="px-3 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
                           >
                             Cancel Request
                           </button>
@@ -552,16 +595,16 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                         {b.status === 'completed' && (
                           <button
                             onClick={() => handleOpenReviewModal(b)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 text-white text-[10px] font-extrabold rounded-lg hover:bg-amber-600 transition"
+                            className="flex items-center gap-1 px-3 py-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 hover:bg-amber-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer animate-pulse"
                           >
-                            <Star className="h-3 w-3 fill-white" />
+                            <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
                             Write Review
                           </button>
                         )}
                         {b.status !== 'pending' && (
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                            b.status === 'approved' ? 'bg-emerald-500/10 text-emerald-500' :
-                            b.status === 'completed' ? 'bg-blue-500/10 text-blue-500' : 'bg-red-500/10 text-red-500'
+                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
+                            b.status === 'approved' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20' :
+                            b.status === 'completed' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
                           }`}>
                             {b.status}
                           </span>
@@ -579,23 +622,25 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
 
       {/* Listing Form Modal */}
       {showAddForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-lg rounded-3xl bg-card border border-border p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/80 pb-3">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-lg rounded-2xl bg-card border border-border/40 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/40 pb-3">
               {editingListingId ? 'Edit Listed Item' : 'List a New Item'}
             </h3>
             <button
               onClick={handleCloseForm}
-              className="absolute right-4 top-4 p-2 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition"
+              className="absolute right-4 top-4 p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer"
             >
-              <XCircle className="h-5 w-5" />
+              <X className="h-5 w-5" />
             </button>
 
             {formSuccess ? (
               <div className="flex flex-col items-center justify-center py-8 text-center animate-in zoom-in-95">
-                <CheckCircle2 className="h-14 w-14 text-emerald-500 mb-2" />
-                <h4 className="font-bold text-lg">{editingListingId ? 'Item Updated!' : 'Item Listed!'}</h4>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="h-16 w-16 flex items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 mb-3 animate-bounce">
+                  <CheckCircle2 className="h-8 w-8" />
+                </div>
+                <h4 className="font-bold text-lg text-foreground">{editingListingId ? 'Item Updated!' : 'Item Listed!'}</h4>
+                <p className="text-xs text-muted-foreground mt-1 max-w-xs leading-relaxed">
                   {editingListingId ? 'Your item changes have been saved.' : 'Item was listed successfully at your simulated location!'}
                 </p>
               </div>
@@ -603,24 +648,24 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
               <form onSubmit={handleCreateListing} className="flex flex-col gap-4 mt-4 text-xs font-semibold">
                 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] text-muted-foreground uppercase">Item Title</label>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Item Title</label>
                   <input
                     type="text"
                     required
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="e.g. Cordless Lawn Mower"
-                    className="rounded-xl border border-border bg-transparent p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                    className="rounded-xl border border-border bg-muted/40 p-2.5 text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] text-muted-foreground uppercase">Category</label>
+                    <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Category</label>
                     <select
                       value={formCategory}
                       onChange={(e) => setFormCategory(e.target.value)}
-                      className="rounded-xl border border-border bg-card p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                      className="rounded-xl border border-border bg-card p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                     >
                       <option>Tools</option>
                       <option>Electronics</option>
@@ -632,61 +677,61 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] text-muted-foreground uppercase">Address / Location</label>
+                    <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Address / Location</label>
                     <input
                       type="text"
                       required
                       value={formAddress}
                       onChange={(e) => setFormAddress(e.target.value)}
-                      className="rounded-xl border border-border bg-transparent p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                      className="rounded-xl border border-border bg-muted/40 p-2.5 text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2.5">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] text-muted-foreground uppercase">Price / Day ($)</label>
+                    <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Price / Day ($)</label>
                     <input
                       type="number"
                       required
                       value={formPrice}
                       onChange={(e) => setFormPrice(Number(e.target.value))}
-                      className="rounded-xl border border-border bg-transparent p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                      className="rounded-xl border border-border bg-muted/40 p-2.5 text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] text-muted-foreground uppercase">Security Deposit ($)</label>
+                    <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Security Deposit ($)</label>
                     <input
                       type="number"
                       value={formDeposit}
                       onChange={(e) => setFormDeposit(Number(e.target.value))}
-                      className="rounded-xl border border-border bg-transparent p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                      className="rounded-xl border border-border bg-muted/40 p-2.5 text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                     />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] text-muted-foreground uppercase">Description</label>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Description</label>
                   <textarea
                     required
                     value={formDescription}
                     onChange={(e) => setFormDescription(e.target.value)}
                     placeholder="Provide condition, features, and pickup instructions..."
                     rows={3}
-                    className="rounded-xl border border-border bg-transparent p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                    className="rounded-xl border border-border bg-muted/40 p-2.5 text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] text-muted-foreground uppercase">Item Image</label>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Item Image</label>
                   <div className="flex flex-col gap-2">
                     {formImage && (
-                      <div className="relative h-28 w-full rounded-xl overflow-hidden border border-border bg-muted">
+                      <div className="relative h-28 w-full rounded-xl overflow-hidden border border-border/40 bg-muted">
                         <img src={formImage} alt="Preview" className="h-full w-full object-cover" />
                         <button
                           type="button"
                           onClick={() => setFormImage('')}
-                          className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 hover:bg-black/80 transition"
+                          className="absolute top-2 right-2 bg-black/75 hover:bg-black text-white rounded-full p-1.5 hover:text-rose-400 transition cursor-pointer"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -699,7 +744,7 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                         const file = e.dataTransfer.files?.[0];
                         if (file) handleImageFile(file);
                       }}
-                      className="flex flex-col items-center justify-center border-2 border-dashed border-border hover:border-primary/50 rounded-xl p-4 cursor-pointer transition bg-transparent"
+                      className="flex flex-col items-center justify-center border border-dashed border-border/60 hover:border-primary/60 rounded-xl p-4.5 cursor-pointer transition-all duration-200 bg-muted/20 hover:bg-muted/40"
                     >
                       <input
                         type="file"
@@ -712,16 +757,17 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                         id="image-file-input"
                       />
                       <label htmlFor="image-file-input" className="cursor-pointer flex flex-col items-center text-center w-full">
-                        <Upload className="h-5 w-5 text-muted-foreground mb-1" />
+                        <Upload className="h-5 w-5 text-primary mb-1.5" />
                         <span className="text-[11px] text-muted-foreground">
-                          Drag & drop or <span className="text-primary font-bold">browse</span> image file
+                          Drag & drop or <span className="text-primary font-bold hover:underline">browse</span> image file
                         </span>
+                        <span className="text-[9px] text-muted-foreground/60 mt-0.5">Supports PNG, JPG, GIF up to 5MB</span>
                       </label>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-2 bg-primary/5 rounded-2xl p-3 border border-primary/10">
+                <div className="flex items-start gap-2 bg-primary/5 rounded-xl p-3 border border-primary/10">
                   <PlusCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                   <p className="text-[10px] text-muted-foreground leading-relaxed">
                     This item will be listed at coordinates <span className="font-semibold text-foreground">[{currentLocation.coordinates.join(', ')}]</span> corresponding to your current simulated location, enabling hyperlocal discovery.
@@ -729,15 +775,15 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                 </div>
 
                 {formError && (
-                  <div className="flex items-center gap-1.5 text-destructive bg-destructive/10 border border-destructive/20 p-2.5 rounded-xl text-[10px]">
-                    <AlertCircle className="h-4 w-4" />
+                  <div className="flex items-center gap-1.5 text-rose-500 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl text-[10px]">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
                     <span>{formError}</span>
                   </div>
                 )}
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-primary text-white font-extrabold rounded-2xl hover:bg-primary/90 transition shadow-lg shadow-primary/15 mt-2"
+                  className="w-full py-2.5 bg-primary text-white font-extrabold rounded-xl hover:brightness-110 border border-primary/20 transition-all duration-200 cursor-pointer shadow-sm active:scale-98 mt-2"
                 >
                   {editingListingId ? 'Save Changes' : 'Confirm Listing'}
                 </button>
@@ -750,21 +796,23 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
 
       {/* Review Modal */}
       {showReviewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-3xl bg-card border border-border p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/80 pb-3">Write a Review</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-md rounded-2xl bg-card border border-border/40 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/40 pb-3">Write a Review</h3>
             <button
               onClick={() => setShowReviewModal(false)}
-              className="absolute right-4 top-4 p-2 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition"
+              className="absolute right-4 top-4 p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
 
             {reviewSuccess ? (
               <div className="flex flex-col items-center justify-center py-8 text-center animate-in zoom-in-95">
-                <CheckCircle2 className="h-14 w-14 text-emerald-500 mb-2" />
-                <h4 className="font-bold text-lg">Review Submitted!</h4>
-                <p className="text-xs text-muted-foreground mt-1">
+                <div className="h-16 w-16 flex items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 mb-3 animate-bounce">
+                  <CheckCircle2 className="h-8 w-8" />
+                </div>
+                <h4 className="font-bold text-lg text-foreground">Review Submitted!</h4>
+                <p className="text-xs text-muted-foreground mt-1 max-w-xs leading-relaxed">
                   Thank you for sharing your experience!
                 </p>
               </div>
@@ -772,20 +820,20 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
               <form onSubmit={handleSubmitReview} className="flex flex-col gap-4 mt-4 text-xs font-semibold">
                 
                 <div className="flex flex-col gap-1 items-center my-2">
-                  <label className="text-[10px] text-muted-foreground uppercase mb-1">Your Rating</label>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Your Rating</label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         type="button"
                         onClick={() => setReviewRating(star)}
-                        className="transition transform hover:scale-110 p-1"
+                        className="transition-transform hover:scale-110 p-1 cursor-pointer"
                       >
                         <Star
-                          className={`h-7 w-7 ${
+                          className={`h-7 w-7 transition-colors duration-150 ${
                             star <= reviewRating
-                              ? 'fill-amber-400 text-amber-400'
-                              : 'text-muted-foreground/40 hover:text-amber-400/80'
+                              ? 'fill-amber-450 text-amber-500'
+                              : 'text-muted-foreground/35 hover:text-amber-500'
                           }`}
                         />
                       </button>
@@ -794,27 +842,27 @@ export default function DashboardView({ user, currentLocation }: DashboardViewPr
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <label className="text-[10px] text-muted-foreground uppercase">Comments / Feedback</label>
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Comments / Feedback</label>
                   <textarea
                     required
                     value={reviewComment}
                     onChange={(e) => setReviewComment(e.target.value)}
                     placeholder="Tell us about the item condition, owner communication, and overall experience..."
                     rows={4}
-                    className="rounded-xl border border-border bg-transparent p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                    className="rounded-xl border border-border bg-muted/40 p-2.5 text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none"
                   />
                 </div>
 
                 {reviewError && (
-                  <div className="flex items-center gap-1.5 text-destructive bg-destructive/10 border border-destructive/20 p-2.5 rounded-xl text-[10px]">
-                    <AlertCircle className="h-4 w-4" />
+                  <div className="flex items-center gap-1.5 text-rose-500 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl text-[10px]">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
                     <span>{reviewError}</span>
                   </div>
                 )}
 
                 <button
                   type="submit"
-                  className="w-full py-2.5 bg-primary text-white font-extrabold rounded-2xl hover:bg-primary/90 transition shadow-lg shadow-primary/15 mt-2"
+                  className="w-full py-2.5 bg-primary text-white font-extrabold rounded-xl hover:brightness-110 border border-primary/20 transition-all duration-200 cursor-pointer shadow-sm active:scale-98 mt-2"
                 >
                   Submit Review
                 </button>

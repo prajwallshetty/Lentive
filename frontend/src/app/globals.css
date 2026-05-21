@@ -1,48 +1,48 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fafafc;
-  --foreground: #090d16;
+  --background: #fcf9f8;
+  --foreground: #1c1b1b;
   --card: #ffffff;
-  --card-foreground: #090d16;
+  --card-foreground: #1c1b1b;
   --popover: #ffffff;
-  --popover-foreground: #090d16;
-  --primary: #4f46e5;
+  --popover-foreground: #1c1b1b;
+  --primary: #006c49;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f8fafc;
-  --muted-foreground: #64748b;
-  --accent: #ff385c;
-  --accent-foreground: #ffffff;
-  --destructive: #ef4444;
+  --secondary: #2b6954;
+  --secondary-foreground: #ffffff;
+  --muted: #f6f3f2;
+  --muted-foreground: #3c4a42;
+  --accent: #10b981;
+  --accent-foreground: #002113;
+  --destructive: #ba1a1a;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #6366f1;
-  --radius: 1rem;
+  --border: #bbcabf;
+  --input: #e5e2e1;
+  --ring: #006c49;
+  --radius: 1.5rem;
 }
 
 .dark {
-  --background: #090c15;
-  --foreground: #f8fafc;
-  --card: #111827;
-  --card-foreground: #f8fafc;
-  --popover: #111827;
-  --popover-foreground: #f8fafc;
-  --primary: #6366f1;
-  --primary-foreground: #ffffff;
-  --secondary: #1f2937;
-  --secondary-foreground: #f8fafc;
-  --muted: #1f2937;
-  --muted-foreground: #9ca3af;
-  --accent: #ff4e72;
-  --accent-foreground: #ffffff;
-  --destructive: #f87171;
-  --destructive-foreground: #ffffff;
-  --border: #1f2937;
-  --input: #1f2937;
-  --ring: #818cf8;
+  --background: #0f1511;
+  --foreground: #e5e2e1;
+  --card: #161e1a;
+  --card-foreground: #e5e2e1;
+  --popover: #161e1a;
+  --popover-foreground: #e5e2e1;
+  --primary: #4edea3;
+  --primary-foreground: #002113;
+  --secondary: #95d3ba;
+  --secondary-foreground: #002117;
+  --muted: #1c2521;
+  --muted-foreground: #bbcabf;
+  --accent: #6ffbbe;
+  --accent-foreground: #002113;
+  --destructive: #ffb4ab;
+  --destructive-foreground: #690005;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.05);
+  --ring: #4edea3;
 }
 
 @theme {
@@ -74,52 +74,39 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   overflow-x: hidden;
   transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
 }
 
-/* Premium utilities */
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.dark .glass {
-  background: rgba(17, 24, 39, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
-}
-
-.dark .glass-card {
-  background: rgba(17, 24, 39, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.03);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+/* Material Symbols Support */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
 }
 
 /* Hide scrollbar but keep functional */
-.no-scrollbar::-webkit-scrollbar {
+.hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
-.no-scrollbar {
+.hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-/* Premium Scrollbar */
+/* Premium scrollbar for lists */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -128,9 +115,23 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.2);
+  background: rgba(12, 108, 73, 0.15);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.4);
+  background: rgba(12, 108, 73, 0.3);
+}
+
+/* Premium Card utilities */
+.m3-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.m3-card:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }

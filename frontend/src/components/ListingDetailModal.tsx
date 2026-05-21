@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, ShieldCheck, MapPin, Star, User, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { X, Calendar, ShieldCheck, MapPin, Star, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 import { api } from '../lib/api';
 
@@ -140,13 +140,13 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
   const isOwner = user && (user.id === listing.owner?._id || user.id === listing.owner);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-card border border-border text-foreground shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200 no-scrollbar">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-card border border-border/40 text-foreground shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200 hide-scrollbar">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-2 rounded-full hover:bg-secondary text-muted-foreground hover:text-foreground transition"
+          className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer"
         >
           <X className="h-5 w-5" />
         </button>
@@ -157,17 +157,17 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
           {/* Main Content - Left 3 Columns */}
           <div className="md:col-span-3 flex flex-col gap-6">
             <div>
-              <span className="text-xs font-bold text-accent uppercase tracking-widest">{listing.category}</span>
-              <h2 className="text-2xl font-extrabold tracking-tight mt-1 leading-tight">{listing.title}</h2>
+              <span className="text-xs font-extrabold text-primary uppercase tracking-widest">{listing.category}</span>
+              <h2 className="text-2xl font-black tracking-tight text-foreground mt-1 leading-tight">{listing.title}</h2>
               
-              <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                <MapPin className="h-4 w-4 text-accent" />
+              <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground">
+                <MapPin className="h-4 w-4 text-primary shrink-0" />
                 <span>{listing.address}</span>
               </div>
             </div>
 
             {/* Image Showcase */}
-            <div className="aspect-video w-full overflow-hidden rounded-2xl bg-secondary border border-border">
+            <div className="aspect-video w-full overflow-hidden rounded-2xl bg-muted border border-border/40 shadow-inner">
               <img
                 src={listing.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=600&q=80'}
                 alt={listing.title}
@@ -177,22 +177,22 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
 
             {/* Description */}
             <div>
-              <h4 className="font-bold text-base border-b border-border/80 pb-2">Description</h4>
-              <p className="text-sm text-muted-foreground leading-relaxed mt-2.5">
+              <h4 className="font-bold text-sm text-foreground border-b border-border/40 pb-2 uppercase tracking-wider">Description</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed mt-3">
                 {listing.description}
               </p>
             </div>
 
             {/* Owner Section */}
-            <div className="flex items-center justify-between rounded-2xl border border-border p-4 bg-muted/40">
+            <div className="flex items-center justify-between rounded-2xl border border-border/40 p-4 bg-muted/40 dark:bg-black/10">
               <div className="flex items-center gap-3">
                 <img
                   src={listing.owner?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80'}
                   alt={listing.owner?.name || 'Owner'}
-                  className="h-11 w-11 rounded-full object-cover border border-border shadow-sm"
+                  className="h-11 w-11 rounded-full object-cover border border-border/20 shadow-sm"
                 />
                 <div>
-                  <p className="text-xs text-muted-foreground">Offered by</p>
+                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Offered by</p>
                   <p className="text-sm font-bold text-foreground">{listing.owner?.name || 'Local Host'}</p>
                 </div>
               </div>
@@ -200,7 +200,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
               {listing.owner?.ratings && (
                 <div className="flex flex-col items-end">
                   <div className="flex items-center gap-1 text-sm font-bold text-foreground">
-                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
                     <span>{(listing.owner.ratings.average || 5.0).toFixed(1)}</span>
                   </div>
                   <span className="text-[10px] text-muted-foreground">{listing.owner.ratings.count || 3} reviews</span>
@@ -209,12 +209,12 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
             </div>
 
             {/* Reviews Section */}
-            <div className="mt-4">
-              <h4 className="font-bold text-base border-b border-border/80 pb-2 flex items-center justify-between">
+            <div className="mt-2">
+              <h4 className="font-bold text-sm text-foreground border-b border-border/40 pb-2 flex items-center justify-between uppercase tracking-wider">
                 <span>Reviews & Ratings</span>
                 {listing.ratings && listing.ratings.count > 0 && (
-                  <span className="text-xs text-muted-foreground font-medium flex items-center gap-1">
-                    <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                  <span className="text-xs text-primary font-bold flex items-center gap-1 normal-case tracking-normal">
+                    <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
                     {listing.ratings.average.toFixed(1)} ({listing.ratings.count} ratings)
                   </span>
                 )}
@@ -223,19 +223,19 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
               {reviewsLoading ? (
                 <div className="py-6 text-center text-xs text-muted-foreground animate-pulse">Loading reviews...</div>
               ) : reviews.length === 0 ? (
-                <div className="py-8 text-center rounded-2xl border border-dashed border-border bg-muted/10 mt-3 text-xs text-muted-foreground">
+                <div className="py-8 text-center rounded-2xl border border-dashed border-border/40 bg-muted/20 mt-3 text-xs text-muted-foreground">
                   No reviews yet. Be the first to rent and review this item!
                 </div>
               ) : (
-                <div className="flex flex-col gap-3 mt-3 max-h-[300px] overflow-y-auto pr-1 no-scrollbar">
+                <div className="flex flex-col gap-3 mt-3 max-h-[300px] overflow-y-auto pr-1 hide-scrollbar">
                   {reviews.map((rev) => (
-                    <div key={rev._id} className="p-4 rounded-2xl border border-border bg-card shadow-sm flex flex-col gap-2">
+                    <div key={rev._id} className="p-4 rounded-2xl border border-border/30 bg-muted/25 shadow-sm flex flex-col gap-2">
                       <div className="flex justify-between items-center">
                         <div className="flex items-center gap-2">
                           <img
                             src={rev.reviewer?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=40&h=40&q=80'}
                             alt=""
-                            className="h-7 w-7 rounded-full object-cover border border-border"
+                            className="h-7 w-7 rounded-full object-cover border border-border/20"
                           />
                           <div>
                             <p className="text-xs font-bold text-foreground">{rev.reviewer?.name || 'Renter'}</p>
@@ -243,7 +243,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
                           </div>
                         </div>
                         <div className="flex items-center gap-0.5 text-xs text-amber-500 font-bold">
-                          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400 shrink-0" />
+                          <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500 shrink-0" />
                           <span>{rev.rating.toFixed(1)}</span>
                         </div>
                       </div>
@@ -257,17 +257,17 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
 
           {/* Booking Side Widget - Right 2 Columns */}
           <div className="md:col-span-2 flex flex-col gap-4">
-            <div className="rounded-3xl border border-border bg-card p-6 shadow-lg shadow-black/5">
+            <div className="rounded-3xl border border-border/40 bg-card p-6 shadow-md">
               
               {/* Daily pricing head */}
-              <div className="flex items-baseline justify-between border-b border-border pb-4 mb-4">
+              <div className="flex items-baseline justify-between border-b border-border/40 pb-4 mb-4">
                 <div>
-                  <span className="text-2xl font-black text-foreground">{formatCurrency(listing.pricePerDay)}</span>
+                  <span className="text-2xl font-black text-primary">{formatCurrency(listing.pricePerDay)}</span>
                   <span className="text-xs text-muted-foreground"> / day</span>
                 </div>
                 {listing.ratings && listing.ratings.count > 0 && (
-                  <div className="flex items-center gap-1 text-xs font-semibold text-foreground">
-                    <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  <div className="flex items-center gap-1 text-xs font-bold text-foreground">
+                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
                     <span>{listing.ratings.average.toFixed(1)}</span>
                     <span className="text-muted-foreground">({listing.ratings.count})</span>
                   </div>
@@ -276,12 +276,12 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
 
               {/* Blocked Dates Notice */}
               {blockedDates.length > 0 && (
-                <div className="mb-4 bg-muted/40 border border-border p-3 rounded-2xl text-[10px] text-muted-foreground">
+                <div className="mb-4 bg-muted/40 border border-border/40 p-3 rounded-2xl text-[10px] text-muted-foreground">
                   <p className="font-bold text-foreground mb-1 flex items-center gap-1">
-                    <Calendar className="h-3.5 w-3.5 text-accent" />
+                    <Calendar className="h-3.5 w-3.5 text-primary" />
                     Booked Dates (Unavailable)
                   </p>
-                  <div className="flex flex-col gap-1 max-h-[60px] overflow-y-auto no-scrollbar font-semibold">
+                  <div className="flex flex-col gap-1 max-h-[60px] overflow-y-auto hide-scrollbar font-semibold">
                     {blockedDates.map((b, idx) => (
                       <div key={idx} className="flex justify-between">
                         <span>• {new Date(b.startDate).toLocaleDateString()}</span>
@@ -294,7 +294,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
 
               {success ? (
                 <div className="flex flex-col items-center justify-center py-8 text-center animate-in zoom-in-95">
-                  <CheckCircle2 className="h-16 w-16 text-emerald-500 mb-3" />
+                  <CheckCircle2 className="h-16 w-16 text-primary mb-3" />
                   <h4 className="font-bold text-lg text-foreground">Reservation Sent!</h4>
                   <p className="text-xs text-muted-foreground mt-1 max-w-[200px]">
                     Your booking request has been sent to the owner. Redirecting...
@@ -312,7 +312,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
                         value={startDate}
                         min={new Date().toISOString().split('T')[0]}
                         onChange={(e) => setStartDate(e.target.value)}
-                        className="rounded-xl border border-border bg-transparent p-2 text-xs font-medium focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground"
+                        className="rounded-xl border border-border bg-muted/40 p-2.5 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground cursor-pointer"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
@@ -323,14 +323,14 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
                         value={endDate}
                         min={startDate || new Date().toISOString().split('T')[0]}
                         onChange={(e) => setEndDate(e.target.value)}
-                        className="rounded-xl border border-border bg-transparent p-2 text-xs font-medium focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground"
+                        className="rounded-xl border border-border bg-muted/40 p-2.5 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground cursor-pointer"
                       />
                     </div>
                   </div>
 
-                  {/* Pricing break downs */}
+                  {/* Pricing breakdowns */}
                   {days > 0 && (
-                    <div className="flex flex-col gap-2 bg-secondary/50 rounded-2xl p-4 mt-2 border border-border/40 text-xs">
+                    <div className="flex flex-col gap-2 bg-muted/50 dark:bg-black/15 rounded-2xl p-4 mt-2 border border-border/40 text-xs">
                       <div className="flex justify-between text-muted-foreground">
                         <span>{formatCurrency(listing.pricePerDay)} × {days} days</span>
                         <span className="font-semibold text-foreground">{formatCurrency(totalPrice)}</span>
@@ -339,17 +339,17 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
                         <span>Refundable deposit</span>
                         <span className="font-semibold text-foreground">{formatCurrency(listing.securityDeposit)}</span>
                       </div>
-                      <div className="h-[1px] bg-border my-1" />
+                      <div className="h-[1px] bg-border/40 my-1" />
                       <div className="flex justify-between text-sm font-extrabold">
                         <span>Total Due</span>
-                        <span className="text-accent">{formatCurrency(totalPrice + listing.securityDeposit)}</span>
+                        <span className="text-primary font-black">{formatCurrency(totalPrice + listing.securityDeposit)}</span>
                       </div>
                     </div>
                   )}
 
                   {/* Warning for owners */}
                   {isOwner && (
-                    <div className="flex items-start gap-2 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-500 border border-amber-500/20">
+                    <div className="flex items-start gap-2 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400 border border-amber-500/20">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                       <span>This is your listing. You cannot rent your own items.</span>
                     </div>
@@ -357,7 +357,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
 
                   {/* Error Notification */}
                   {error && (
-                    <div className="flex items-start gap-2 rounded-xl bg-destructive/10 p-3 text-xs text-destructive border border-destructive/20">
+                    <div className="flex items-start gap-2 rounded-xl bg-rose-500/10 p-3 text-xs text-rose-600 dark:text-rose-400 border border-rose-500/20">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                       <span>{error}</span>
                     </div>
@@ -366,13 +366,13 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
                   <button
                     type="submit"
                     disabled={loading || isOwner}
-                    className="w-full py-3 bg-accent hover:bg-accent/90 active:scale-95 text-white font-bold rounded-2xl disabled:opacity-50 transition shadow-lg shadow-accent/20 text-sm mt-2 cursor-pointer"
+                    className="w-full py-3.5 bg-primary hover:brightness-110 active:scale-95 text-white font-bold rounded-2xl disabled:opacity-50 transition shadow-sm text-xs uppercase tracking-wider mt-2 cursor-pointer"
                   >
                     {loading ? 'Reserving...' : 'Reserve Rental'}
                   </button>
 
-                  <div className="flex items-center justify-center gap-1.5 mt-2 text-[10px] text-muted-foreground font-semibold">
-                    <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0" />
+                  <div className="flex items-center justify-center gap-1.5 mt-2 text-[10px] text-muted-foreground font-bold">
+                    <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
                     <span>Refundable security deposit is protected</span>
                   </div>
                 </form>
@@ -384,39 +384,39 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
 
       {/* Razorpay Checkout Simulator overlay */}
       {showPaymentSimulator && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-sm rounded-3xl bg-[#1e2230] text-white border border-[#2b3147] shadow-2xl p-6 flex flex-col justify-between overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
+          <div className="relative w-full max-w-sm rounded-3xl bg-card text-foreground border border-border/40 shadow-2xl p-6 flex flex-col justify-between overflow-hidden animate-in zoom-in-95 duration-200">
             
             {/* Razorpay stylized header */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+            <div className="flex items-center justify-between border-b border-border/40 pb-4 mb-4">
               <div className="flex items-center gap-2">
                 <div className="h-7 w-7 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-sm tracking-tight text-white">R</div>
                 <div>
-                  <p className="text-[10px] text-white/50 uppercase tracking-widest leading-none font-bold">Razorpay Secure</p>
-                  <p className="text-xs font-bold leading-none mt-1">Lentive Hyperlocal</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest leading-none font-bold">Razorpay Secure</p>
+                  <p className="text-xs font-bold leading-none mt-1 text-foreground">Lentive Hyperlocal</p>
                 </div>
               </div>
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20">TEST MODE</span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/20">TEST MODE</span>
             </div>
 
             <div className="flex flex-col gap-4 text-xs font-medium">
-              <div className="flex justify-between items-center bg-white/5 p-3 rounded-2xl border border-white/5">
+              <div className="flex justify-between items-center bg-muted/50 dark:bg-black/15 p-3 rounded-2xl border border-border/40">
                 <div>
-                  <p className="text-white/60 text-[10px]">Rental Item</p>
-                  <p className="text-xs font-bold mt-0.5 text-white truncate max-w-[150px]">{listing.title}</p>
+                  <p className="text-muted-foreground text-[10px]">Rental Item</p>
+                  <p className="text-xs font-bold mt-0.5 text-foreground truncate max-w-[150px]">{listing.title}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-white/60 text-[10px]">Total Amount</p>
-                  <p className="text-sm font-black mt-0.5 text-blue-400">{formatCurrency(totalPrice + listing.securityDeposit)}</p>
+                  <p className="text-muted-foreground text-[10px]">Total Amount</p>
+                  <p className="text-sm font-black mt-0.5 text-primary">{formatCurrency(totalPrice + listing.securityDeposit)}</p>
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-white/5 border border-white/5">
-                <p className="text-white/60 text-[10px] uppercase">Renter Account</p>
-                <p className="font-bold truncate">{user?.name} ({user?.email})</p>
+              <div className="flex flex-col gap-1.5 p-3 rounded-2xl bg-muted/50 dark:bg-black/15 border border-border/40">
+                <p className="text-muted-foreground text-[10px] uppercase">Renter Account</p>
+                <p className="font-bold truncate text-foreground">{user?.name} ({user?.email})</p>
               </div>
 
-              <div className="flex flex-col gap-1 bg-blue-500/10 text-blue-400 p-3 rounded-2xl border border-blue-500/20 text-[10px] leading-relaxed">
+              <div className="flex flex-col gap-1 bg-primary/10 text-primary p-3 rounded-2xl border border-primary/20 text-[10px] leading-relaxed">
                 <p className="font-bold">Trust Indicators & Escrow Guarantee:</p>
                 <p>• Refundable security deposit of {formatCurrency(listing.securityDeposit)} is protected in escrow.</p>
                 <p>• Daily rate of {formatCurrency(listing.pricePerDay)} is held pending owner approval.</p>
@@ -429,13 +429,13 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
                   const mockPayId = `pay_simulated_${Math.random().toString(36).substring(2, 12)}`;
                   handlePaymentSuccess(mockPayId);
                 }}
-                className="flex-grow py-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold rounded-2xl transition shadow-lg shadow-blue-600/30 cursor-pointer text-center"
+                className="flex-grow py-3 bg-primary hover:brightness-110 active:scale-95 text-white text-xs font-bold rounded-2xl transition shadow-md cursor-pointer text-center"
               >
                 Pay Successful
               </button>
               <button
                 onClick={() => setShowPaymentSimulator(false)}
-                className="py-3 px-4 bg-white/10 hover:bg-white/15 active:scale-95 text-white text-xs font-bold rounded-2xl transition border border-white/15 cursor-pointer text-center"
+                className="py-3 px-4 bg-muted hover:bg-muted/80 active:scale-95 text-foreground text-xs font-bold rounded-2xl transition border border-border/40 cursor-pointer text-center"
               >
                 Cancel
               </button>
