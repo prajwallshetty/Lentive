@@ -184,3 +184,23 @@ exports.deleteListing = async (req, res, next) => {
     next(err);
   }
 };
+
+// @desc    Get booked date ranges for a listing
+// @route   GET /api/listings/:id/availability
+// @access  Public
+exports.getListingAvailability = async (req, res, next) => {
+  try {
+    const Booking = require('../models/Booking');
+    const bookings = await Booking.find({
+      listing: req.params.id,
+      status: { $in: ['approved', 'active', 'completed', 'pending'] }
+    }).select('startDate endDate');
+
+    res.status(200).json({
+      success: true,
+      bookings
+    });
+  } catch (err) {
+    next(err);
+  }
+};

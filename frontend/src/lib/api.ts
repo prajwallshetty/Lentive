@@ -160,11 +160,20 @@ export const api = {
       if (!res.ok) throw new Error(json.error || 'Failed to delete listing');
       return json;
     },
+    
+    async getAvailability(id: string) {
+      const res = await fetch(`${API_URL}/listings/${id}/availability`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch listing availability');
+      return json;
+    },
   },
 
   // Bookings
   bookings: {
-    async create(data: { listingId: string; startDate: string; endDate: string }) {
+    async create(data: { listingId: string; startDate: string; endDate: string; paymentId?: string; paymentStatus?: string }) {
       const res = await fetch(`${API_URL}/bookings`, {
         method: 'POST',
         headers: getHeaders(),
@@ -201,6 +210,28 @@ export const api = {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to update booking status');
+      return json;
+    },
+  },
+
+  // Reviews
+  reviews: {
+    async getForListing(listingId: string) {
+      const res = await fetch(`${API_URL}/listings/${listingId}/reviews`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch reviews');
+      return json;
+    },
+    async create(listingId: string, data: { rating: number; comment: string }) {
+      const res = await fetch(`${API_URL}/listings/${listingId}/reviews`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to submit review');
       return json;
     },
   },
