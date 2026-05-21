@@ -6,19 +6,20 @@ const {
   updateListing,
   deleteListing
 } = require('../controllers/listings');
-const { protect } = require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 const router = express.Router();
 
 router
   .route('/')
   .get(getListings)
-  .post(protect, createListing);
+  .post(protect, authorize('owner', 'admin'), createListing);
 
 router
   .route('/:id')
   .get(getListing)
-  .put(protect, updateListing)
-  .delete(protect, deleteListing);
+  .put(protect, authorize('owner', 'admin'), updateListing)
+  .delete(protect, authorize('owner', 'admin'), deleteListing);
 
 module.exports = router;
+

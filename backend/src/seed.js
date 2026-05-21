@@ -169,8 +169,6 @@ const seedDB = async () => {
     // 1. Create Users
     const users = [];
     for (const u of usersData) {
-      const salt = await bcrypt.genSalt(10);
-      u.password = await bcrypt.hash(u.password, salt);
       const createdUser = await User.create(u);
       users.push(createdUser);
     }

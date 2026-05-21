@@ -1,0 +1,207 @@
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+// Helper to get auth headers
+const getHeaders = () => {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+  
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  return headers;
+};
+
+export const api = {
+  // Authentication
+  auth: {
+    async register(data: any) {
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Registration failed');
+      return json;
+    },
+    async login(data: any) {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Login failed');
+      return json;
+    },
+    async me() {
+      const res = await fetch(`${API_URL}/auth/me`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch user');
+      return json;
+    },
+    async forgotPassword(email: string) {
+      const res = await fetch(`${API_URL}/auth/forgotpassword`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to request password reset');
+      return json;
+    },
+    async resetPassword(token: string, data: any) {
+      const res = await fetch(`${API_URL}/auth/resetpassword/${token}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Password reset failed');
+      return json;
+    },
+    async verifyEmail(token: string) {
+      const res = await fetch(`${API_URL}/auth/verifyemail/${token}`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Email verification failed');
+      return json;
+    },
+    async resendVerification() {
+      const res = await fetch(`${API_URL}/auth/resendverification`, {
+        method: 'POST',
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to resend verification email');
+      return json;
+    },
+  },
+
+  // Listings
+  listings: {
+    async getAll(params: {
+      lng?: number;
+      lat?: number;
+      distance?: number;
+      category?: string;
+      query?: string;
+      minPrice?: number;
+      maxPrice?: number;
+    } = {}) {
+      const queryParams = new URLSearchParams();
+      
+      if (params.lng !== undefined && params.lat !== undefined) {
+        queryParams.append('lng', params.lng.toString());
+        queryParams.append('lat', params.lat.toString());
+        if (params.distance) queryParams.append('distance', params.distance.toString());
+      }
+      
+      if (params.category && params.category !== 'All') {
+        queryParams.append('category', params.category);
+      }
+      
+      if (params.query) {
+        queryParams.append('query', params.query);
+      }
+
+      if (params.minPrice) queryParams.append('minPrice', params.minPrice.toString());
+      if (params.maxPrice) queryParams.append('maxPrice', params.maxPrice.toString());
+
+      const res = await fetch(`${API_URL}/listings?${queryParams.toString()}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch listings');
+      return json;
+    },
+
+    async getOne(id: string) {
+      const res = await fetch(`${API_URL}/listings/${id}`);
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch listing');
+      return json;
+    },
+
+    async create(data: any) {
+      const res = await fetch(`${API_URL}/listings`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to create listing');
+      return json;
+    },
+    
+    async update(id: string, data: any) {
+      const res = await fetch(`${API_URL}/listings/${id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to update listing');
+      return json;
+    },
+
+    async delete(id: string) {
+      const res = await fetch(`${API_URL}/listings/${id}`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to delete listing');
+      return json;
+    },
+  },
+
+  // Bookings
+  bookings: {
+    async create(data: { listingId: string; startDate: string; endDate: string }) {
+      const res = await fetch(`${API_URL}/bookings`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to create booking');
+      return json;
+    },
+
+    async getRenterBookings() {
+      const res = await fetch(`${API_URL}/bookings/renter`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch renter bookings');
+      return json;
+    },
+
+    async getOwnerBookings() {
+      const res = await fetch(`${API_URL}/bookings/owner`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch owner bookings');
+      return json;
+    },
+
+    async updateStatus(id: string, status: 'approved' | 'active' | 'completed' | 'cancelled') {
+      const res = await fetch(`${API_URL}/bookings/${id}/status`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify({ status }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to update booking status');
+      return json;
+    },
+  },
+};
