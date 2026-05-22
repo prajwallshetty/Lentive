@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Mail, Lock, User, Eye, EyeOff, Sparkles, ArrowRight, Loader2, ArrowLeft, ShieldAlert, ShoppingBag, ShieldCheck } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, ArrowRight, Loader2, ArrowLeft, Package, Megaphone } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SignupPage() {
@@ -98,7 +98,6 @@ export default function SignupPage() {
         password,
         role
       });
-      // AuthProvider handles success toast and redirection triggers
     } catch (err: any) {
       // AuthProvider handles error toast
     } finally {
@@ -107,81 +106,81 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 overflow-hidden font-sans">
-      {/* Decorative Blur Orbs */}
-      <div className="absolute top-1/4 left-1/4 h-80 w-80 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
+    <div className="min-h-screen relative flex items-center justify-center p-4 auth-gradient overflow-hidden font-sans">
+      {/* Animated Emerald Orbs */}
+      <div className="auth-orb-1" />
+      <div className="auth-orb-2" />
+      <div className="auth-orb-3" />
 
       {/* Main Container */}
-      <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-6 duration-500 py-6">
+      <div className="w-full max-w-md relative z-10 animate-fadeInUp py-6">
         
         {/* Back Link */}
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 mb-4 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition group"
+          className="inline-flex items-center gap-2 mb-4 text-xs sm:text-sm font-semibold text-emerald-300/60 hover:text-emerald-200 transition group"
         >
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to Listings
         </Link>
 
         {/* Auth Card */}
-        <div className="rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden">
-          {/* Card Top Border Glow */}
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="rounded-3xl auth-card p-8 relative overflow-hidden">
+          <div className="auth-glow-line" />
           
           {/* Brand Header */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-white shadow-xl shadow-accent/20 mb-3">
-              <span className="text-2xl font-black tracking-tighter">L</span>
+            <div className="logo-mark mb-4">
+              L
             </div>
             <h1 className="text-2xl font-extrabold tracking-tight text-white">Create Account</h1>
-            <p className="text-xs text-slate-400 mt-1 max-w-[250px]">
-              Join Lentive and start sharing and renting items.
+            <p className="text-xs text-emerald-200/40 mt-1.5 max-w-[260px] leading-relaxed">
+              Join Lentive and start sharing and renting items in your neighborhood.
             </p>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-xs sm:text-sm font-semibold text-white">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             
-            {/* Interactive Role Selector Tabs */}
+            {/* Role Selector Tabs */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold">Account Role</label>
-              <div className="grid grid-cols-2 gap-2.5 p-1 bg-white/5 border border-white/10 rounded-2xl">
+              <label className="auth-label">I want to</label>
+              <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
                 <button
                   type="button"
                   onClick={() => setRole('renter')}
-                  className={`flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition cursor-pointer text-center ${
+                  className={`flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all duration-200 cursor-pointer text-center ${
                     role === 'renter' 
-                      ? 'bg-primary text-white shadow-md' 
-                      : 'hover:bg-white/5 text-slate-400 hover:text-white'
+                      ? 'bg-primary text-white shadow-lg shadow-primary/25' 
+                      : 'hover:bg-emerald-500/5 text-emerald-300/50 hover:text-emerald-200'
                   }`}
                 >
-                  <ShoppingBag className="h-4 w-4 shrink-0" />
-                  <span className="text-xs font-bold leading-none">Renter</span>
-                  <span className={`text-[8px] font-medium leading-none ${role === 'renter' ? 'text-white/80' : 'text-slate-500'}`}>I want to rent gear</span>
+                  <Package className="h-4 w-4 shrink-0" />
+                  <span className="text-xs font-bold leading-none">Rent Gear</span>
+                  <span className={`text-[8px] font-medium leading-none ${role === 'renter' ? 'text-white/70' : 'text-emerald-400/30'}`}>I need items</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setRole('owner')}
-                  className={`flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition cursor-pointer text-center ${
+                  className={`flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all duration-200 cursor-pointer text-center ${
                     role === 'owner' 
-                      ? 'bg-accent text-white shadow-md' 
-                      : 'hover:bg-white/5 text-slate-400 hover:text-white'
+                      ? 'bg-primary text-white shadow-lg shadow-primary/25' 
+                      : 'hover:bg-emerald-500/5 text-emerald-300/50 hover:text-emerald-200'
                   }`}
                 >
-                  <ShieldCheck className="h-4 w-4 shrink-0" />
-                  <span className="text-xs font-bold leading-none">Host/Owner</span>
-                  <span className={`text-[8px] font-medium leading-none ${role === 'owner' ? 'text-white/80' : 'text-slate-500'}`}>I want to list gear</span>
+                  <Megaphone className="h-4 w-4 shrink-0" />
+                  <span className="text-xs font-bold leading-none">List & Earn</span>
+                  <span className={`text-[8px] font-medium leading-none ${role === 'owner' ? 'text-white/70' : 'text-emerald-400/30'}`}>I have items</span>
                 </button>
               </div>
             </div>
 
             {/* Name Input */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold">Full Name</label>
+              <label className="auth-label">Full Name</label>
               <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
                 <input
                   type="text"
                   value={name}
@@ -190,11 +189,7 @@ export default function SignupPage() {
                     if (errors.name) setErrors(prev => ({ ...prev, name: undefined }));
                   }}
                   placeholder="John Doe"
-                  className={`w-full pl-11 pr-4 py-3 bg-white/5 border rounded-2xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 transition-all ${
-                    errors.name 
-                      ? 'border-rose-500/50 focus:ring-rose-500 focus:border-rose-500' 
-                      : 'border-white/10 focus:ring-primary focus:border-primary'
-                  }`}
+                  className={`auth-input ${errors.name ? 'auth-input-error' : ''}`}
                 />
               </div>
               {errors.name && (
@@ -204,9 +199,9 @@ export default function SignupPage() {
 
             {/* Email Input */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold">Email Address</label>
+              <label className="auth-label">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
                 <input
                   type="email"
                   value={email}
@@ -215,11 +210,7 @@ export default function SignupPage() {
                     if (errors.email) setErrors(prev => ({ ...prev, email: undefined }));
                   }}
                   placeholder="name@example.com"
-                  className={`w-full pl-11 pr-4 py-3 bg-white/5 border rounded-2xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 transition-all ${
-                    errors.email 
-                      ? 'border-rose-500/50 focus:ring-rose-500 focus:border-rose-500' 
-                      : 'border-white/10 focus:ring-primary focus:border-primary'
-                  }`}
+                  className={`auth-input ${errors.email ? 'auth-input-error' : ''}`}
                 />
               </div>
               {errors.email && (
@@ -229,9 +220,9 @@ export default function SignupPage() {
 
             {/* Password Input */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold">Password</label>
+              <label className="auth-label">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -240,16 +231,12 @@ export default function SignupPage() {
                     if (errors.password) setErrors(prev => ({ ...prev, password: undefined }));
                   }}
                   placeholder="••••••••"
-                  className={`w-full pl-11 pr-12 py-3 bg-white/5 border rounded-2xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 transition-all ${
-                    errors.password 
-                      ? 'border-rose-500/50 focus:ring-rose-500 focus:border-rose-500' 
-                      : 'border-white/10 focus:ring-primary focus:border-primary'
-                  }`}
+                  className={`auth-input !pr-12 ${errors.password ? 'auth-input-error' : ''}`}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-400/40 hover:text-emerald-300 transition"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -257,15 +244,15 @@ export default function SignupPage() {
               {/* Password Strength Meter */}
               {password && (
                 <div className="flex flex-col gap-1 mt-1 ml-1">
-                  <div className="flex justify-between items-center text-[9px] text-slate-400">
+                  <div className="flex justify-between items-center text-[9px] text-emerald-300/40">
                     <span>Password Strength</span>
                     <span className="font-bold">{passwordStrength.label}</span>
                   </div>
-                  <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden flex gap-0.5">
+                  <div className="h-1 w-full bg-emerald-500/10 rounded-full overflow-hidden flex gap-0.5">
                     {[...Array(5)].map((_, i) => (
                       <div 
                         key={i} 
-                        className={`h-full flex-1 transition ${
+                        className={`h-full flex-1 rounded-full transition ${
                           i < passwordStrength.score ? passwordStrength.color : 'bg-transparent'
                         }`}
                       />
@@ -280,9 +267,9 @@ export default function SignupPage() {
 
             {/* Confirm Password Input */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold">Confirm Password</label>
+              <label className="auth-label">Confirm Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
                 <input
                   type="password"
                   value={confirmPassword}
@@ -291,11 +278,7 @@ export default function SignupPage() {
                     if (errors.confirmPassword) setErrors(prev => ({ ...prev, confirmPassword: undefined }));
                   }}
                   placeholder="••••••••"
-                  className={`w-full pl-11 pr-4 py-3 bg-white/5 border rounded-2xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 transition-all ${
-                    errors.confirmPassword 
-                      ? 'border-rose-500/50 focus:ring-rose-500 focus:border-rose-500' 
-                      : 'border-white/10 focus:ring-primary focus:border-primary'
-                  }`}
+                  className={`auth-input ${errors.confirmPassword ? 'auth-input-error' : ''}`}
                 />
               </div>
               {errors.confirmPassword && (
@@ -307,7 +290,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3 bg-primary text-white font-extrabold rounded-2xl hover:bg-primary/90 transition shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer group"
+              className="auth-btn-primary mt-2 group"
             >
               {loading ? (
                 <>
@@ -316,7 +299,7 @@ export default function SignupPage() {
                 </>
               ) : (
                 <>
-                  Register
+                  Create Account
                   <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                 </>
               )}
@@ -324,9 +307,9 @@ export default function SignupPage() {
           </form>
 
           {/* Footer Navigation */}
-          <p className="text-center text-xs text-slate-400 mt-6 font-medium">
+          <p className="text-center text-xs text-emerald-300/40 mt-6 font-medium">
             Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline font-bold">
+            <Link href="/login" className="text-emerald-400 hover:text-emerald-300 hover:underline font-bold transition">
               Log in
             </Link>
           </p>

@@ -17,18 +17,38 @@ interface DashboardViewProps {
   currentLocation: MockLocation;
   initialShowAddForm?: boolean;
   onCloseAddForm?: () => void;
+  initialTab?: 'overview' | 'listings' | 'requests' | 'rentals';
+  onStatsUpdate?: (unread: number, pending: number) => void;
+  onTabChange?: (tab: 'overview' | 'listings' | 'requests' | 'rentals') => void;
 }
 
 export default function DashboardView({ 
   user, 
   currentLocation,
   initialShowAddForm,
-  onCloseAddForm
+  onCloseAddForm,
+  initialTab,
+  onStatsUpdate,
+  onTabChange
 }: DashboardViewProps) {
   const { showToast } = useToast();
   
   // Tabs: overview | listings | requests (hosting requests) | rentals (renting history)
-  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'requests' | 'rentals'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'requests' | 'rentals'>(initialTab || 'overview');
+
+  // Sync activeTab with initialTab prop
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
+
+  const handleTabChange = (tab: 'overview' | 'listings' | 'requests' | 'rentals') => {
+    setActiveTab(tab);
+    if (onTabChange) {
+      onTabChange(tab);
+    }
+  };
   
   const [listings, setListings] = useState<any[]>([]);
   const [renterBookings, setRenterBookings] = useState<any[]>([]);
@@ -106,7 +126,7 @@ export default function DashboardView({
     if (initialShowAddForm) {
       setEditingListingId(null);
       setShowAddForm(true);
-      setActiveTab('listings');
+      handleTabChange('listings');
       if (onCloseAddForm) {
         onCloseAddForm();
       }
@@ -315,6 +335,13 @@ export default function DashboardView({
   // 4. Unread Notifications Count
   const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
 
+  // Sync stats badge counts back to parent page component
+  useEffect(() => {
+    if (onStatsUpdate) {
+      onStatsUpdate(unreadNotificationsCount, pendingRequestsCount);
+    }
+  }, [unreadNotificationsCount, pendingRequestsCount, onStatsUpdate]);
+
   // Status Chip Rendering Helper
   const renderStatusBadge = (status: string) => {
     const s = (status || '').toLowerCase();
@@ -353,21 +380,22 @@ export default function DashboardView({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Dashboard Header */}
-        <div className="flex flex-col gap-4 border-b border-border/40 pb-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-2">
+        <div className="relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br from-primary/[0.03] via-card to-card p-6 md:p-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between shadow-sm mb-6">
+          <div className="absolute top-0 right-0 h-40 w-40 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10">
+            <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight flex items-center gap-2">
               Marketplace Dashboard
             </h2>
-            <p className="text-xs text-muted-foreground mt-1">
-              Welcome back, <span className="font-semibold text-primary">{user.name}</span>. Manage your listings and rentals.
+            <p className="text-xs text-muted-foreground mt-1.5">
+              Welcome back, <span className="font-bold text-primary">{user.name}</span>. Track your listings, bookings, and earnings.
             </p>
           </div>
           
-          <div className="flex items-center gap-2.5">
+          <div className="relative z-10 flex items-center gap-2.5">
             <button
               onClick={fetchDashboardData}
               title="Refresh Dashboard"
-              className="p-2.5 bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/40 rounded-xl transition cursor-pointer"
+              className="p-2.5 bg-white dark:bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/30 rounded-xl transition active:scale-95 cursor-pointer shadow-xs"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </button>
@@ -376,8 +404,9 @@ export default function DashboardView({
                 setEditingListingId(null);
                 setShowAddForm(true);
               }}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:brightness-110 text-white text-xs font-bold rounded-xl border border-primary/20 transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
+              className="relative overflow-hidden flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-[#005c3e] text-white text-xs font-extrabold rounded-xl border border-primary/10 transition-all duration-200 cursor-pointer shadow-sm active:scale-95 group"
             >
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent -translate-x-full animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
               <Plus className="h-4 w-4" />
               List an Item
             </button>
@@ -387,7 +416,7 @@ export default function DashboardView({
         {/* Tab Controls */}
         <div className="flex gap-1 bg-muted dark:bg-black/10 border border-border/40 p-1 rounded-xl my-6 w-fit overflow-x-auto hide-scrollbar">
           <button
-            onClick={() => setActiveTab('overview')}
+            onClick={() => handleTabChange('overview')}
             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'overview' 
                 ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
@@ -402,7 +431,7 @@ export default function DashboardView({
             )}
           </button>
           <button
-            onClick={() => setActiveTab('listings')}
+            onClick={() => handleTabChange('listings')}
             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
               activeTab === 'listings' 
                 ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
@@ -412,7 +441,7 @@ export default function DashboardView({
             My Listings ({listings.length})
           </button>
           <button
-            onClick={() => setActiveTab('requests')}
+            onClick={() => handleTabChange('requests')}
             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'requests' 
                 ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
@@ -427,7 +456,7 @@ export default function DashboardView({
             )}
           </button>
           <button
-            onClick={() => setActiveTab('rentals')}
+            onClick={() => handleTabChange('rentals')}
             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
               activeTab === 'rentals' 
                 ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
@@ -454,9 +483,9 @@ export default function DashboardView({
             <div className="lg:col-span-2 flex flex-col gap-6">
               
               {/* Stat Cards Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-4 pb-3 md:pb-0 hide-scrollbar snap-x snap-mandatory">
                 {/* Total Earnings */}
-                <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
+                <div className="min-w-[260px] md:min-w-0 flex-1 shrink-0 md:shrink md:flex-initial snap-start relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
                   <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
                     <DollarSign className="h-5 w-5" />
@@ -468,7 +497,7 @@ export default function DashboardView({
                 </div>
 
                 {/* My Listed Items */}
-                <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
+                <div className="min-w-[260px] md:min-w-0 flex-1 shrink-0 md:shrink md:flex-initial snap-start relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
                   <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
                     <Package className="h-5 w-5" />
@@ -480,7 +509,7 @@ export default function DashboardView({
                 </div>
 
                 {/* Active Bookings (Both) */}
-                <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
+                <div className="min-w-[260px] md:min-w-0 flex-1 shrink-0 md:shrink md:flex-initial snap-start relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
                   <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
                   <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
                     <ShoppingBag className="h-5 w-5" />
@@ -510,8 +539,14 @@ export default function DashboardView({
 
                   if (activeRentalsList.length === 0) {
                     return (
-                      <div className="py-8 text-center text-xs text-muted-foreground">
-                        No active or upcoming bookings tracking right now.
+                      <div className="py-12 flex flex-col items-center justify-center text-center gap-2">
+                        <div className="h-12 w-12 rounded-full bg-primary/5 flex items-center justify-center text-primary/40 border border-primary/10 mb-1">
+                          <Calendar className="h-5 w-5" />
+                        </div>
+                        <h4 className="font-bold text-xs text-foreground">No Active Rentals</h4>
+                        <p className="text-[10px] text-muted-foreground max-w-[200px] leading-relaxed">
+                          You don't have any active handovers or confirmed rentals currently.
+                        </p>
                       </div>
                     );
                   }
@@ -574,8 +609,14 @@ export default function DashboardView({
               </h3>
 
               {notifications.length === 0 ? (
-                <div className="py-12 text-center text-xs text-muted-foreground">
-                  No notifications yet.
+                <div className="py-16 flex flex-col items-center justify-center text-center gap-2">
+                  <div className="h-12 w-12 rounded-full bg-primary/5 flex items-center justify-center text-primary/40 border border-primary/10 mb-1">
+                    <Bell className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-bold text-xs text-foreground">All Caught Up</h4>
+                  <p className="text-[10px] text-muted-foreground max-w-[200px] leading-relaxed">
+                    No new activity notifications at the moment.
+                  </p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-2.5 max-h-[380px] overflow-y-auto pr-1 hide-scrollbar">
@@ -627,7 +668,24 @@ export default function DashboardView({
             </div>
 
             {listings.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-12">You haven't listed any items yet.</p>
+              <div className="py-16 flex flex-col items-center justify-center text-center gap-3">
+                <div className="h-16 w-16 rounded-full bg-primary/5 flex items-center justify-center text-primary border border-primary/10 mb-1 animate-pulse">
+                  <Package className="h-7 w-7 text-primary" />
+                </div>
+                <h4 className="font-extrabold text-sm text-foreground">No Items Listed Yet</h4>
+                <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
+                  Turn your idle cameras, tools, or bikes into extra income by listing them in your community.
+                </p>
+                <button
+                  onClick={() => {
+                    setEditingListingId(null);
+                    setShowAddForm(true);
+                  }}
+                  className="mt-2 px-4 py-2 bg-primary hover:brightness-110 text-white text-xs font-bold rounded-xl transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
+                >
+                  List Your First Item
+                </button>
+              </div>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {listings.map((item) => (
@@ -702,7 +760,15 @@ export default function DashboardView({
             </div>
 
             {ownerBookings.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-12">No rental requests received for your listings yet.</p>
+              <div className="py-16 flex flex-col items-center justify-center text-center gap-3">
+                <div className="h-16 w-16 rounded-full bg-primary/5 flex items-center justify-center text-primary border border-primary/10 mb-1">
+                  <Clock className="h-7 w-7 text-primary" />
+                </div>
+                <h4 className="font-extrabold text-sm text-foreground">No Requests Yet</h4>
+                <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
+                  When other users request to rent your listed items, they will show up here for you to accept or reject.
+                </p>
+              </div>
             ) : (
               <div className="flex flex-col gap-4">
                 {ownerBookings.map((b) => {
@@ -751,14 +817,16 @@ export default function DashboardView({
                             <>
                               <button
                                 onClick={() => handleAcceptRequest(b._id)}
-                                className="px-3.5 py-1.5 bg-emerald-500 text-white hover:brightness-110 active:scale-95 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-emerald-500/10"
+                                className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white hover:brightness-110 active:scale-95 text-xs font-black tracking-wide rounded-full transition-all duration-200 cursor-pointer shadow-md shadow-emerald-600/20 flex items-center gap-1.5 min-h-[40px] hover:scale-[1.02]"
                               >
+                                <CheckCircle2 className="h-4 w-4 shrink-0" />
                                 Accept
                               </button>
                               <button
                                 onClick={() => handleRejectRequest(b._id)}
-                                className="px-3.5 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer animate-in fade-in"
+                                className="px-5 py-2.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 hover:border-rose-500/35 active:scale-95 text-xs font-black tracking-wide rounded-full transition-all duration-200 cursor-pointer flex items-center gap-1.5 min-h-[40px] hover:scale-[1.02]"
                               >
+                                <XCircle className="h-4 w-4 shrink-0" />
                                 Reject
                               </button>
                             </>
@@ -767,9 +835,9 @@ export default function DashboardView({
                           {status === 'accepted' && (
                             <button
                               onClick={() => handleUpdateBookingStatus(b._id, 'active')}
-                              className="px-3.5 py-1.5 bg-indigo-500 text-white hover:brightness-110 active:scale-95 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1"
+                              className="px-5 py-2.5 bg-indigo-600 text-white hover:brightness-110 active:scale-95 text-xs font-black tracking-wide rounded-full transition-all duration-200 cursor-pointer flex items-center gap-1.5 min-h-[40px] shadow-md shadow-indigo-600/20 hover:scale-[1.02]"
                             >
-                              <Play className="h-3 w-3 fill-white" />
+                              <Play className="h-4 w-4 fill-white shrink-0" />
                               Handover (Start)
                             </button>
                           )}
@@ -777,9 +845,9 @@ export default function DashboardView({
                           {status === 'active' && (
                             <button
                               onClick={() => handleUpdateBookingStatus(b._id, 'completed')}
-                              className="px-3.5 py-1.5 bg-primary text-white hover:brightness-110 active:scale-95 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1"
+                              className="px-5 py-2.5 bg-primary text-white hover:brightness-110 active:scale-95 text-xs font-black tracking-wide rounded-full transition-all duration-200 cursor-pointer flex items-center gap-1.5 min-h-[40px] shadow-md shadow-primary/20 hover:scale-[1.02]"
                             >
-                              <CheckCircle2 className="h-3 w-3" />
+                              <CheckCircle2 className="h-4 w-4 shrink-0" />
                               Complete Rental
                             </button>
                           )}
@@ -807,7 +875,21 @@ export default function DashboardView({
             </div>
 
             {renterBookings.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-12">You have not booked any items yet.</p>
+              <div className="py-16 flex flex-col items-center justify-center text-center gap-3">
+                <div className="h-16 w-16 rounded-full bg-primary/5 flex items-center justify-center text-primary border border-primary/10 mb-1">
+                  <ShoppingBag className="h-7 w-7 text-primary" />
+                </div>
+                <h4 className="font-extrabold text-sm text-foreground">No Rentals Yet</h4>
+                <p className="text-xs text-muted-foreground max-w-xs leading-relaxed">
+                  Explore available items nearby and request a booking to start renting gear.
+                </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="mt-2 px-4 py-2 bg-primary hover:brightness-110 text-white text-xs font-bold rounded-xl transition-all duration-200 shadow-sm active:scale-95 cursor-pointer"
+                >
+                  Browse Local Items
+                </button>
+              </div>
             ) : (
               <div className="flex flex-col gap-4">
                 {renterBookings.map((b) => {
@@ -856,8 +938,9 @@ export default function DashboardView({
                           {['pending', 'accepted'].includes(status) && (
                             <button
                               onClick={() => handleCancelBooking(b._id)}
-                              className="px-3.5 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
+                              className="px-5 py-2.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 hover:border-rose-500/35 active:scale-95 text-xs font-black tracking-wide rounded-full transition-all duration-200 cursor-pointer flex items-center gap-1.5 min-h-[40px] hover:scale-[1.02]"
                             >
+                              <XCircle className="h-4 w-4 shrink-0" />
                               Cancel Request
                             </button>
                           )}
@@ -865,9 +948,9 @@ export default function DashboardView({
                           {status === 'completed' && (
                             <button
                               onClick={() => handleOpenReviewModal(b)}
-                              className="flex items-center gap-1 px-3.5 py-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 hover:bg-amber-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer animate-pulse"
+                              className="px-5 py-2.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/35 active:scale-95 text-xs font-black tracking-wide rounded-full transition-all duration-200 cursor-pointer hover:scale-[1.02] flex items-center gap-1.5 min-h-[40px]"
                             >
-                              <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                              <Star className="h-4 w-4 fill-amber-500 text-amber-500 shrink-0" />
                               Write Review
                             </button>
                           )}
@@ -893,14 +976,18 @@ export default function DashboardView({
 
       {/* Listing Form Modal */}
       {showAddForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-lg rounded-2xl bg-card border border-border/40 p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[95vh] overflow-y-auto hide-scrollbar">
-            <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/40 pb-3">
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-xs bottom-sheet-overlay">
+          <div className="relative w-full md:max-w-lg max-h-[92vh] md:max-h-[95vh] overflow-y-auto rounded-t-[28px] md:rounded-2xl bg-card border-t md:border border-border/40 p-6 shadow-2xl bottom-sheet-content md:animate-in md:zoom-in-95 md:duration-200 hide-scrollbar">
+            
+            {/* Mobile drag handle */}
+            <div className="block md:hidden drag-handle" />
+
+            <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/40 pb-3 mt-2 md:mt-0">
               {editingListingId ? 'Edit Listed Item' : 'List a New Item'}
             </h3>
             <button
               onClick={handleCloseForm}
-              className="absolute right-4 top-4 p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer"
+              className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer z-10"
             >
               <X className="h-5 w-5" />
             </button>
@@ -1068,12 +1155,16 @@ export default function DashboardView({
 
       {/* Review Modal */}
       {showReviewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-md rounded-2xl bg-card border border-border/40 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/40 pb-3">Write a Review</h3>
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-xs bottom-sheet-overlay">
+          <div className="relative w-full md:max-w-md max-h-[92vh] md:max-h-[95vh] overflow-y-auto rounded-t-[28px] md:rounded-2xl bg-card border-t md:border border-border/40 p-6 shadow-2xl bottom-sheet-content md:animate-in md:zoom-in-95 md:duration-200 hide-scrollbar">
+            
+            {/* Mobile drag handle */}
+            <div className="block md:hidden drag-handle" />
+
+            <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/40 pb-3 mt-2 md:mt-0">Write a Review</h3>
             <button
               onClick={() => setShowReviewModal(false)}
-              className="absolute right-4 top-4 p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer"
+              className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer z-10"
             >
               <X className="h-5 w-5" />
             </button>

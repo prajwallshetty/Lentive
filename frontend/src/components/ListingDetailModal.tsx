@@ -140,19 +140,22 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
   const isOwner = user && (user.id === listing.owner?._id || user.id === listing.owner);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-3xl bg-card border border-border/40 text-foreground shadow-2xl p-6 md:p-8 animate-in zoom-in-95 duration-200 hide-scrollbar">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-xs bottom-sheet-overlay">
+      <div className="relative w-full md:max-w-4xl max-h-[92vh] md:max-h-[90vh] overflow-y-auto rounded-t-[28px] md:rounded-[32px] bg-card border-t md:border border-border/30 text-foreground shadow-2xl p-6 md:p-8 bottom-sheet-content md:animate-in md:zoom-in-95 md:duration-200 hide-scrollbar">
         
+        {/* Mobile drag handle */}
+        <div className="block md:hidden drag-handle" />
+
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer"
+          className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer z-10"
         >
           <X className="h-5 w-5" />
         </button>
 
         {/* Modal Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mt-2 md:mt-4">
           
           {/* Main Content - Left 3 Columns */}
           <div className="md:col-span-3 flex flex-col gap-6">
@@ -303,79 +306,79 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
               ) : (
                 <form onSubmit={handleBookingClick} className="flex flex-col gap-4">
                   {/* Date pickers */}
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase">Start Date</label>
+                      <label className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider">Start Date</label>
                       <input
                         type="date"
                         required
                         value={startDate}
                         min={new Date().toISOString().split('T')[0]}
                         onChange={(e) => setStartDate(e.target.value)}
-                        className="rounded-xl border border-border bg-muted/40 p-2.5 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground cursor-pointer"
+                        className="w-full rounded-2xl border border-border/40 bg-muted/40 dark:bg-black/25 p-3 text-xs font-bold focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground cursor-pointer h-12"
                       />
                     </div>
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-muted-foreground uppercase">End Date</label>
+                      <label className="text-[9px] font-extrabold text-muted-foreground uppercase tracking-wider">End Date</label>
                       <input
                         type="date"
                         required
                         value={endDate}
                         min={startDate || new Date().toISOString().split('T')[0]}
                         onChange={(e) => setEndDate(e.target.value)}
-                        className="rounded-xl border border-border bg-muted/40 p-2.5 text-xs font-semibold focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground cursor-pointer"
+                        className="w-full rounded-2xl border border-border/40 bg-muted/40 dark:bg-black/25 p-3 text-xs font-bold focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none text-foreground cursor-pointer h-12"
                       />
                     </div>
                   </div>
 
                   {/* Pricing breakdowns */}
                   {days > 0 && (
-                    <div className="flex flex-col gap-2 bg-muted/50 dark:bg-black/15 rounded-2xl p-4 mt-2 border border-border/40 text-xs">
-                      <div className="flex justify-between text-muted-foreground">
+                    <div className="flex flex-col gap-2.5 bg-muted/50 dark:bg-black/15 rounded-2xl p-4 mt-2 border border-border/40 text-xs">
+                      <div className="flex justify-between text-muted-foreground font-semibold">
                         <span>{formatCurrency(listing.pricePerDay)} × {days} days</span>
-                        <span className="font-semibold text-foreground">{formatCurrency(totalPrice)}</span>
+                        <span className="font-bold text-foreground">{formatCurrency(totalPrice)}</span>
                       </div>
                       {listing.securityDeposit > 0 && (
-                        <div className="flex justify-between text-muted-foreground">
+                        <div className="flex justify-between text-muted-foreground font-semibold">
                           <span>Refundable deposit</span>
-                          <span className="font-semibold text-foreground">{formatCurrency(listing.securityDeposit)}</span>
+                          <span className="font-bold text-foreground">{formatCurrency(listing.securityDeposit)}</span>
                         </div>
                       )}
                       <div className="h-[1px] bg-border/40 my-1" />
                       <div className="flex justify-between text-sm font-extrabold">
                         <span>Total Due</span>
-                        <span className="text-primary font-black">{formatCurrency(totalPrice + (listing.securityDeposit || 0))}</span>
+                        <span className="text-primary font-black text-base">{formatCurrency(totalPrice + (listing.securityDeposit || 0))}</span>
                       </div>
                     </div>
                   )}
 
                   {/* Warning for owners */}
                   {isOwner && (
-                    <div className="flex items-start gap-2 rounded-xl bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400 border border-amber-500/20">
+                    <div className="flex items-start gap-2 rounded-2xl bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400 border border-amber-500/20">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span>This is your listing. You cannot rent your own items.</span>
+                      <span className="font-semibold">This is your listing. You cannot rent your own items.</span>
                     </div>
                   )}
 
                   {/* Error Notification */}
                   {error && (
-                    <div className="flex items-start gap-2 rounded-xl bg-rose-500/10 p-3 text-xs text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                    <div className="flex items-start gap-2 rounded-2xl bg-rose-500/10 p-3 text-xs text-rose-600 dark:text-rose-400 border border-rose-500/20">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span>{error}</span>
+                      <span className="font-semibold">{error}</span>
                     </div>
                   )}
 
                   <button
                     type="submit"
                     disabled={loading || isOwner || !!error || !startDate || !endDate}
-                    className="w-full py-3.5 bg-primary hover:brightness-110 active:scale-95 text-white font-bold rounded-2xl disabled:opacity-50 transition shadow-sm text-xs uppercase tracking-wider mt-2 cursor-pointer"
+                    className="w-full h-12 bg-primary hover:bg-primary/95 text-white font-extrabold rounded-2xl disabled:opacity-50 transition shadow-md text-xs uppercase tracking-wider mt-2 cursor-pointer active:scale-[0.98]"
                   >
                     {loading ? 'Reserving...' : 'Request Booking'}
                   </button>
 
                   <div className="flex items-center justify-center gap-1.5 mt-2 text-[10px] text-muted-foreground font-bold">
                     <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-                    <span>Refundable security deposit is protected</span>
+                    <span>Refundable security deposit is protected in escrow</span>
                   </div>
                 </form>
               )}

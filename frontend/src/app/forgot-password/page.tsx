@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Mail, ArrowLeft, Loader2, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Mail, ArrowLeft, Loader2, Zap, CheckCircle2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ForgotPasswordPage() {
-  const { user, forgotPassword, loading: authLoading } = useAuth();
+  const { forgotPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -30,7 +30,6 @@ export default function ForgotPasswordPage() {
       const res = await forgotPassword(email);
       setIsSent(true);
       if (res && res.simulatedLink) {
-        // Strip the localhost:3000 parts if redirecting internally
         const urlObj = new URL(res.simulatedLink);
         setSimulatedLink(`${urlObj.pathname}${urlObj.search}`);
       }
@@ -42,49 +41,49 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 overflow-hidden font-sans">
-      {/* Decorative Blur Orbs */}
-      <div className="absolute top-1/4 left-1/4 h-80 w-80 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full bg-accent/15 blur-3xl pointer-events-none" />
+    <div className="min-h-screen relative flex items-center justify-center p-4 auth-gradient overflow-hidden font-sans">
+      {/* Animated Emerald Orbs */}
+      <div className="auth-orb-1" />
+      <div className="auth-orb-2" />
+      <div className="auth-orb-3" />
 
       {/* Main Container */}
-      <div className="w-full max-w-md relative z-10 animate-in fade-in slide-in-from-bottom-6 duration-500">
+      <div className="w-full max-w-md relative z-10 animate-fadeInUp">
         
         {/* Back Link */}
         <Link 
           href="/login" 
-          className="inline-flex items-center gap-2 mb-6 text-xs sm:text-sm font-semibold text-slate-400 hover:text-white transition group"
+          className="inline-flex items-center gap-2 mb-6 text-xs sm:text-sm font-semibold text-emerald-300/60 hover:text-emerald-200 transition group"
         >
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to Login
         </Link>
 
         {/* Card */}
-        <div className="rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden">
-          {/* Card Top Border Glow */}
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="rounded-3xl auth-card p-8 relative overflow-hidden">
+          <div className="auth-glow-line" />
           
           {!isSent ? (
             <>
               {/* Header */}
               <div className="flex flex-col items-center text-center mb-6">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent text-white shadow-xl shadow-accent/20 mb-3">
-                  <span className="text-2xl font-black tracking-tighter">L</span>
+                <div className="logo-mark mb-4">
+                  L
                 </div>
                 <h1 className="text-2xl font-extrabold tracking-tight text-white">Reset Password</h1>
-                <p className="text-xs text-slate-400 mt-1 max-w-[250px]">
-                  Enter your email address and we'll send you a link to reset your password.
+                <p className="text-xs text-emerald-200/40 mt-1.5 max-w-[260px] leading-relaxed">
+                  Enter your email and we&apos;ll send you a link to reset your password.
                 </p>
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="flex flex-col gap-4 text-xs sm:text-sm font-semibold text-white">
+              <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 
                 {/* Email Input */}
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[10px] text-slate-400 uppercase tracking-wider font-extrabold">Email Address</label>
+                  <label className="auth-label">Email Address</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
                     <input
                       type="email"
                       value={email}
@@ -93,11 +92,7 @@ export default function ForgotPasswordPage() {
                         if (error) setError('');
                       }}
                       placeholder="name@example.com"
-                      className={`w-full pl-11 pr-4 py-3 bg-white/5 border rounded-2xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 transition-all ${
-                        error 
-                          ? 'border-rose-500/50 focus:ring-rose-500 focus:border-rose-500' 
-                          : 'border-white/10 focus:ring-primary focus:border-primary'
-                      }`}
+                      className={`auth-input ${error ? 'auth-input-error' : ''}`}
                     />
                   </div>
                   {error && (
@@ -109,7 +104,7 @@ export default function ForgotPasswordPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full mt-2 py-3 bg-primary text-white font-extrabold rounded-2xl hover:bg-primary/90 transition shadow-lg shadow-primary/20 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer group"
+                  className="auth-btn-primary mt-2 group"
                 >
                   {loading ? (
                     <>
@@ -127,25 +122,27 @@ export default function ForgotPasswordPage() {
             </>
           ) : (
             <div className="flex flex-col items-center text-center py-4">
-              <CheckCircle2 className="h-16 w-16 text-emerald-500 mb-4 animate-bounce" />
+              <div className="h-16 w-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
+                <CheckCircle2 className="h-8 w-8 text-emerald-400 animate-bounce" />
+              </div>
               <h2 className="text-xl font-extrabold text-white">Reset Link Sent</h2>
-              <p className="text-xs text-slate-400 mt-2 max-w-[280px] leading-relaxed">
-                If an account exists for <span className="text-white font-bold">{email}</span>, we've sent instructions on how to reset your password.
+              <p className="text-xs text-emerald-200/40 mt-2 max-w-[280px] leading-relaxed">
+                If an account exists for <span className="text-white font-bold">{email}</span>, we&apos;ve sent instructions to reset your password.
               </p>
 
               {/* Dev Simulation Bypass Link */}
               {simulatedLink && (
-                <div className="mt-6 w-full p-4 rounded-2xl bg-primary/5 border border-primary/10 flex flex-col items-center">
-                  <div className="flex items-center gap-1.5 mb-2 text-primary">
-                    <Sparkles className="h-4 w-4 text-accent fill-accent" />
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider">Simulated Outbox</span>
+                <div className="mt-6 w-full p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex flex-col items-center">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <Zap className="h-4 w-4 text-emerald-400" />
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300/60">Simulated Outbox</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 leading-normal mb-3">
-                    SMTP is not configured. We logged the password reset token to the terminal console, or you can bypass email checking below:
+                  <p className="text-[10px] text-emerald-300/40 leading-normal mb-3">
+                    SMTP is not configured. We logged the token to the terminal, or you can bypass below:
                   </p>
                   <Link
                     href={simulatedLink}
-                    className="w-full py-2.5 bg-accent hover:bg-accent/95 text-white font-bold rounded-xl text-xs transition shadow-md shadow-accent/15 flex items-center justify-center gap-1"
+                    className="auth-btn-primary !py-2.5 !text-xs"
                   >
                     Open Reset Password Form
                     <ArrowRight className="h-3.5 w-3.5" />
@@ -155,7 +152,7 @@ export default function ForgotPasswordPage() {
 
               <Link
                 href="/login"
-                className="mt-6 py-2.5 px-4 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2"
+                className="mt-6 py-2.5 px-5 bg-emerald-500/5 hover:bg-emerald-500/10 text-white border border-emerald-500/10 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Return to Login

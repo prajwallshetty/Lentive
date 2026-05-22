@@ -43,7 +43,17 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0" />;
       case 'info':
       default:
-        return <Info className="h-5 w-5 text-blue-500 shrink-0" />;
+        return <Info className="h-5 w-5 text-primary shrink-0" />;
+    }
+  };
+
+  const getAccentColor = (type: ToastType) => {
+    switch (type) {
+      case 'success': return 'border-l-emerald-500';
+      case 'error': return 'border-l-rose-500';
+      case 'warning': return 'border-l-amber-500';
+      case 'info':
+      default: return 'border-l-primary';
     }
   };
 
@@ -51,12 +61,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ToastContext.Provider value={{ showToast }}>
       {children}
       
-      {/* Toast Container */}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full pointer-events-none">
+      {/* Toast Container — positioned above bottom nav on mobile */}
+      <div className="fixed bottom-20 md:bottom-5 right-4 left-4 md:left-auto z-[60] flex flex-col gap-3 md:max-w-sm md:w-full pointer-events-none toast-container">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className="pointer-events-auto flex items-start gap-3 p-4 rounded-2xl border shadow-xl bg-card/85 dark:bg-card/75 border-border glass-card animate-in slide-in-from-bottom-5 fade-in duration-300"
+            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-2xl border border-border/40 shadow-xl glass-card border-l-4 ${getAccentColor(toast.type)} animate-in slide-in-from-bottom-5 fade-in duration-300`}
             role="alert"
           >
             {getIcon(toast.type)}
@@ -67,7 +77,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
             <button
               onClick={() => removeToast(toast.id)}
-              className="p-1 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition shrink-0"
+              className="p-1 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition shrink-0"
               aria-label="Close toast"
             >
               <X className="h-4 w-4" />
