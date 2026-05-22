@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ArrowLeft, Zap } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 function LoginFormContent() {
@@ -60,19 +60,7 @@ function LoginFormContent() {
     }
   };
 
-  // Pre-fill demo accounts
-  const handleQuickDemoLogin = async (demoEmail: string) => {
-    setLoading(true);
-    setEmail(demoEmail);
-    setPassword('password123');
-    try {
-      await login(demoEmail, 'password123');
-    } catch (err: any) {
-      // error handled by provider
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 auth-gradient overflow-hidden font-sans">
@@ -188,33 +176,7 @@ function LoginFormContent() {
             </button>
           </form>
 
-          {/* Quick Demo Section */}
-          <div className="mt-8 border-t border-emerald-500/10 pt-6">
-            <div className="flex items-center gap-1.5 mb-3">
-              <Zap className="h-3.5 w-3.5 text-emerald-400 animate-pulse" />
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300/50">
-                Quick Demo Login
-              </span>
-            </div>
-            
-            <div className="grid grid-cols-3 gap-2">
-              {[
-                { name: 'John', email: 'john@example.com', role: 'Host' },
-                { name: 'Sarah', email: 'sarah@example.com', role: 'Host' },
-                { name: 'Jane', email: 'jane@example.com', role: 'Renter' },
-              ].map((demo) => (
-                <button
-                  key={demo.email}
-                  type="button"
-                  onClick={() => handleQuickDemoLogin(demo.email)}
-                  className="px-2 py-2.5 rounded-xl bg-emerald-500/5 border border-emerald-500/10 hover:bg-emerald-500/10 hover:border-emerald-500/20 text-center flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all duration-200 active:scale-95"
-                >
-                  <span className="text-xs font-bold text-emerald-300">{demo.name}</span>
-                  <span className="text-[8px] text-emerald-400/40 font-medium">{demo.role}</span>
-                </button>
-              ))}
-            </div>
-          </div>
+
 
           {/* Footer Navigation */}
           <p className="text-center text-xs text-emerald-300/40 mt-6 font-medium">

@@ -18,11 +18,13 @@ const usersData = [
     password: 'password123',
     role: 'owner',
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80',
-    address: 'Union Square, San Francisco, CA',
+    address: 'Indiranagar, Bengaluru, Karnataka, India',
     location: {
       type: 'Point',
-      coordinates: [-122.4089, 37.7879] // [longitude, latitude]
-    }
+      coordinates: [77.6412, 12.9719] // [longitude, latitude]
+    },
+    isVerified: true,
+    verificationStatus: 'approved'
   },
   {
     name: 'Sarah Connor',
@@ -30,11 +32,13 @@ const usersData = [
     password: 'password123',
     role: 'owner',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80',
-    address: 'The Castro, San Francisco, CA',
+    address: 'Koramangala, Bengaluru, Karnataka, India',
     location: {
       type: 'Point',
-      coordinates: [-122.4316, 37.7699]
-    }
+      coordinates: [77.6245, 12.9352]
+    },
+    isVerified: true,
+    verificationStatus: 'approved'
   },
   {
     name: 'Jane Smith',
@@ -42,11 +46,27 @@ const usersData = [
     password: 'password123',
     role: 'renter',
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150&h=150&q=80',
-    address: 'Civic Center, San Francisco, CA',
+    address: 'HSR Layout, Bengaluru, Karnataka, India',
     location: {
       type: 'Point',
-      coordinates: [-122.4194, 37.7749]
-    }
+      coordinates: [77.6387, 12.9101]
+    },
+    isVerified: true,
+    verificationStatus: 'approved'
+  },
+  {
+    name: 'Admin User',
+    email: 'admin@example.com',
+    password: 'password123',
+    role: 'admin',
+    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80',
+    address: 'Whitefield, Bengaluru, Karnataka, India',
+    location: {
+      type: 'Point',
+      coordinates: [77.7499, 12.9698]
+    },
+    isVerified: true,
+    verificationStatus: 'approved'
   }
 ];
 
@@ -55,16 +75,16 @@ const listingsData = [
     title: 'DeWalt 20V Max Cordless Drill Kit',
     description: 'High-performance cordless drill with 2 batteries, charger, and carrying case. Perfect for home improvement projects, mounting TVs, or assembling furniture.',
     category: 'Tools',
-    pricePerDay: 15,
-    securityDeposit: 50,
+    pricePerDay: 400,
+    securityDeposit: 1500,
     images: [
       'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=600&q=80',
       'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=600&q=80'
     ],
-    address: 'Union Square, San Francisco, CA',
+    address: 'Indiranagar, Bengaluru, Karnataka, India',
     location: {
       type: 'Point',
-      coordinates: [-122.4089, 37.7879] // Owned by John Doe (Union Square)
+      coordinates: [77.6412, 12.9719] // Owned by John Doe (Indiranagar)
     },
     isAvailable: true
   },
@@ -72,16 +92,16 @@ const listingsData = [
     title: 'Sony Alpha 7 III Mirrorless Camera',
     description: 'Premium full-frame camera. Excellent for high-quality photography and 4K videography. Supplied with a 28-70mm lens, 2 batteries, and a 128GB SD card.',
     category: 'Electronics',
-    pricePerDay: 45,
-    securityDeposit: 250,
+    pricePerDay: 2500,
+    securityDeposit: 10000,
     images: [
       'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80',
       'https://images.unsplash.com/photo-1616440347437-b1c73416efc2?auto=format&fit=crop&w=600&q=80'
     ],
-    address: 'Chinatown, San Francisco, CA',
+    address: 'Domlur, Bengaluru, Karnataka, India',
     location: {
       type: 'Point',
-      coordinates: [-122.4075, 37.7941] // Near John Doe's area
+      coordinates: [77.6380, 12.9620] // Near John Doe's area
     },
     isAvailable: true
   },
@@ -89,16 +109,16 @@ const listingsData = [
     title: 'Segway Ninebot Max Electric Scooter',
     description: 'Foldable electric kick scooter with a 40-mile range. Speed up to 18.6 mph. Ideal for commuting, exploring the city, or running errands.',
     category: 'Vehicles',
-    pricePerDay: 25,
-    securityDeposit: 100,
+    pricePerDay: 800,
+    securityDeposit: 4000,
     images: [
       'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80',
       'https://images.unsplash.com/photo-1605335198083-d2d0a0b63cc9?auto=format&fit=crop&w=600&q=80'
     ],
-    address: 'The Castro, San Francisco, CA',
+    address: 'Koramangala, Bengaluru, Karnataka, India',
     location: {
       type: 'Point',
-      coordinates: [-122.4316, 37.7699] // Owned by Sarah Connor (Castro)
+      coordinates: [77.6245, 12.9352] // Owned by Sarah Connor (Koramangala)
     },
     isAvailable: true
   },
@@ -106,49 +126,49 @@ const listingsData = [
     title: 'Premium 4-Person Camping Tent',
     description: 'Coleman dome tent with setup in under 5 minutes. Weather-proof with rainfly included. Spacious interior fits a queen size airbed.',
     category: 'Outdoor',
-    pricePerDay: 18,
-    securityDeposit: 40,
+    pricePerDay: 500,
+    securityDeposit: 2000,
     images: [
       'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80',
       'https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=600&q=80'
     ],
-    address: 'Noe Valley, San Francisco, CA',
+    address: 'HSR Layout Sector 3, Bengaluru, Karnataka, India',
     location: {
       type: 'Point',
-      coordinates: [-122.4350, 37.7550] // Near Sarah Connor's area
+      coordinates: [77.6300, 12.9150] // Near Sarah Connor's area
     },
     isAvailable: true
   },
   {
     title: 'JBL PartyBox 310 Bluetooth Speaker',
-    description: '240W of powerful sound, dynamic light show synced to the beat, and 18 hours of battery life. Perfect for backyard parties, beach events, or weddings.',
+    description: '240W of powerful sound, dynamic light show synced to the beat, and 18 hours of battery life. Perfect for backyard parties, events, or weddings.',
     category: 'Party Supplies',
-    pricePerDay: 35,
-    securityDeposit: 150,
+    pricePerDay: 1500,
+    securityDeposit: 5000,
     images: [
       'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=600&q=80',
       'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=600&q=80'
     ],
-    address: 'Mission District, San Francisco, CA',
+    address: 'Koramangala, Bengaluru, Karnataka, India',
     location: {
       type: 'Point',
-      coordinates: [-122.4148, 37.7599] // Owned by Sarah Connor
+      coordinates: [77.6245, 12.9352] // Owned by Sarah Connor
     },
     isAvailable: true
   },
   {
     title: 'Patagonia Retro-X Fleece Jacket (Size M)',
-    description: 'Windproof, warm, and stylish fleece jacket. Great for cold San Francisco evenings or outdoor hiking trips.',
+    description: 'Windproof, warm, and stylish fleece jacket. Great for cold evenings or outdoor trekking trips.',
     category: 'Fashion',
-    pricePerDay: 12,
-    securityDeposit: 30,
+    pricePerDay: 300,
+    securityDeposit: 1000,
     images: [
       'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80'
     ],
-    address: 'SOMA, San Francisco, CA',
+    address: 'Indiranagar, Bengaluru, Karnataka, India',
     location: {
       type: 'Point',
-      coordinates: [-122.4010, 37.7785] // Owned by John Doe
+      coordinates: [77.6412, 12.9719] // Owned by John Doe
     },
     isAvailable: true
   }
@@ -164,7 +184,14 @@ const seedDB = async () => {
     await Listing.deleteMany();
     await Booking.deleteMany();
     await Review.deleteMany();
-    console.log('Cleared existing data.');
+    
+    // Import and clear new models
+    const Chat = require('./models/Chat');
+    const Payment = require('./models/Payment');
+    await Chat.deleteMany();
+    await Payment.deleteMany();
+    
+    console.log('Cleared existing data (including chats and payments).');
 
     // 1. Create Users
     const users = [];
@@ -216,7 +243,7 @@ const seedDB = async () => {
         listing: listings[2]._id, // Scooter
         reviewer: jane._id,
         rating: 5,
-        comment: 'So much fun riding around SF on this scooter! Batterylife was excellent. Sarah was super nice.'
+        comment: 'So much fun riding around Bengaluru on this scooter! Batterylife was excellent. Sarah was super nice.'
       },
       {
         listing: listings[3]._id, // Tent

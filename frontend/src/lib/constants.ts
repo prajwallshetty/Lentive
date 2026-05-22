@@ -6,29 +6,29 @@ export interface MockLocation {
 
 export const MOCK_LOCATIONS: MockLocation[] = [
   {
-    name: 'Union Square (SF Downtown)',
-    address: 'Union Square, San Francisco, CA',
-    coordinates: [-122.4089, 37.7879]
+    name: 'Indiranagar (Bengaluru East)',
+    address: 'Indiranagar, Bengaluru, Karnataka, India',
+    coordinates: [77.6412, 12.9719]
   },
   {
-    name: 'The Castro (SF Central-West)',
-    address: 'The Castro, San Francisco, CA',
-    coordinates: [-122.4316, 37.7699]
+    name: 'Koramangala (Bengaluru South)',
+    address: 'Koramangala, Bengaluru, Karnataka, India',
+    coordinates: [77.6245, 12.9352]
   },
   {
-    name: 'Civic Center (SF Central)',
-    address: 'Civic Center, San Francisco, CA',
-    coordinates: [-122.4194, 37.7749]
+    name: 'HSR Layout (Bengaluru Southeast)',
+    address: 'HSR Layout, Bengaluru, Karnataka, India',
+    coordinates: [77.6387, 12.9101]
   },
   {
-    name: 'SOMA (SF East)',
-    address: 'SOMA, San Francisco, CA',
-    coordinates: [-122.4010, 37.7785]
+    name: 'Whitefield (Bengaluru East)',
+    address: 'Whitefield, Bengaluru, Karnataka, India',
+    coordinates: [77.7499, 12.9698]
   },
   {
-    name: 'Golden Gate Park (SF West)',
-    address: 'Golden Gate Park, San Francisco, CA',
-    coordinates: [-122.4862, 37.7694]
+    name: 'Malleshwaram (Bengaluru North)',
+    address: 'Malleshwaram, Bengaluru, Karnataka, India',
+    coordinates: [77.5736, 12.9961]
   }
 ];
 

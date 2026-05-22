@@ -17,7 +17,6 @@ interface NavbarProps {
   user: any;
   currentView: 'browse' | 'dashboard';
   setCurrentView: (view: 'browse' | 'dashboard') => void;
-  onQuickLogin: (email: string) => void;
   onLogout: () => void;
 }
 
@@ -31,7 +30,6 @@ export default function Navbar({
   user,
   currentView,
   setCurrentView,
-  onQuickLogin,
   onLogout,
 }: NavbarProps) {
   const { showToast } = useToast();

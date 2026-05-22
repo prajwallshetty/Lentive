@@ -9,13 +9,14 @@ const {
   updateBookingStatus
 } = require('../controllers/bookings');
 const { protect } = require('../middleware/auth');
+const { validateBooking } = require('../middleware/validation');
 
 const router = express.Router();
 
 router.use(protect); // All booking routes are protected
 
 router.route('/')
-  .post(createBooking);
+  .post(validateBooking, createBooking);
 
 router.route('/renter')
   .get(getRenterBookings);

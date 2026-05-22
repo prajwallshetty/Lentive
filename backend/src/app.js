@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/error');
 
@@ -16,6 +19,20 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+// Set security headers
+app.use(helmet());
+
+// Prevent NoSQL injection
+app.use(mongoSanitize());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 500, // limit each IP to 500 requests per windowMs
+  message: 'Too many requests from this IP, please try again later'
+});
+app.use('/api', limiter);
+
 // Enable CORS
 app.use(cors({
   origin: '*', // Allow all origins for development
@@ -28,11 +45,17 @@ const auth = require('./routes/auth');
 const listings = require('./routes/listings');
 const bookings = require('./routes/bookings');
 const notifications = require('./routes/notifications');
+const chats = require('./routes/chats');
+const payments = require('./routes/payments');
+const admin = require('./routes/admin');
 
 app.use('/api/auth', auth);
 app.use('/api/listings', listings);
 app.use('/api/bookings', bookings);
 app.use('/api/notifications', notifications);
+app.use('/api/chats', chats);
+app.use('/api/payments', payments);
+app.use('/api/admin', admin);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

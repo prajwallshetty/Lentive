@@ -204,3 +204,22 @@ exports.getListingAvailability = async (req, res, next) => {
     next(err);
   }
 };
+
+// @desc    Get owner listings (including unavailable ones)
+// @route   GET /api/listings/my
+// @access  Private
+exports.getMyListings = async (req, res, next) => {
+  try {
+    const listings = await Listing.find({ owner: req.user.id })
+      .populate('owner', 'name email avatar ratings address')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: listings.length,
+      listings
+    });
+  } catch (err) {
+    next(err);
+  }
+};

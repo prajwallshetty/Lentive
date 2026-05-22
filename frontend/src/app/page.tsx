@@ -23,7 +23,8 @@ export default function Home() {
   
   const { user, logout, resendVerification, loading: authLoading } = useAuth();
   const [currentView, setCurrentView] = useState<'browse' | 'dashboard'>('browse');
-  const [activeDashboardTab, setActiveDashboardTab] = useState<'overview' | 'listings' | 'requests' | 'rentals'>('overview');
+  const [activeDashboardTab, setActiveDashboardTab] = useState<'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin'>('overview');
+  const [chatRecipientId, setChatRecipientId] = useState<string | null>(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [pendingRequests, setPendingRequests] = useState(0);
   
@@ -56,10 +57,6 @@ export default function Home() {
     fetchListings();
   }, [currentLocation, radius, selectedCategory, searchQuery]);
 
-  const handleQuickLogin = async (email: string) => {
-    // legacy mock quick-login bypass
-  };
-
   const handleLogout = () => {
     logout();
     setCurrentView('browse');
@@ -88,6 +85,18 @@ export default function Home() {
     setPostFormOnLoad(true);
   };
 
+  const handleStartChat = (ownerId: string) => {
+    if (!user) {
+      showToast('Please log in to message owners.', 'info');
+      window.location.href = '/login';
+      return;
+    }
+    setChatRecipientId(ownerId);
+    setCurrentView('dashboard');
+    setActiveDashboardTab('chats');
+    setSelectedListing(null); // close detail modal
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground transition-all duration-300 relative overflow-hidden">
       
@@ -102,7 +111,6 @@ export default function Home() {
         user={user}
         currentView={currentView}
         setCurrentView={setCurrentView}
-        onQuickLogin={handleQuickLogin}
         onLogout={handleLogout}
       />
 
@@ -207,7 +215,7 @@ export default function Home() {
                 <div className="absolute bottom-6 left-6 right-6 z-10 text-white flex flex-col">
                   <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#34d399] bg-primary/20 px-2.5 py-0.5 rounded-md w-fit border border-primary/30">Featured Rental</span>
                   <h4 className="text-xl font-black mt-2 leading-tight">Super73 Electric Bike</h4>
-                  <p className="text-xs text-gray-200 mt-1">Rent for $45/day • 1.2 km away</p>
+                  <p className="text-xs text-gray-200 mt-1">Rent for ₹3,500/day • 1.2 km away</p>
                 </div>
               </div>
             </div>
@@ -300,6 +308,8 @@ export default function Home() {
             initialShowAddForm={postFormOnLoad}
             onCloseAddForm={() => setPostFormOnLoad(false)}
             initialTab={activeDashboardTab}
+            chatRecipientId={chatRecipientId}
+            onClearChatRecipient={() => setChatRecipientId(null)}
             onStatsUpdate={(unreadCount, pendingCount) => {
               setUnreadNotifications(unreadCount);
               setPendingRequests(pendingCount);
@@ -316,6 +326,7 @@ export default function Home() {
           user={user}
           onClose={() => setSelectedListing(null)}
           onBookingSuccess={fetchListings}
+          onStartChat={handleStartChat}
         />
       )}
 

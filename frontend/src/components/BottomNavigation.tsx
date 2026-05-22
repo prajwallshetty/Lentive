@@ -5,8 +5,8 @@ import { Compass, ShoppingBag, Plus, ClipboardList, Bell } from 'lucide-react';
 
 interface BottomNavigationProps {
   currentView: 'browse' | 'dashboard';
-  activeTab: 'overview' | 'listings' | 'requests' | 'rentals';
-  onNavigate: (view: 'browse' | 'dashboard', tab?: 'overview' | 'listings' | 'requests' | 'rentals') => void;
+  activeTab: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin';
+  onNavigate: (view: 'browse' | 'dashboard', tab?: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin') => void;
   onPostClick: () => void;
   unreadNotifications: number;
   pendingRequests: number;
@@ -23,7 +23,7 @@ export default function BottomNavigation({
   const isExplore = currentView === 'browse';
   const isRentals = currentView === 'dashboard' && activeTab === 'rentals';
   const isRequests = currentView === 'dashboard' && activeTab === 'requests';
-  const isInbox = currentView === 'dashboard' && activeTab === 'overview';
+  const isInbox = currentView === 'dashboard' && (activeTab === 'overview' || activeTab === 'chats');
 
   return (
     <div className="floating-bottom-nav md:hidden">

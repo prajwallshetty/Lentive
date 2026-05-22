@@ -245,6 +245,50 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
+// @desc    Upload Identity Verification Document
+// @route   PUT /api/auth/verify-document
+// @access  Private
+exports.uploadDocument = async (req, res, next) => {
+  try {
+    const { document } = req.body;
+
+    if (!document) {
+      return res.status(400).json({ success: false, error: 'Please provide a document (base64 or URL)' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    user.verificationDocument = document;
+    user.verificationStatus = 'pending';
+    user.verificationRemarks = '';
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Verification document uploaded successfully. Status is now pending approval.',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        address: user.address,
+        location: user.location,
+        ratings: user.ratings,
+        isVerified: user.isVerified,
+        verificationStatus: user.verificationStatus,
+        verificationDocument: user.verificationDocument,
+        verificationRemarks: user.verificationRemarks
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // Helper function to sign JWT and return token response
 const sendTokenResponse = (user, statusCode, res) => {
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -263,7 +307,10 @@ const sendTokenResponse = (user, statusCode, res) => {
       address: user.address,
       location: user.location,
       ratings: user.ratings,
-      isVerified: user.isVerified
+      isVerified: user.isVerified,
+      verificationStatus: user.verificationStatus,
+      verificationDocument: user.verificationDocument,
+      verificationRemarks: user.verificationRemarks
     }
   });
 };

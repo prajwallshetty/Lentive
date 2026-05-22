@@ -84,6 +84,16 @@ export const api = {
       if (!res.ok) throw new Error(json.error || 'Failed to resend verification email');
       return json;
     },
+    async uploadDocument(document: string) {
+      const res = await fetch(`${API_URL}/auth/verify-document`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({ document }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to upload verification document');
+      return json;
+    },
   },
 
   // Listings
@@ -167,6 +177,14 @@ export const api = {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to fetch listing availability');
+      return json;
+    },
+    async getMy() {
+      const res = await fetch(`${API_URL}/listings/my`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch my listings');
       return json;
     },
   },
@@ -284,6 +302,128 @@ export const api = {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to submit review');
+      return json;
+    },
+  },
+
+  // Chats
+  chats: {
+    async getAll() {
+      const res = await fetch(`${API_URL}/chats`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch chats');
+      return json;
+    },
+    async getHistory(userId: string) {
+      const res = await fetch(`${API_URL}/chats/${userId}`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch chat history');
+      return json;
+    },
+    async sendMessage(recipientId: string, message: string) {
+      const res = await fetch(`${API_URL}/chats`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ recipientId, message }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to send message');
+      return json;
+    },
+  },
+
+  // Payments
+  payments: {
+    async createOrder(bookingId: string) {
+      const res = await fetch(`${API_URL}/payments/order`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ bookingId }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to initialize payment order');
+      return json;
+    },
+    async verifyPayment(data: {
+      razorpayOrderId: string;
+      razorpayPaymentId?: string;
+      razorpaySignature?: string;
+      bookingId: string;
+    }) {
+      const res = await fetch(`${API_URL}/payments/verify`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to verify payment');
+      return json;
+    },
+    async getHistory() {
+      const res = await fetch(`${API_URL}/payments/history`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch payment history');
+      return json;
+    },
+  },
+
+  // Admin
+  admin: {
+    async getAnalytics() {
+      const res = await fetch(`${API_URL}/admin/analytics`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch admin analytics');
+      return json;
+    },
+    async getUsers() {
+      const res = await fetch(`${API_URL}/admin/users`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch users');
+      return json;
+    },
+    async verifyUser(userId: string, status: 'approved' | 'rejected', remarks?: string) {
+      const res = await fetch(`${API_URL}/admin/users/${userId}/verify`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({ status, remarks }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to update user verification');
+      return json;
+    },
+    async getListings() {
+      const res = await fetch(`${API_URL}/admin/listings`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch listings');
+      return json;
+    },
+    async moderateListing(listingId: string) {
+      const res = await fetch(`${API_URL}/admin/listings/${listingId}`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to delete/moderate listing');
+      return json;
+    },
+    async getBookings() {
+      const res = await fetch(`${API_URL}/admin/bookings`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch bookings');
       return json;
     },
   },

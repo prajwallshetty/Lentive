@@ -4,15 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { X, Calendar, ShieldCheck, MapPin, Star, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 import { api } from '../lib/api';
+import { useBookingStore } from '../store/bookingStore';
+import { usePaymentStore } from '../store/paymentStore';
 
 interface ListingDetailModalProps {
   listing: any;
   user: any;
   onClose: () => void;
   onBookingSuccess: () => void;
+  onStartChat?: (ownerId: string) => void;
 }
 
-export default function ListingDetailModal({ listing, user, onClose, onBookingSuccess }: ListingDetailModalProps) {
+export default function ListingDetailModal({ listing, user, onClose, onBookingSuccess, onStartChat }: ListingDetailModalProps) {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [totalPrice, setTotalPrice] = useState(0);
@@ -26,6 +29,26 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [showPaymentSimulator, setShowPaymentSimulator] = useState(false);
+  const [pendingBooking, setPendingBooking] = useState<any>(null);
+  const [pendingOrder, setPendingOrder] = useState<any>(null);
+
+  const createBooking = useBookingStore((state) => state.createBooking);
+  const createOrder = usePaymentStore((state) => state.createOrder);
+  const verifyPayment = usePaymentStore((state) => state.verifyPayment);
+
+  // Load Razorpay SDK
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const existingScript = document.getElementById('razorpay-sdk');
+      if (!existingScript) {
+        const script = document.createElement('script');
+        script.id = 'razorpay-sdk';
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        document.body.appendChild(script);
+      }
+    }
+  }, []);
 
   // Fetch blocked dates and reviews on mount
   useEffect(() => {
@@ -89,7 +112,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
     }
   }, [startDate, endDate, listing.pricePerDay, blockedDates]);
 
-  const handleBookingClick = (e: React.FormEvent) => {
+  const handleBookingClick = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
       setError('Please login first to reserve items.');
@@ -108,22 +131,83 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
       return;
     }
 
-    // Trigger Razorpay simulated checkout
-    setShowPaymentSimulator(true);
-  };
-
-  const handlePaymentSuccess = async (paymentId: string) => {
     setLoading(true);
     setError('');
-    setShowPaymentSimulator(false);
-    
+
     try {
-      await api.bookings.create({
+      // 1. Create booking in pending status
+      const booking = await createBooking({
         listingId: listing._id,
         startDate,
         endDate,
-        paymentId,
-        paymentStatus: 'captured'
+      });
+
+      // 2. Create order via payments API
+      const orderRes = await createOrder(booking._id);
+      
+      if (orderRes.isSimulated) {
+        setPendingBooking(booking);
+        setPendingOrder(orderRes.order);
+        setShowPaymentSimulator(true);
+      } else {
+        const options = {
+          key: orderRes.keyId,
+          amount: orderRes.order.amount,
+          currency: orderRes.order.currency,
+          name: 'Lentive Hyperlocal',
+          description: `Rental of ${listing.title}`,
+          order_id: orderRes.order.id,
+          handler: async function (response: any) {
+            setLoading(true);
+            try {
+              await verifyPayment({
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+                bookingId: booking._id,
+              });
+              setSuccess(true);
+              setTimeout(() => {
+                onBookingSuccess();
+                onClose();
+              }, 2000);
+            } catch (err: any) {
+              setError(err.message || 'Payment verification failed.');
+            } finally {
+              setLoading(false);
+            }
+          },
+          prefill: {
+            name: user?.name,
+            email: user?.email,
+          },
+          theme: {
+            color: '#3b82f6',
+          },
+        };
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', function (response: any) {
+          setError(response.error.description || 'Payment failed.');
+        });
+        rzp.open();
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to initialize booking or payment.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSimulatedPaymentSuccess = async () => {
+    if (!pendingBooking || !pendingOrder) return;
+    setLoading(true);
+    setError('');
+    setShowPaymentSimulator(false);
+
+    try {
+      await verifyPayment({
+        razorpayOrderId: pendingOrder.id,
+        bookingId: pendingBooking._id,
       });
       setSuccess(true);
       setTimeout(() => {
@@ -187,27 +271,39 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
             </div>
 
             {/* Owner Section */}
-            <div className="flex items-center justify-between rounded-2xl border border-border/40 p-4 bg-muted/40 dark:bg-black/10">
-              <div className="flex items-center gap-3">
-                <img
-                  src={listing.owner?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80'}
-                  alt={listing.owner?.name || 'Owner'}
-                  className="h-11 w-11 rounded-full object-cover border border-border/20 shadow-sm"
-                />
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Offered by</p>
-                  <p className="text-sm font-bold text-foreground">{listing.owner?.name || 'Local Host'}</p>
+            <div className="flex flex-col gap-3 rounded-2xl border border-border/40 p-4 bg-muted/40 dark:bg-black/10">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={listing.owner?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&h=80&q=80'}
+                    alt={listing.owner?.name || 'Owner'}
+                    className="h-11 w-11 rounded-full object-cover border border-border/20 shadow-sm"
+                  />
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">Offered by</p>
+                    <p className="text-sm font-bold text-foreground">{listing.owner?.name || 'Local Host'}</p>
+                  </div>
                 </div>
+                
+                {listing.owner?.ratings && (
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center gap-1 text-sm font-bold text-foreground">
+                      <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
+                      <span>{(listing.owner.ratings.average || 5.0).toFixed(1)}</span>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">{listing.owner.ratings.count || 3} reviews</span>
+                  </div>
+                )}
               </div>
               
-              {listing.owner?.ratings && (
-                <div className="flex flex-col items-end">
-                  <div className="flex items-center gap-1 text-sm font-bold text-foreground">
-                    <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-                    <span>{(listing.owner.ratings.average || 5.0).toFixed(1)}</span>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground">{listing.owner.ratings.count || 3} reviews</span>
-                </div>
+              {!isOwner && user && onStartChat && (
+                <button
+                  type="button"
+                  onClick={() => onStartChat(listing.owner?._id || listing.owner)}
+                  className="w-full py-2 bg-secondary hover:brightness-110 text-secondary-foreground font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer text-center"
+                >
+                  Message Owner
+                </button>
               )}
             </div>
 
@@ -430,10 +526,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
 
             <div className="flex gap-2.5 mt-6">
               <button
-                onClick={() => {
-                  const mockPayId = `pay_simulated_${Math.random().toString(36).substring(2, 12)}`;
-                  handlePaymentSuccess(mockPayId);
-                }}
+                onClick={handleSimulatedPaymentSuccess}
                 className="flex-grow py-3 bg-primary hover:brightness-110 active:scale-95 text-white text-xs font-bold rounded-2xl transition shadow-md cursor-pointer text-center"
               >
                 Pay Successful

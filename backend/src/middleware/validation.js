@@ -1,74 +1,79 @@
+const {
+  validateRegisterInput,
+  validateLoginInput,
+  validateForgotPasswordInput,
+  validateResetPasswordInput
+} = require('../validations/auth');
+
+const { validateListingInput } = require('../validations/listings');
+const { validateBookingInput } = require('../validations/bookings');
+
+const {
+  validateCreateOrderInput,
+  validateVerifyPaymentInput
+} = require('../validations/payments');
+
 const validateRegister = (req, res, next) => {
-  const { name, email, password, role } = req.body;
-
-  if (!name || name.trim() === '') {
-    return res.status(400).json({ success: false, error: 'Please add a name' });
+  const { isValid, errors } = validateRegisterInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ success: false, error: errors[0] });
   }
-
-  if (!email) {
-    return res.status(400).json({ success: false, error: 'Please add an email' });
-  }
-
-  const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ success: false, error: 'Please add a valid email' });
-  }
-
-  if (!password) {
-    return res.status(400).json({ success: false, error: 'Please add a password' });
-  }
-
-  if (password.length < 6) {
-    return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
-  }
-
-  if (role && !['renter', 'owner', 'admin'].includes(role)) {
-    return res.status(400).json({ success: false, error: 'Invalid user role' });
-  }
-
   next();
 };
 
 const validateLogin = (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ success: false, error: 'Please provide an email' });
+  const { isValid, errors } = validateLoginInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ success: false, error: errors[0] });
   }
-
-  if (!password) {
-    return res.status(400).json({ success: false, error: 'Please provide a password' });
-  }
-
   next();
 };
 
 const validateForgotPassword = (req, res, next) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({ success: false, error: 'Please provide an email' });
+  const { isValid, errors } = validateForgotPasswordInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ success: false, error: errors[0] });
   }
-
-  const emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  if (!emailRegex.test(email)) {
-    return res.status(400).json({ success: false, error: 'Please provide a valid email' });
-  }
-
   next();
 };
 
 const validateResetPassword = (req, res, next) => {
-  const { password } = req.body;
-
-  if (!password) {
-    return res.status(400).json({ success: false, error: 'Please provide a password' });
+  const { isValid, errors } = validateResetPasswordInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ success: false, error: errors[0] });
   }
+  next();
+};
 
-  if (password.length < 6) {
-    return res.status(400).json({ success: false, error: 'Password must be at least 6 characters' });
+const validateListing = (req, res, next) => {
+  const { isValid, errors } = validateListingInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ success: false, error: errors[0] });
   }
+  next();
+};
 
+const validateBooking = (req, res, next) => {
+  const { isValid, errors } = validateBookingInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ success: false, error: errors[0] });
+  }
+  next();
+};
+
+const validateCreateOrder = (req, res, next) => {
+  const { isValid, errors } = validateCreateOrderInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ success: false, error: errors[0] });
+  }
+  next();
+};
+
+const validateVerifyPayment = (req, res, next) => {
+  const { isValid, errors } = validateVerifyPaymentInput(req.body);
+  if (!isValid) {
+    return res.status(400).json({ success: false, error: errors[0] });
+  }
   next();
 };
 
@@ -76,5 +81,9 @@ module.exports = {
   validateRegister,
   validateLogin,
   validateForgotPassword,
-  validateResetPassword
+  validateResetPassword,
+  validateListing,
+  validateBooking,
+  validateCreateOrder,
+  validateVerifyPayment
 };
