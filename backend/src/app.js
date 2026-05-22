@@ -27,10 +27,12 @@ app.use(cors({
 const auth = require('./routes/auth');
 const listings = require('./routes/listings');
 const bookings = require('./routes/bookings');
+const notifications = require('./routes/notifications');
 
 app.use('/api/auth', auth);
 app.use('/api/listings', listings);
 app.use('/api/bookings', bookings);
+app.use('/api/notifications', notifications);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

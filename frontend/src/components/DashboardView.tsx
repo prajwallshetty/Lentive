@@ -8,7 +8,8 @@ import { useToast } from '../context/ToastContext';
 import { 
   Plus, DollarSign, Package, ShoppingBag, 
   CheckCircle2, Clock, Calendar, PlusCircle,
-  Pencil, Trash2, Star, X, Upload, AlertCircle
+  Pencil, Trash2, Star, X, Upload, AlertCircle,
+  Bell, User, ShieldCheck, RefreshCw, XCircle, Play
 } from 'lucide-react';
 
 interface DashboardViewProps {
@@ -25,10 +26,16 @@ export default function DashboardView({
   onCloseAddForm
 }: DashboardViewProps) {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState<'stats' | 'requests' | 'listings' | 'rentals'>('stats');
-  const [bookings, setBookings] = useState<any[]>([]);
-  const [listings, setListings] = useState<any[]>([]);
   
+  // Tabs: overview | listings | requests (hosting requests) | rentals (renting history)
+  const [activeTab, setActiveTab] = useState<'overview' | 'listings' | 'requests' | 'rentals'>('overview');
+  
+  const [listings, setListings] = useState<any[]>([]);
+  const [renterBookings, setRenterBookings] = useState<any[]>([]);
+  const [ownerBookings, setOwnerBookings] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   // Listing form state
   const [showAddForm, setShowAddForm] = useState(initialShowAddForm || false);
   const [editingListingId, setEditingListingId] = useState<string | null>(null);
@@ -51,23 +58,35 @@ export default function DashboardView({
   const [reviewSuccess, setReviewSuccess] = useState(false);
 
   const fetchDashboardData = async () => {
+    setLoading(true);
     try {
-      if (user.role === 'owner') {
-        const bookingsRes = await api.bookings.getOwnerBookings();
-        setBookings(bookingsRes.bookings || []);
-        
-        // Fetch listings belonging to the owner
-        const listingsRes = await api.listings.getAll();
-        const myItems = (listingsRes.listings || []).filter(
-          (item: any) => item.owner?._id === user.id || item.owner === user.id
-        );
-        setListings(myItems);
-      } else {
-        const rentalsRes = await api.bookings.getRenterBookings();
-        setBookings(rentalsRes.bookings || []);
-      }
+      // Parallel loading of Listings, Renter Bookings, Owner Bookings and Notifications
+      const [listingsRes, renterRes, ownerRes, notificationsRes] = await Promise.all([
+        api.listings.getAll(),
+        api.bookings.getRenterBookings(),
+        api.bookings.getOwnerBookings(),
+        api.notifications.getAll().catch(() => ({ notifications: [] })) // Graceful handling if backend notification api isn't ready immediately
+      ]);
+
+      // Filter listings belonging to current user
+      const myItems = (listingsRes.listings || []).filter(
+        (item: any) => item.owner?._id === user.id || item.owner === user.id
+      );
+      setListings(myItems);
+
+      // Bookings renter made
+      setRenterBookings(renterRes.bookings || renterRes.data || []);
+      
+      // Bookings owner received
+      setOwnerBookings(ownerRes.bookings || ownerRes.data || []);
+
+      // Notifications
+      setNotifications(notificationsRes.notifications || []);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
+      showToast('Error loading dashboard console data', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -138,6 +157,8 @@ export default function DashboardView({
         formCategory === 'Electronics' ? 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80' :
         formCategory === 'Vehicles' ? 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80' :
         formCategory === 'Outdoor' ? 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80' :
+        formCategory === 'Party Supplies' ? 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=600&q=80' :
+        formCategory === 'Fashion' ? 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80' :
         'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=600&q=80'
       ];
 
@@ -183,18 +204,60 @@ export default function DashboardView({
     }
   };
 
-  const handleUpdateStatus = async (bookingId: string, status: 'approved' | 'completed' | 'cancelled') => {
+  // Actions for bookings
+  const handleAcceptRequest = async (bookingId: string) => {
+    try {
+      await api.bookings.accept(bookingId);
+      showToast('Booking request accepted successfully!', 'success');
+      fetchDashboardData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to accept booking request.', 'error');
+    }
+  };
+
+  const handleRejectRequest = async (bookingId: string) => {
+    if (!confirm('Are you sure you want to reject this booking request?')) return;
+    try {
+      await api.bookings.reject(bookingId);
+      showToast('Booking request rejected.', 'info');
+      fetchDashboardData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to reject booking request.', 'error');
+    }
+  };
+
+  const handleCancelBooking = async (bookingId: string) => {
+    if (!confirm('Are you sure you want to cancel this booking? This will notify the other party.')) return;
+    try {
+      await api.bookings.cancel(bookingId);
+      showToast('Booking cancelled successfully.', 'success');
+      fetchDashboardData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to cancel booking.', 'error');
+    }
+  };
+
+  const handleUpdateBookingStatus = async (bookingId: string, status: 'active' | 'completed') => {
     try {
       await api.bookings.updateStatus(bookingId, status);
       showToast(`Booking marked as ${status}.`, 'success');
       fetchDashboardData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update booking status.', 'error');
+    }
+  };
+
+  const handleMarkNotificationRead = async (id: string) => {
+    try {
+      await api.notifications.markAsRead(id);
+      setNotifications(prev => prev.map(n => n._id === id ? { ...n, isRead: true } : n));
     } catch (err) {
-      showToast('Failed to update booking status.', 'error');
+      console.error('Failed to mark notification as read:', err);
     }
   };
 
   const handleOpenReviewModal = (booking: any) => {
-    setReviewListingId(booking.listing?._id || booking.listing);
+    setReviewListingId(booking.listing?._id || booking.listingId?._id || booking.listing);
     setReviewRating(5);
     setReviewComment('');
     setReviewError('');
@@ -235,10 +298,55 @@ export default function DashboardView({
     }
   };
 
-  // Stats calculators
-  const approvedBookings = bookings.filter(b => b.status === 'approved' || b.status === 'active' || b.status === 'completed');
-  const totalEarnings = approvedBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
-  const pendingCount = bookings.filter(b => b.status === 'pending').length;
+  // Stats Aggregations
+  // 1. Total Earnings from listings: accepted, active, completed bookings
+  const acceptedOwnerBookings = ownerBookings.filter(b => 
+    ['accepted', 'active', 'completed'].includes(b.status || b.bookingStatus)
+  );
+  const totalEarnings = acceptedOwnerBookings.reduce((sum, b) => sum + (b.totalPrice || b.totalAmount || 0), 0);
+
+  // 2. Incoming Pending Requests Count
+  const pendingRequestsCount = ownerBookings.filter(b => (b.status || b.bookingStatus) === 'pending').length;
+
+  // 3. Active Rentals Count (either renting or lending)
+  const activeRentalsCount = renterBookings.filter(b => (b.status || b.bookingStatus) === 'active').length + 
+                             ownerBookings.filter(b => (b.status || b.bookingStatus) === 'active').length;
+
+  // 4. Unread Notifications Count
+  const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
+
+  // Status Chip Rendering Helper
+  const renderStatusBadge = (status: string) => {
+    const s = (status || '').toLowerCase();
+    let classes = 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20';
+    let label = 'Unknown';
+
+    if (s === 'pending') {
+      classes = 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20';
+      label = 'Pending Approval';
+    } else if (s === 'accepted') {
+      classes = 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20';
+      label = 'Confirmed';
+    } else if (s === 'rejected') {
+      classes = 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20';
+      label = 'Rejected';
+    } else if (s === 'active') {
+      classes = 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20 animate-pulse';
+      label = 'Active Rental';
+    } else if (s === 'completed') {
+      classes = 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20';
+      label = 'Completed';
+    } else if (s === 'cancelled') {
+      classes = 'bg-slate-500/10 text-slate-500 dark:text-slate-400 border-slate-500/10';
+      label = 'Cancelled';
+    }
+
+    return (
+      <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border ${classes}`}>
+        {label}
+      </span>
+    );
+  };
 
   return (
     <div className="w-full py-6 animate-in fade-in duration-300 relative z-10">
@@ -247,15 +355,22 @@ export default function DashboardView({
         {/* Dashboard Header */}
         <div className="flex flex-col gap-4 border-b border-border/40 pb-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-3xl font-black text-foreground tracking-tight">
-              {user.role === 'owner' ? 'Hosting Console' : 'Renter Console'}
+            <h2 className="text-3xl font-black text-foreground tracking-tight flex items-center gap-2">
+              Marketplace Dashboard
             </h2>
             <p className="text-xs text-muted-foreground mt-1">
-              Logged in as <span className="font-semibold text-primary">{user.name}</span> ({user.email})
+              Welcome back, <span className="font-semibold text-primary">{user.name}</span>. Manage your listings and rentals.
             </p>
           </div>
           
-          {user.role === 'owner' && (
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={fetchDashboardData}
+              title="Refresh Dashboard"
+              className="p-2.5 bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/40 rounded-xl transition cursor-pointer"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            </button>
             <button
               onClick={() => {
                 setEditingListingId(null);
@@ -266,240 +381,259 @@ export default function DashboardView({
               <Plus className="h-4 w-4" />
               List an Item
             </button>
-          )}
+          </div>
         </div>
 
-        {/* Dashboard Tabs Segment Control */}
+        {/* Tab Controls */}
         <div className="flex gap-1 bg-muted dark:bg-black/10 border border-border/40 p-1 rounded-xl my-6 w-fit overflow-x-auto hide-scrollbar">
-          {user.role === 'owner' ? (
-            <>
-              <button
-                onClick={() => setActiveTab('stats')}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
-                  activeTab === 'stats' 
-                    ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
-                    : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
-                }`}
-              >
-                Overview
-              </button>
-              <button
-                onClick={() => setActiveTab('requests')}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-                  activeTab === 'requests' 
-                    ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
-                    : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
-                }`}
-              >
-                Rental Requests
-                {pendingCount > 0 && (
-                  <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white">
-                    {pendingCount}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={() => setActiveTab('listings')}
-                className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
-                  activeTab === 'listings' 
-                    ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
-                    : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
-                }`}
-              >
-                My Items ({listings.length})
-              </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setActiveTab('rentals')}
-              className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
-                activeTab === 'rentals' 
-                  ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
-                  : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
-              }`}
-            >
-              My Rentals ({bookings.length})
-            </button>
-          )}
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'overview' 
+                ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
+                : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            Overview
+            {unreadNotificationsCount > 0 && (
+              <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-extrabold text-white">
+                {unreadNotificationsCount}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('listings')}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
+              activeTab === 'listings' 
+                ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
+                : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            My Listings ({listings.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('requests')}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'requests' 
+                ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
+                : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            Booking Requests
+            {pendingRequestsCount > 0 && (
+              <span className="flex h-4.5 w-4.5 items-center justify-center rounded-full bg-amber-500 text-[10px] font-extrabold text-white">
+                {pendingRequestsCount}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('rentals')}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
+              activeTab === 'rentals' 
+                ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
+                : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            My Rentals ({renterBookings.length})
+          </button>
         </div>
+
+        {/* Dashboard Loading State */}
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <RefreshCw className="h-8 w-8 animate-spin text-primary mb-3" />
+            <p className="text-xs font-semibold">Loading marketplace console...</p>
+          </div>
+        )}
 
         {/* Overview Tab Content */}
-        {activeTab === 'stats' && user.role === 'owner' && (
-          <div className="flex flex-col gap-6">
-            {/* Stat Cards */}
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-              {/* Total Revenue */}
-              <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
-                <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
-                  <DollarSign className="h-6 w-6" />
+        {!loading && activeTab === 'overview' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Stats Panel - Left 2 columns */}
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              
+              {/* Stat Cards Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Total Earnings */}
+                <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
+                  <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+                    <DollarSign className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Total Earnings</p>
+                    <p className="text-xl font-black text-foreground mt-0.5">{formatCurrency(totalEarnings)}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Total Revenue</p>
-                  <p className="text-2xl font-black text-foreground mt-0.5">{formatCurrency(totalEarnings)}</p>
+
+                {/* My Listed Items */}
+                <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
+                  <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+                    <Package className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">My Listed Items</p>
+                    <p className="text-xl font-black text-foreground mt-0.5">{listings.length}</p>
+                  </div>
+                </div>
+
+                {/* Active Bookings (Both) */}
+                <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
+                  <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+                    <ShoppingBag className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Active Rentals</p>
+                    <p className="text-xl font-black text-foreground mt-0.5">{activeRentalsCount}</p>
+                  </div>
                 </div>
               </div>
 
-              {/* Active Listings */}
-              <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
-                <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
-                  <Package className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Active Listings</p>
-                  <p className="text-2xl font-black text-foreground mt-0.5">{listings.length}</p>
-                </div>
+              {/* Quick Status / Calendar list */}
+              <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
+                <h3 className="text-base font-extrabold text-foreground border-b border-border/40 pb-3 mb-4 flex items-center justify-between">
+                  <span>Active & Upcoming Rentals</span>
+                  <span className="text-[10px] bg-primary/15 text-primary border border-primary/25 font-bold px-2 py-0.5 rounded-full">
+                    Unified Tracker
+                  </span>
+                </h3>
+
+                {/* List combined bookings that are accepted or active */}
+                {(() => {
+                  const activeRentalsList = [
+                    ...renterBookings.map(b => ({ ...b, role: 'renter' })),
+                    ...ownerBookings.map(b => ({ ...b, role: 'owner' }))
+                  ].filter(b => ['accepted', 'active'].includes((b.status || b.bookingStatus || '').toLowerCase()));
+
+                  if (activeRentalsList.length === 0) {
+                    return (
+                      <div className="py-8 text-center text-xs text-muted-foreground">
+                        No active or upcoming bookings tracking right now.
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="flex flex-col gap-3">
+                      {activeRentalsList.map((b) => (
+                        <div key={b._id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:bg-muted/40 transition-all duration-200">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'}
+                              alt=""
+                              className="h-10 w-10 rounded-lg object-cover border border-border/20 shrink-0"
+                            />
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-xs font-bold text-foreground truncate max-w-[200px]">{b.listing?.title}</p>
+                                <span className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${
+                                  b.role === 'renter' 
+                                    ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20' 
+                                    : 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                                }`}>
+                                  {b.role === 'renter' ? 'Renting' : 'Lending'}
+                                </span>
+                              </div>
+                              <p className="text-[10px] text-muted-foreground mt-0.5">
+                                {b.role === 'renter' ? `Owner: ${b.owner?.name}` : `Renter: ${b.renter?.name}`} • {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4 self-stretch sm:self-auto justify-between sm:justify-end">
+                            <div className="text-xs">
+                              <p className="font-extrabold text-foreground">{formatCurrency(b.totalPrice || b.totalAmount)}</p>
+                              <p className="text-[9px] text-muted-foreground">{b.totalDays || Math.ceil((new Date(b.endDate).getTime() - new Date(b.startDate).getTime()) / (1000 * 3600 * 24))} days</p>
+                            </div>
+                            {renderStatusBadge(b.status || b.bookingStatus)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
 
-              {/* Total Bookings */}
-              <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-card p-6 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
-                <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
-                  <ShoppingBag className="h-6 w-6" />
-                </div>
-                <div>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Total Bookings</p>
-                  <p className="text-2xl font-black text-foreground mt-0.5">{bookings.length}</p>
-                </div>
-              </div>
             </div>
 
-            {/* Quick Requests Snippet */}
-            <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-foreground border-b border-border/40 pb-3 mb-4">
-                Recent Booking Requests
+            {/* Notification Center Panel - Right 1 Column */}
+            <div className="rounded-2xl border border-border/40 bg-card p-5 shadow-sm h-fit">
+              <h3 className="text-base font-extrabold text-foreground border-b border-border/40 pb-3 mb-4 flex items-center justify-between">
+                <span className="flex items-center gap-1.5">
+                  <Bell className="h-4.5 w-4.5 text-primary shrink-0" />
+                  Live Notifications
+                </span>
+                {unreadNotificationsCount > 0 && (
+                  <span className="bg-rose-500 text-white font-extrabold text-[9px] px-2 py-0.5 rounded-full shrink-0">
+                    {unreadNotificationsCount} New
+                  </span>
+                )}
               </h3>
-              {bookings.length === 0 ? (
-                <p className="text-xs text-muted-foreground text-center py-6">No recent requests.</p>
+
+              {notifications.length === 0 ? (
+                <div className="py-12 text-center text-xs text-muted-foreground">
+                  No notifications yet.
+                </div>
               ) : (
-                <div className="flex flex-col gap-3">
-                  {bookings.slice(0, 3).map((b) => (
-                    <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:bg-muted/40 sm:flex-row sm:items-center transition-all duration-200">
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
-                          alt="" 
-                          className="h-10 w-10 rounded-lg object-cover border border-border/20"
-                        />
-                        <div>
-                          <p className="text-xs font-bold text-foreground truncate max-w-[200px]">{b.listing?.title}</p>
-                          <p className="text-[10px] text-muted-foreground">
-                            Renter: <span className="font-semibold text-foreground">{b.renter?.name}</span>
-                          </p>
-                        </div>
+                <div className="flex flex-col gap-2.5 max-h-[380px] overflow-y-auto pr-1 hide-scrollbar">
+                  {notifications.map((n) => (
+                    <div 
+                      key={n._id} 
+                      onClick={() => !n.isRead && handleMarkNotificationRead(n._id)}
+                      className={`p-3 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col gap-1.5 ${
+                        n.isRead 
+                          ? 'bg-muted/10 border-border/20 text-muted-foreground' 
+                          : 'bg-primary/5 border-primary/20 text-foreground hover:bg-primary/10'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 text-[11px]">
+                        <p className={`font-semibold leading-relaxed ${!n.isRead ? 'font-bold' : ''}`}>
+                          {n.message}
+                        </p>
+                        {!n.isRead && (
+                          <span className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1" />
+                        )}
                       </div>
                       
-                      <div className="flex items-center gap-6">
-                        <div className="text-xs">
-                          <p className="font-bold text-foreground">{formatCurrency(b.totalPrice)}</p>
-                          <span className="text-[9px] text-muted-foreground">For {Math.ceil((new Date(b.endDate).getTime() - new Date(b.startDate).getTime()) / (1000 * 3600 * 24))} days</span>
-                        </div>
-                        
-                        {/* Status tag */}
-                        <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
-                          b.status === 'pending' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20' :
-                          b.status === 'approved' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20' :
-                          b.status === 'completed' ? 'bg-primary/10 text-primary border-primary/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                        }`}>
-                          {b.status}
-                        </span>
+                      <div className="flex justify-between items-center text-[9px] text-muted-foreground font-semibold">
+                        <span>{new Date(n.createdAt).toLocaleDateString()} at {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        {!n.isRead && (
+                          <button 
+                            type="button" 
+                            className="text-primary hover:underline"
+                          >
+                            Mark Read
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-          </div>
-        )}
 
-        {/* Requests Tab Content */}
-        {activeTab === 'requests' && user.role === 'owner' && (
-          <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-foreground border-b border-border/40 pb-3 mb-4">Manage Requests</h3>
-            {bookings.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">No requests found for your items.</p>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {bookings.map((b) => (
-                  <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:border-primary/25 hover:bg-muted/40 md:flex-row md:items-center transition-all duration-300">
-                    <div className="flex items-center gap-4">
-                      <img 
-                        src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
-                        alt="" 
-                        className="h-12 w-12 rounded-lg object-cover border border-border/20"
-                      />
-                      <div>
-                        <p className="text-sm font-bold text-foreground">{b.listing?.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Renter: <span className="font-semibold text-foreground">{b.renter?.name}</span> ({b.renter?.email})
-                        </p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1">
-                          <Calendar className="h-3 w-3 text-primary" />
-                          {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                      <div className="text-xs md:text-right">
-                        <p className="text-sm font-black text-foreground">{formatCurrency(b.totalPrice)}</p>
-                        <span className="text-[10px] text-muted-foreground">Deposit: {formatCurrency(b.securityDeposit)} (Refundable)</span>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        {b.status === 'pending' && (
-                          <>
-                            <button
-                              onClick={() => handleUpdateStatus(b._id, 'approved')}
-                              className="px-3 py-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 hover:bg-emerald-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => handleUpdateStatus(b._id, 'cancelled')}
-                              className="px-3 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
-                            >
-                              Decline
-                            </button>
-                          </>
-                        )}
-                        {b.status === 'approved' && (
-                          <button
-                            onClick={() => handleUpdateStatus(b._id, 'completed')}
-                            className="px-3 py-1.5 bg-primary/10 text-primary border border-primary/20 hover:bg-primary/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
-                          >
-                            Mark Completed
-                          </button>
-                        )}
-                        {b.status !== 'pending' && b.status !== 'approved' && (
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
-                            b.status === 'completed' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                          }`}>
-                            {b.status}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         )}
 
         {/* Listings Tab Content */}
-        {activeTab === 'listings' && user.role === 'owner' && (
+        {!loading && activeTab === 'listings' && (
           <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-foreground border-b border-border/40 pb-3 mb-4">My Listed Items</h3>
+            <div className="flex items-center justify-between border-b border-border/40 pb-3 mb-4">
+              <h3 className="text-base font-extrabold text-foreground">My Listed Items</h3>
+              <span className="text-xs text-muted-foreground font-semibold">Total: {listings.length} items</span>
+            </div>
+
             {listings.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">You haven't listed any items yet.</p>
+              <p className="text-xs text-muted-foreground text-center py-12">You haven't listed any items yet.</p>
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
                 {listings.map((item) => (
                   <div key={item._id} className="rounded-xl border border-border/30 p-3.5 bg-muted/20 hover:border-primary/35 hover:bg-muted/40 flex flex-col justify-between gap-3.5 transition-all duration-300 group shadow-sm">
                     <div className="flex gap-3">
-                      <div className="relative h-16 w-16 rounded-lg overflow-hidden border border-border/20 shrink-0">
+                      <div className="relative h-16 w-16 rounded-lg overflow-hidden border border-border/20 shrink-0 bg-muted">
                         <img 
                           src={item.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
                           alt="" 
@@ -516,31 +650,41 @@ export default function DashboardView({
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center justify-end gap-2 border-t border-border/20 pt-2 mt-1">
-                      <button
-                        onClick={() => {
-                          setEditingListingId(item._id);
-                          setFormTitle(item.title);
-                          setFormDescription(item.description);
-                          setFormCategory(item.category);
-                          setFormPrice(item.pricePerDay);
-                          setFormDeposit(item.securityDeposit);
-                          setFormAddress(item.address || currentLocation.address);
-                          setFormImage(item.images?.[0] || '');
-                          setShowAddForm(true);
-                        }}
-                        className="flex items-center gap-1 px-2.5 py-1.5 bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/40 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer"
-                      >
-                        <Pencil className="h-3 w-3 text-primary" />
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => handleDeleteListing(item._id)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 hover:border-rose-500/30 border border-rose-500/15 text-[10px] font-bold rounded-lg transition-all duration-200 cursor-pointer"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                        Delete
-                      </button>
+                    
+                    <div className="flex items-center justify-between border-t border-border/20 pt-2.5 mt-1 text-[10px] font-bold">
+                      <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase border ${
+                        item.isAvailable 
+                          ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/15' 
+                          : 'bg-rose-500/10 text-rose-600 border-rose-500/15'
+                      }`}>
+                        {item.isAvailable ? 'Listed Available' : 'Inactive / Booked'}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            setEditingListingId(item._id);
+                            setFormTitle(item.title);
+                            setFormDescription(item.description);
+                            setFormCategory(item.category);
+                            setFormPrice(item.pricePerDay);
+                            setFormDeposit(item.securityDeposit);
+                            setFormAddress(item.address || currentLocation.address);
+                            setFormImage(item.images?.[0] || '');
+                            setShowAddForm(true);
+                          }}
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/40 rounded-lg transition-all duration-200 cursor-pointer"
+                        >
+                          <Pencil className="h-3 w-3 text-primary" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteListing(item._id)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 hover:border-rose-500/30 border border-rose-500/15 rounded-lg transition-all duration-200 cursor-pointer"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -549,70 +693,197 @@ export default function DashboardView({
           </div>
         )}
 
-        {/* Rentals Tab Content */}
-        {activeTab === 'rentals' && user.role !== 'owner' && (
+        {/* Booking Requests Tab (Lender console) */}
+        {!loading && activeTab === 'requests' && (
           <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-foreground border-b border-border/40 pb-3 mb-4">Rental History</h3>
-            {bookings.length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-8">You have not booked any rentals yet.</p>
+            <div className="flex items-center justify-between border-b border-border/40 pb-3 mb-4">
+              <h3 className="text-base font-extrabold text-foreground">Manage Incoming Booking Requests</h3>
+              <span className="text-xs text-muted-foreground font-semibold">Total Requests: {ownerBookings.length}</span>
+            </div>
+
+            {ownerBookings.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-12">No rental requests received for your listings yet.</p>
             ) : (
               <div className="flex flex-col gap-4">
-                {bookings.map((b) => (
-                  <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:border-primary/25 hover:bg-muted/40 md:flex-row md:items-center transition-all duration-300">
-                    <div className="flex items-center gap-4">
-                      <img 
-                        src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
-                        alt="" 
-                        className="h-12 w-12 rounded-lg object-cover border border-border/20"
-                      />
-                      <div>
-                        <p className="text-sm font-bold text-foreground">{b.listing?.title}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          Owner: <span className="font-semibold text-foreground">{b.owner?.name}</span> ({b.owner?.email})
-                        </p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1">
-                          <Calendar className="h-3 w-3 text-primary" />
-                          {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
-                        </p>
+                {ownerBookings.map((b) => {
+                  const status = (b.status || b.bookingStatus || '').toLowerCase();
+                  return (
+                    <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:border-primary/25 hover:bg-muted/40 md:flex-row md:items-center transition-all duration-300">
+                      
+                      {/* Left: Listing & Renter Profile details */}
+                      <div className="flex items-start gap-4">
+                        <img 
+                          src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
+                          alt="" 
+                          className="h-12 w-12 rounded-lg object-cover border border-border/20 shrink-0 bg-muted"
+                        />
+                        <div>
+                          <p className="text-sm font-extrabold text-foreground">{b.listing?.title}</p>
+                          
+                          {/* Renter Profile details */}
+                          <div className="flex items-center gap-2 mt-1 bg-white/50 dark:bg-black/10 px-2.5 py-1 rounded-lg border border-border/30 w-fit">
+                            <img
+                              src={b.renter?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=40&h=40&q=80'}
+                              alt=""
+                              className="h-4.5 w-4.5 rounded-full object-cover border border-border/20 shrink-0"
+                            />
+                            <p className="text-[10px] font-semibold text-muted-foreground leading-none">
+                              Renter: <span className="font-bold text-foreground">{b.renter?.name}</span> ({b.renter?.email})
+                            </p>
+                          </div>
+
+                          <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1.5 font-semibold">
+                            <Calendar className="h-3 w-3 text-primary shrink-0" />
+                            {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto justify-between md:justify-end">
-                      <div className="text-xs md:text-right">
-                        <p className="text-sm font-black text-foreground">{formatCurrency(b.totalPrice)}</p>
-                        <span className="text-[10px] text-muted-foreground">Deposit: {formatCurrency(b.securityDeposit)}</span>
+                      
+                      {/* Right: Pricing and Action buttons */}
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t border-border/20 pt-3 md:border-t-0 md:pt-0">
+                        <div className="text-xs md:text-right font-semibold">
+                          <p className="text-sm font-black text-foreground">{formatCurrency(b.totalPrice || b.totalAmount)}</p>
+                          <span className="text-[10px] text-muted-foreground">Deposit: {formatCurrency(b.securityDeposit || b.depositAmount)} (Escrow)</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-end">
+                          {status === 'pending' && (
+                            <>
+                              <button
+                                onClick={() => handleAcceptRequest(b._id)}
+                                className="px-3.5 py-1.5 bg-emerald-500 text-white hover:brightness-110 active:scale-95 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer shadow-sm shadow-emerald-500/10"
+                              >
+                                Accept
+                              </button>
+                              <button
+                                onClick={() => handleRejectRequest(b._id)}
+                                className="px-3.5 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer animate-in fade-in"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+
+                          {status === 'accepted' && (
+                            <button
+                              onClick={() => handleUpdateBookingStatus(b._id, 'active')}
+                              className="px-3.5 py-1.5 bg-indigo-500 text-white hover:brightness-110 active:scale-95 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1"
+                            >
+                              <Play className="h-3 w-3 fill-white" />
+                              Handover (Start)
+                            </button>
+                          )}
+
+                          {status === 'active' && (
+                            <button
+                              onClick={() => handleUpdateBookingStatus(b._id, 'completed')}
+                              className="px-3.5 py-1.5 bg-primary text-white hover:brightness-110 active:scale-95 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1"
+                            >
+                              <CheckCircle2 className="h-3 w-3" />
+                              Complete Rental
+                            </button>
+                          )}
+
+                          {['rejected', 'completed', 'cancelled'].includes(status) && (
+                            renderStatusBadge(b.status || b.bookingStatus)
+                          )}
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-2 shrink-0">
-                        {b.status === 'pending' && (
-                          <button
-                            onClick={() => handleUpdateStatus(b._id, 'cancelled')}
-                            className="px-3 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
-                          >
-                            Cancel Request
-                          </button>
-                        )}
-                        {b.status === 'completed' && (
-                          <button
-                            onClick={() => handleOpenReviewModal(b)}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 hover:bg-amber-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer animate-pulse"
-                          >
-                            <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
-                            Write Review
-                          </button>
-                        )}
-                        {b.status !== 'pending' && (
-                          <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border ${
-                            b.status === 'approved' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20' :
-                            b.status === 'completed' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                          }`}>
-                            {b.status}
-                          </span>
-                        )}
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* My Rentals Tab (Renter console) */}
+        {!loading && activeTab === 'rentals' && (
+          <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
+            <div className="flex items-center justify-between border-b border-border/40 pb-3 mb-4">
+              <h3 className="text-base font-extrabold text-foreground">My Outgoing Rentals</h3>
+              <span className="text-xs text-muted-foreground font-semibold">Total Bookings: {renterBookings.length}</span>
+            </div>
+
+            {renterBookings.length === 0 ? (
+              <p className="text-xs text-muted-foreground text-center py-12">You have not booked any items yet.</p>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {renterBookings.map((b) => {
+                  const status = (b.status || b.bookingStatus || '').toLowerCase();
+                  return (
+                    <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:border-primary/25 hover:bg-muted/40 md:flex-row md:items-center transition-all duration-300">
+                      
+                      {/* Left side details */}
+                      <div className="flex items-start gap-4">
+                        <img 
+                          src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
+                          alt="" 
+                          className="h-12 w-12 rounded-lg object-cover border border-border/20 shrink-0 bg-muted"
+                        />
+                        <div>
+                          <p className="text-sm font-extrabold text-foreground">{b.listing?.title}</p>
+                          
+                          {/* Owner Profile details */}
+                          <div className="flex items-center gap-2 mt-1 bg-white/50 dark:bg-black/10 px-2.5 py-1 rounded-lg border border-border/30 w-fit">
+                            <img
+                              src={b.owner?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=40&h=40&q=80'}
+                              alt=""
+                              className="h-4.5 w-4.5 rounded-full object-cover border border-border/20 shrink-0"
+                            />
+                            <p className="text-[10px] font-semibold text-muted-foreground leading-none">
+                              Owner: <span className="font-bold text-foreground">{b.owner?.name}</span> ({b.owner?.email})
+                            </p>
+                          </div>
+
+                          <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1.5 font-semibold">
+                            <Calendar className="h-3 w-3 text-primary shrink-0" />
+                            {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      {/* Right side pricing & actions */}
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t border-border/20 pt-3 md:border-t-0 md:pt-0">
+                        <div className="text-xs md:text-right font-semibold">
+                          <p className="text-sm font-black text-foreground">{formatCurrency(b.totalPrice || b.totalAmount)}</p>
+                          <span className="text-[10px] text-muted-foreground">Deposit: {formatCurrency(b.securityDeposit || b.depositAmount)}</span>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-end">
+                          {/* Cancellation allowed for pending or accepted requests */}
+                          {['pending', 'accepted'].includes(status) && (
+                            <button
+                              onClick={() => handleCancelBooking(b._id)}
+                              className="px-3.5 py-1.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer"
+                            >
+                              Cancel Request
+                            </button>
+                          )}
+
+                          {status === 'completed' && (
+                            <button
+                              onClick={() => handleOpenReviewModal(b)}
+                              className="flex items-center gap-1 px-3.5 py-1.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 hover:bg-amber-500/25 text-[10px] font-extrabold rounded-lg transition-all duration-200 cursor-pointer animate-pulse"
+                            >
+                              <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+                              Write Review
+                            </button>
+                          )}
+
+                          {status !== 'completed' && !['pending', 'accepted'].includes(status) && (
+                            renderStatusBadge(b.status || b.bookingStatus)
+                          )}
+                          {['pending', 'accepted'].includes(status) && (
+                            renderStatusBadge(b.status || b.bookingStatus)
+                          )}
+                        </div>
+                      </div>
+
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -623,7 +894,7 @@ export default function DashboardView({
       {/* Listing Form Modal */}
       {showAddForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in">
-          <div className="relative w-full max-w-lg rounded-2xl bg-card border border-border/40 p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-lg rounded-2xl bg-card border border-border/40 p-6 shadow-2xl animate-in zoom-in-95 duration-200 max-h-[95vh] overflow-y-auto hide-scrollbar">
             <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/40 pb-3">
               {editingListingId ? 'Edit Listed Item' : 'List a New Item'}
             </h3>
@@ -645,7 +916,7 @@ export default function DashboardView({
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleCreateListing} className="flex flex-col gap-4 mt-4 text-xs font-semibold">
+              <form onSubmit={handleCreateListing} className="flex flex-col gap-4 mt-4 text-xs font-semibold text-foreground">
                 
                 <div className="flex flex-col gap-1">
                   <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Item Title</label>
@@ -665,7 +936,7 @@ export default function DashboardView({
                     <select
                       value={formCategory}
                       onChange={(e) => setFormCategory(e.target.value)}
-                      className="rounded-xl border border-border bg-card p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      className="rounded-xl border border-border bg-card p-2.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all text-xs"
                     >
                       <option>Tools</option>
                       <option>Electronics</option>
@@ -673,6 +944,7 @@ export default function DashboardView({
                       <option>Outdoor</option>
                       <option>Party Supplies</option>
                       <option>Fashion</option>
+                      <option>Other</option>
                     </select>
                   </div>
 
@@ -769,7 +1041,7 @@ export default function DashboardView({
 
                 <div className="flex items-start gap-2 bg-primary/5 rounded-xl p-3 border border-primary/10">
                   <PlusCircle className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">
+                  <p className="text-[10px] text-muted-foreground leading-relaxed font-semibold">
                     This item will be listed at coordinates <span className="font-semibold text-foreground">[{currentLocation.coordinates.join(', ')}]</span> corresponding to your current simulated location, enabling hyperlocal discovery.
                   </p>
                 </div>
@@ -819,7 +1091,7 @@ export default function DashboardView({
             ) : (
               <form onSubmit={handleSubmitReview} className="flex flex-col gap-4 mt-4 text-xs font-semibold">
                 
-                <div className="flex flex-col gap-1 items-center my-2">
+                <div className="flex flex-col gap-1 items-center my-2 text-foreground">
                   <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Your Rating</label>
                   <div className="flex gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -832,7 +1104,7 @@ export default function DashboardView({
                         <Star
                           className={`h-7 w-7 transition-colors duration-150 ${
                             star <= reviewRating
-                              ? 'fill-amber-450 text-amber-500'
+                              ? 'fill-amber-400 text-amber-500'
                               : 'text-muted-foreground/35 hover:text-amber-500'
                           }`}
                         />

@@ -192,8 +192,8 @@ exports.getListingAvailability = async (req, res, next) => {
   try {
     const Booking = require('../models/Booking');
     const bookings = await Booking.find({
-      listing: req.params.id,
-      status: { $in: ['approved', 'active', 'completed', 'pending'] }
+      listingId: req.params.id,
+      bookingStatus: { $in: ['accepted', 'active', 'completed', 'pending'] }
     }).select('startDate endDate');
 
     res.status(200).json({

@@ -202,7 +202,7 @@ export const api = {
       return json;
     },
 
-    async updateStatus(id: string, status: 'approved' | 'active' | 'completed' | 'cancelled') {
+    async updateStatus(id: string, status: 'pending' | 'accepted' | 'rejected' | 'active' | 'completed' | 'cancelled') {
       const res = await fetch(`${API_URL}/bookings/${id}/status`, {
         method: 'PATCH',
         headers: getHeaders(),
@@ -210,6 +210,58 @@ export const api = {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to update booking status');
+      return json;
+    },
+
+    async accept(id: string) {
+      const res = await fetch(`${API_URL}/bookings/${id}/accept`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to accept booking');
+      return json;
+    },
+
+    async reject(id: string) {
+      const res = await fetch(`${API_URL}/bookings/${id}/reject`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to reject booking');
+      return json;
+    },
+
+    async cancel(id: string) {
+      const res = await fetch(`${API_URL}/bookings/${id}/cancel`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to cancel booking');
+      return json;
+    },
+  },
+
+  // Notifications
+  notifications: {
+    async getAll() {
+      const res = await fetch(`${API_URL}/notifications`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch notifications');
+      return json;
+    },
+
+    async markAsRead(id: string) {
+      const res = await fetch(`${API_URL}/notifications/${id}/read`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to mark notification as read');
       return json;
     },
   },

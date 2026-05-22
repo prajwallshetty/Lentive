@@ -1,17 +1,17 @@
 const mongoose = require('mongoose');
 
 const BookingSchema = new mongoose.Schema({
-  listing: {
+  listingId: {
     type: mongoose.Schema.ObjectId,
     ref: 'Listing',
     required: true
   },
-  renter: {
+  renterId: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
     required: true
   },
-  owner: {
+  ownerId: {
     type: mongoose.Schema.ObjectId,
     ref: 'User',
     required: true
@@ -24,17 +24,22 @@ const BookingSchema = new mongoose.Schema({
     type: Date,
     required: [true, 'Please add an end date']
   },
-  totalPrice: {
+  totalDays: {
     type: Number,
     required: true
   },
-  securityDeposit: {
+  totalAmount: {
     type: Number,
     required: true
   },
-  status: {
+  depositAmount: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  bookingStatus: {
     type: String,
-    enum: ['pending', 'approved', 'active', 'completed', 'cancelled'],
+    enum: ['pending', 'accepted', 'rejected', 'active', 'completed', 'cancelled'],
     default: 'pending'
   },
   paymentId: {
@@ -44,11 +49,9 @@ const BookingSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'captured', 'failed'],
     default: 'pending'
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now
   }
+}, {
+  timestamps: true
 });
 
 module.exports = mongoose.model('Booking', BookingSchema);

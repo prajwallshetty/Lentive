@@ -335,14 +335,16 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
                         <span>{formatCurrency(listing.pricePerDay)} × {days} days</span>
                         <span className="font-semibold text-foreground">{formatCurrency(totalPrice)}</span>
                       </div>
-                      <div className="flex justify-between text-muted-foreground">
-                        <span>Refundable deposit</span>
-                        <span className="font-semibold text-foreground">{formatCurrency(listing.securityDeposit)}</span>
-                      </div>
+                      {listing.securityDeposit > 0 && (
+                        <div className="flex justify-between text-muted-foreground">
+                          <span>Refundable deposit</span>
+                          <span className="font-semibold text-foreground">{formatCurrency(listing.securityDeposit)}</span>
+                        </div>
+                      )}
                       <div className="h-[1px] bg-border/40 my-1" />
                       <div className="flex justify-between text-sm font-extrabold">
                         <span>Total Due</span>
-                        <span className="text-primary font-black">{formatCurrency(totalPrice + listing.securityDeposit)}</span>
+                        <span className="text-primary font-black">{formatCurrency(totalPrice + (listing.securityDeposit || 0))}</span>
                       </div>
                     </div>
                   )}
@@ -365,10 +367,10 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
 
                   <button
                     type="submit"
-                    disabled={loading || isOwner}
+                    disabled={loading || isOwner || !!error || !startDate || !endDate}
                     className="w-full py-3.5 bg-primary hover:brightness-110 active:scale-95 text-white font-bold rounded-2xl disabled:opacity-50 transition shadow-sm text-xs uppercase tracking-wider mt-2 cursor-pointer"
                   >
-                    {loading ? 'Reserving...' : 'Reserve Rental'}
+                    {loading ? 'Reserving...' : 'Request Booking'}
                   </button>
 
                   <div className="flex items-center justify-center gap-1.5 mt-2 text-[10px] text-muted-foreground font-bold">

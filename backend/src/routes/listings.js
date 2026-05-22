@@ -20,15 +20,15 @@ router.use('/:listingId/reviews', reviewsRouter);
 router
   .route('/')
   .get(getListings)
-  .post(protect, authorize('owner', 'admin'), createListing);
+  .post(protect, createListing);
 
 router.get('/:id/availability', getListingAvailability);
 
 router
   .route('/:id')
   .get(getListing)
-  .put(protect, authorize('owner', 'admin'), updateListing)
-  .delete(protect, authorize('owner', 'admin'), deleteListing);
+  .put(protect, updateListing)
+  .delete(protect, deleteListing);
 
 module.exports = router;
 
