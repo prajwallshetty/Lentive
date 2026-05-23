@@ -5,7 +5,11 @@ const {
   verifyUser,
   getListings,
   moderateListing,
-  getBookings
+  getBookings,
+  getVerificationRequests,
+  verifyVerificationRequest,
+  getDeposits,
+  resolveDepositDispute
 } = require('../controllers/admin');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -20,5 +24,9 @@ router.put('/users/:id/verify', verifyUser);
 router.get('/listings', getListings);
 router.delete('/listings/:id', moderateListing);
 router.get('/bookings', getBookings);
+router.get('/verification-requests', getVerificationRequests);
+router.put('/verification-requests/:id', verifyVerificationRequest);
+router.get('/deposits', getDeposits);
+router.put('/deposits/:id/resolve', resolveDepositDispute);
 
 module.exports = router;

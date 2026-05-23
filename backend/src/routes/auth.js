@@ -7,7 +7,10 @@ const {
   resendVerification,
   forgotPassword,
   resetPassword,
-  uploadDocument
+  uploadDocument,
+  sendPhoneOtp,
+  verifyPhoneOtp,
+  uploadDrivingLicense
 } = require('../controllers/auth');
 const { protect } = require('../middleware/auth');
 const {
@@ -23,6 +26,9 @@ router.post('/register', validateRegister, register);
 router.post('/login', validateLogin, login);
 router.get('/me', protect, getMe);
 router.put('/verify-document', protect, uploadDocument);
+router.put('/verify-driving-license', protect, uploadDrivingLicense);
+router.post('/send-phone-otp', protect, sendPhoneOtp);
+router.post('/verify-phone-otp', protect, verifyPhoneOtp);
 router.get('/verifyemail/:verifytoken', verifyEmail);
 router.post('/resendverification', protect, resendVerification);
 router.post('/forgotpassword', validateForgotPassword, forgotPassword);

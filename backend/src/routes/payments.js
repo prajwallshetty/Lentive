@@ -1,5 +1,5 @@
 const express = require('express');
-const { createOrder, verifyPayment, razorpayWebhook, getPaymentHistory } = require('../controllers/payments');
+const { createOrder, verifyPayment, razorpayWebhook, getPaymentHistory, disputeDeposit } = require('../controllers/payments');
 const { protect } = require('../middleware/auth');
 const { validateCreateOrder, validateVerifyPayment } = require('../middleware/validation');
 
@@ -13,5 +13,6 @@ router.use(protect);
 router.post('/order', validateCreateOrder, createOrder);
 router.post('/verify', validateVerifyPayment, verifyPayment);
 router.get('/history', getPaymentHistory);
+router.post('/deposits/:id/dispute', disputeDeposit);
 
 module.exports = router;

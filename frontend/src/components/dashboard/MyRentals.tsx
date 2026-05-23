@@ -14,6 +14,7 @@ export default function MyRentals() {
   // Review state
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewListingId, setReviewListingId] = useState<string | null>(null);
+  const [reviewBookingId, setReviewBookingId] = useState<string | null>(null);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewError, setReviewError] = useState('');
@@ -35,6 +36,7 @@ export default function MyRentals() {
 
   const handleOpenReviewModal = (booking: any) => {
     setReviewListingId(booking.listing?._id || booking.listingId?._id || booking.listing);
+    setReviewBookingId(booking._id);
     setReviewRating(5);
     setReviewComment('');
     setReviewError('');
@@ -47,8 +49,8 @@ export default function MyRentals() {
     setReviewError('');
     setReviewSuccess(false);
 
-    if (!reviewListingId) {
-      setReviewError('Listing ID is missing.');
+    if (!reviewBookingId) {
+      setReviewError('Booking ID is missing.');
       return;
     }
     if (!reviewComment.trim()) {
@@ -57,7 +59,7 @@ export default function MyRentals() {
     }
 
     try {
-      await api.reviews.create(reviewListingId, {
+      await api.reviews.createBookingReview(reviewBookingId, {
         rating: reviewRating,
         comment: reviewComment
       });

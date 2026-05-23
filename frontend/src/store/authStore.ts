@@ -17,6 +17,9 @@ interface AuthState {
   verifyEmail: (token: string) => Promise<any>;
   resendVerification: () => Promise<any>;
   uploadDocument: (document: string) => Promise<any>;
+  verifyDrivingLicense: (document: string) => Promise<any>;
+  sendPhoneOtp: (phone: string) => Promise<any>;
+  verifyPhoneOtp: (otp: string) => Promise<any>;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -139,6 +142,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true });
     try {
       const res = await api.auth.uploadDocument(document);
+      if (res.success) {
+        await get().refreshUser();
+        return res;
+      }
+    } catch (err: any) {
+      set({ loading: false });
+      throw err;
+    }
+  },
+
+  verifyDrivingLicense: async (document) => {
+    set({ loading: true });
+    try {
+      const res = await api.auth.verifyDrivingLicense(document);
+      if (res.success) {
+        await get().refreshUser();
+        return res;
+      }
+    } catch (err: any) {
+      set({ loading: false });
+      throw err;
+    }
+  },
+
+  sendPhoneOtp: async (phone) => {
+    set({ loading: true });
+    try {
+      const res = await api.auth.sendPhoneOtp(phone);
+      set({ loading: false });
+      return res;
+    } catch (err: any) {
+      set({ loading: false });
+      throw err;
+    }
+  },
+
+  verifyPhoneOtp: async (otp) => {
+    set({ loading: true });
+    try {
+      const res = await api.auth.verifyPhoneOtp(otp);
       if (res.success) {
         await get().refreshUser();
         return res;

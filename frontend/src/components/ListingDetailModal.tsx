@@ -122,6 +122,10 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
       setError('You cannot rent your own item.');
       return;
     }
+    if (listing.category === 'Vehicles' && user.drivingLicenseStatus !== 'approved') {
+      setError('An approved driving license is required to rent vehicle listings. Please upload one in the dashboard.');
+      return;
+    }
     if (days <= 0) {
       setError('Please select valid booking dates.');
       return;

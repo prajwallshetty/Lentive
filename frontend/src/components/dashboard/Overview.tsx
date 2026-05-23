@@ -5,21 +5,24 @@ import { useAuthStore } from '../../store/authStore';
 import { useListingStore } from '../../store/listingStore';
 import { useBookingStore } from '../../store/bookingStore';
 import { useDashboardStore } from '../../store/dashboardStore';
+import { usePaymentStore } from '../../store/paymentStore';
 import { formatCurrency } from '../../lib/utils';
 import Verification from './Verification';
-import { DollarSign, Package, ShoppingBag, Calendar, Bell, RefreshCw } from 'lucide-react';
+import { DollarSign, Package, ShoppingBag, Calendar, Bell, Shield, Heart } from 'lucide-react';
 
 export default function Overview() {
   const { user } = useAuthStore();
   const { myListings, fetchMyListings } = useListingStore();
   const { renterBookings, ownerBookings, fetchRenterBookings, fetchOwnerBookings } = useBookingStore();
   const { notifications, fetchNotifications, markNotificationAsRead } = useDashboardStore();
+  const { transactions, fetchHistory } = usePaymentStore();
 
   useEffect(() => {
     fetchMyListings();
     fetchRenterBookings();
     fetchOwnerBookings();
     fetchNotifications();
+    fetchHistory();
   }, []);
 
   // Calculate earnings from accepted, active, completed bookings
@@ -171,6 +174,58 @@ export default function Overview() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* Escrow & Transaction History */}
+        <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
+          <h3 className="text-base font-extrabold text-foreground border-b border-border/40 pb-3 mb-4 flex items-center justify-between font-sans">
+            <span>Escrow & Transaction History</span>
+            <span className="text-[10px] bg-emerald-500/15 text-emerald-600 border border-emerald-500/25 font-bold px-2 py-0.5 rounded-full">
+              Safe Escrow Logs
+            </span>
+          </h3>
+
+          {transactions.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-6">No payments processed yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-xs text-left">
+                <thead>
+                  <tr className="border-b border-border/20 text-muted-foreground font-bold">
+                    <th className="py-2">Item</th>
+                    <th className="py-2">Type</th>
+                    <th className="py-2">Amount</th>
+                    <th className="py-2">Status</th>
+                    <th className="py-2 text-right">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {transactions.slice(0, 5).map((tx) => (
+                    <tr key={tx._id} className="border-b border-border/10 hover:bg-muted/10">
+                      <td className="py-2.5 font-bold truncate max-w-[120px] text-foreground">
+                        {tx.bookingId?.listingId?.title || 'Seeded Rental'}
+                      </td>
+                      <td className="py-2.5 capitalize">{tx.type}</td>
+                      <td className="py-2.5 font-bold">{formatCurrency(tx.amount)}</td>
+                      <td className="py-2.5">
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                          tx.status === 'captured' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/15' :
+                          tx.status === 'refunded' ? 'bg-blue-500/10 text-blue-600 border border-blue-500/15' :
+                          tx.status === 'pending' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/15' :
+                          'bg-rose-500/10 text-rose-600 border border-rose-500/15'
+                        }`}>
+                          {tx.status === 'captured' ? 'success' : tx.status}
+                        </span>
+                      </td>
+                      <td className="py-2.5 text-right text-muted-foreground">
+                        {new Date(tx.createdAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

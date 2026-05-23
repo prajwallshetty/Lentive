@@ -7,6 +7,12 @@ export interface User {
   avatar: string;
   address: string;
   isVerified: boolean;
+  phone?: string;
+  isPhoneVerified?: boolean;
+  drivingLicense?: string;
+  drivingLicenseStatus?: 'none' | 'pending' | 'approved' | 'rejected';
+  drivingLicenseRemarks?: string;
+  verificationLevel?: 'none' | 'Basic Verified' | 'ID Verified' | 'Trusted User';
   verificationStatus: 'none' | 'pending' | 'approved' | 'rejected';
   verificationRemarks?: string;
   ratings?: {
@@ -51,14 +57,14 @@ export interface Booking {
   totalDays: number;
   totalAmount: number;
   depositAmount: number;
-  bookingStatus: 'pending' | 'accepted' | 'rejected' | 'active' | 'completed' | 'cancelled';
+  bookingStatus: 'pending_payment' | 'pending' | 'accepted' | 'rejected' | 'active' | 'completed' | 'cancelled';
   paymentId?: string;
-  paymentStatus: 'pending' | 'captured' | 'failed';
+  paymentStatus: 'pending' | 'captured' | 'failed' | 'refunded';
   createdAt: string;
   
   // Custom mapped properties for frontend ease of use
   role?: 'renter' | 'owner';
-  status?: 'pending' | 'accepted' | 'rejected' | 'active' | 'completed' | 'cancelled';
+  status?: 'pending_payment' | 'pending' | 'accepted' | 'rejected' | 'active' | 'completed' | 'cancelled';
   totalPrice?: number;
   securityDeposit?: number;
 }

@@ -48,6 +48,7 @@ const notifications = require('./routes/notifications');
 const chats = require('./routes/chats');
 const payments = require('./routes/payments');
 const admin = require('./routes/admin');
+const reviews = require('./routes/reviews');
 
 app.use('/api/auth', auth);
 app.use('/api/listings', listings);
@@ -56,6 +57,7 @@ app.use('/api/notifications', notifications);
 app.use('/api/chats', chats);
 app.use('/api/payments', payments);
 app.use('/api/admin', admin);
+app.use('/api/reviews', reviews);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

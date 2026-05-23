@@ -1,14 +1,24 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useBookingStore } from '../../store/bookingStore';
 import { useToast } from '../../context/ToastContext';
 import { formatCurrency } from '../../lib/utils';
-import { Clock, Calendar, CheckCircle2, XCircle, Play } from 'lucide-react';
+import { api } from '../../lib/api';
+import { Clock, Calendar, CheckCircle2, XCircle, Play, Star, X, AlertCircle } from 'lucide-react';
 
 export default function BookingRequests() {
   const { showToast } = useToast();
   const { ownerBookings, fetchOwnerBookings, acceptBooking, rejectBooking, updateBookingStatus } = useBookingStore();
+
+  // Review states
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewBookingId, setReviewBookingId] = useState<string | null>(null);
+  const [reviewRenterName, setReviewRenterName] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewError, setReviewError] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState(false);
 
   useEffect(() => {
     fetchOwnerBookings();
@@ -24,10 +34,10 @@ export default function BookingRequests() {
   };
 
   const handleRejectRequest = async (bookingId: string) => {
-    if (!confirm('Are you sure you want to reject this booking request?')) return;
+    if (!confirm('Are you sure you want to reject this booking request? This will initiate an automatic refund.')) return;
     try {
       await rejectBooking(bookingId);
-      showToast('Booking request rejected.', 'info');
+      showToast('Booking request rejected. Refund initiated.', 'info');
     } catch (err: any) {
       showToast(err.message || 'Failed to reject booking request.', 'error');
     }
@@ -42,12 +52,53 @@ export default function BookingRequests() {
     }
   };
 
+  const handleOpenReviewModal = (booking: any) => {
+    setReviewBookingId(booking._id);
+    setReviewRenterName(booking.renter?.name || 'Renter');
+    setReviewRating(5);
+    setReviewComment('');
+    setReviewError('');
+    setReviewSuccess(false);
+    setShowReviewModal(true);
+  };
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setReviewError('');
+    setReviewSuccess(false);
+
+    if (!reviewBookingId) return;
+    if (!reviewComment.trim()) {
+      setReviewError('Please enter a review comment.');
+      return;
+    }
+
+    try {
+      await api.reviews.createBookingReview(reviewBookingId, {
+        rating: reviewRating,
+        comment: reviewComment
+      });
+
+      setReviewSuccess(true);
+      showToast('Renter reviewed successfully!', 'success');
+      setTimeout(() => {
+        setShowReviewModal(false);
+        fetchOwnerBookings();
+      }, 1500);
+    } catch (err: any) {
+      setReviewError(err.message || 'Failed to submit review.');
+    }
+  };
+
   const renderStatusBadge = (status: string) => {
     const s = (status || '').toLowerCase();
     let classes = 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20';
     let label = 'Unknown';
 
-    if (s === 'pending') {
+    if (s === 'pending_payment') {
+      classes = 'bg-slate-500/10 text-slate-500 border-slate-500/10 animate-pulse';
+      label = 'Awaiting Payment';
+    } else if (s === 'pending') {
       classes = 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20';
       label = 'Pending Approval';
     } else if (s === 'accepted') {
@@ -58,7 +109,7 @@ export default function BookingRequests() {
       label = 'Rejected';
     } else if (s === 'active') {
       classes = 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 border-indigo-500/20 animate-pulse';
-      label = 'Active Rental';
+      label = 'Active';
     } else if (s === 'completed') {
       classes = 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20';
       label = 'Completed';
@@ -98,7 +149,6 @@ export default function BookingRequests() {
             return (
               <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:border-primary/25 hover:bg-muted/40 md:flex-row md:items-center transition-all duration-300">
                 
-                {/* Left: Listing & Renter Profile details */}
                 <div className="flex items-start gap-4">
                   <img 
                     src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
@@ -106,9 +156,13 @@ export default function BookingRequests() {
                     className="h-12 w-12 rounded-lg object-cover border border-border/20 shrink-0 bg-muted"
                   />
                   <div>
-                    <p className="text-sm font-extrabold text-foreground">{b.listing?.title}</p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-extrabold text-foreground">{b.listing?.title}</p>
+                      {b.listing?.category === 'Vehicles' && (
+                        <span className="text-[8px] bg-purple-500/15 text-purple-600 font-bold px-1.5 py-0.5 rounded-md border border-purple-500/10">Vehicle Permit Audited</span>
+                      )}
+                    </div>
                     
-                    {/* Renter Profile details */}
                     <div className="flex items-center gap-2 mt-1 bg-white/50 dark:bg-black/10 px-2.5 py-1 rounded-lg border border-border/30 w-fit">
                       <img
                         src={b.renter?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=40&h=40&q=80'}
@@ -117,6 +171,9 @@ export default function BookingRequests() {
                       />
                       <p className="text-[10px] font-semibold text-muted-foreground leading-none">
                         Renter: <span className="font-bold text-foreground">{b.renter?.name}</span> ({b.renter?.email})
+                        {b.renter?.verificationLevel && b.renter.verificationLevel !== 'none' && (
+                          <span className="ml-1.5 text-[8px] bg-primary/10 text-primary px-1.5 py-0.5 rounded-sm font-black border border-primary/15">{b.renter.verificationLevel}</span>
+                        )}
                       </p>
                     </div>
 
@@ -127,11 +184,10 @@ export default function BookingRequests() {
                   </div>
                 </div>
                 
-                {/* Right: Pricing and Action buttons */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t border-border/20 pt-3 md:border-t-0 md:pt-0">
                   <div className="text-xs md:text-right font-semibold">
                     <p className="text-sm font-black text-foreground">{formatCurrency(b.totalPrice || b.totalAmount)}</p>
-                    <span className="text-[10px] text-muted-foreground">Deposit: {formatCurrency(b.securityDeposit || b.depositAmount)} (Escrow)</span>
+                    <span className="text-[10px] text-muted-foreground">Deposit: {formatCurrency(b.securityDeposit || b.depositAmount)} (Protected Escrow)</span>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-end">
@@ -174,7 +230,20 @@ export default function BookingRequests() {
                       </button>
                     )}
 
-                    {['rejected', 'completed', 'cancelled'].includes(status) && (
+                    {status === 'completed' && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleOpenReviewModal(b)}
+                          className="px-4 py-2 bg-purple-600 hover:brightness-110 text-white text-xs font-black rounded-full flex items-center gap-1 shadow-sm active:scale-95 cursor-pointer"
+                        >
+                          <Star className="h-3.5 w-3.5 fill-white" />
+                          Rate Renter
+                        </button>
+                        {renderStatusBadge(status)}
+                      </div>
+                    )}
+
+                    {['rejected', 'cancelled', 'pending_payment'].includes(status) && (
                       renderStatusBadge(b.status || b.bookingStatus)
                     )}
                   </div>
@@ -183,6 +252,76 @@ export default function BookingRequests() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Owner-to-Renter Review Modal */}
+      {showReviewModal && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-4 bg-black/70 backdrop-blur-xs bottom-sheet-overlay">
+          <div className="relative w-full md:max-w-md max-h-[92vh] md:max-h-[95vh] overflow-y-auto rounded-t-[28px] md:rounded-2xl bg-card border-t md:border border-border/40 p-6 shadow-2xl bottom-sheet-content md:animate-in md:zoom-in-95 md:duration-200 hide-scrollbar">
+            
+            <h3 className="text-xl font-extrabold text-foreground tracking-tight border-b border-border/40 pb-3 mt-2 md:mt-0">Review Renter: {reviewRenterName}</h3>
+            <button
+              onClick={() => setShowReviewModal(false)}
+              className="absolute right-4 top-4 p-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition cursor-pointer z-10"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {reviewSuccess ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center animate-in zoom-in-95">
+                <CheckCircle2 className="h-16 w-16 text-primary mb-3" />
+                <h4 className="font-bold text-lg text-foreground">Review Submitted!</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Thank you for rating your renter. Trust loop completed!
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitReview} className="flex flex-col gap-4 mt-4 text-xs font-semibold">
+                <div className="flex flex-col gap-1 items-center my-2 text-foreground">
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1.5">Rating</label>
+                  <div className="flex gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewRating(star)}
+                        className="transition-transform hover:scale-110 p-1 cursor-pointer"
+                      >
+                        <Star className={`h-7 w-7 ${star <= reviewRating ? 'fill-amber-400 text-amber-500' : 'text-muted-foreground/35'}`} />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] text-muted-foreground uppercase tracking-wider">Comments</label>
+                  <textarea
+                    required
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    placeholder="Tell us about the renter's item return condition, punctuality, and behavior..."
+                    rows={4}
+                    className="rounded-xl border border-border bg-muted/40 p-2.5 text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none"
+                  />
+                </div>
+
+                {reviewError && (
+                  <div className="flex items-center gap-1.5 text-rose-500 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl text-[10px]">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    <span>{reviewError}</span>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full py-2.5 bg-primary text-white font-extrabold rounded-xl hover:brightness-110 transition cursor-pointer mt-2"
+                >
+                  Submit Review
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       )}
     </div>

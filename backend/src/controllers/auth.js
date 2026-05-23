@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const User = require('../models/User');
+const VerificationRequest = require('../models/VerificationRequest');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
 
@@ -248,6 +249,9 @@ exports.resetPassword = async (req, res, next) => {
 // @desc    Upload Identity Verification Document
 // @route   PUT /api/auth/verify-document
 // @access  Private
+// @desc    Upload Identity Verification Document
+// @route   PUT /api/auth/verify-document
+// @access  Private
 exports.uploadDocument = async (req, res, next) => {
   try {
     const { document } = req.body;
@@ -264,29 +268,187 @@ exports.uploadDocument = async (req, res, next) => {
     user.verificationDocument = document;
     user.verificationStatus = 'pending';
     user.verificationRemarks = '';
+    
+    // Update verification level
+    updateUserVerificationLevel(user);
     await user.save();
+
+    // Create a new VerificationRequest record for tracking/admin
+    await VerificationRequest.create({
+      userId: user._id,
+      type: 'id_verification',
+      documentUrl: document,
+      status: 'pending',
+      remarks: ''
+    });
 
     res.status(200).json({
       success: true,
       message: 'Verification document uploaded successfully. Status is now pending approval.',
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        avatar: user.avatar,
-        address: user.address,
-        location: user.location,
-        ratings: user.ratings,
-        isVerified: user.isVerified,
-        verificationStatus: user.verificationStatus,
-        verificationDocument: user.verificationDocument,
-        verificationRemarks: user.verificationRemarks
-      }
+      user: formatUserObject(user)
     });
   } catch (err) {
     next(err);
   }
+};
+
+// @desc    Send Phone Verification OTP (Simulated)
+// @route   POST /api/auth/send-phone-otp
+// @access  Private
+exports.sendPhoneOtp = async (req, res, next) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      return res.status(400).json({ success: false, error: 'Please provide a phone number' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    // Generate a 6-digit OTP
+    const otp = (100000 + Math.floor(Math.random() * 900000)).toString();
+
+    user.phone = phone;
+    user.phoneOtp = otp;
+    user.phoneOtpExpire = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
+    await user.save({ validateBeforeSave: false });
+
+    // Print to console simulating SMS gateway API
+    console.log(`\n======================================================`);
+    console.log(`[SMS SIMULATION] Verification OTP for ${phone}: ${otp}`);
+    console.log(`======================================================\n`);
+
+    res.status(200).json({
+      success: true,
+      message: `Verification code sent to ${phone} (Simulated). Check your server logs.`
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Verify Phone Verification OTP
+// @route   POST /api/auth/verify-phone-otp
+// @access  Private
+exports.verifyPhoneOtp = async (req, res, next) => {
+  try {
+    const { otp } = req.body;
+
+    if (!otp) {
+      return res.status(400).json({ success: false, error: 'Please provide the OTP' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    if (!user.phoneOtp || user.phoneOtp !== otp || user.phoneOtpExpire < Date.now()) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired phone verification code' });
+    }
+
+    user.isPhoneVerified = true;
+    user.phoneOtp = undefined;
+    user.phoneOtpExpire = undefined;
+    
+    // Recalculate level
+    updateUserVerificationLevel(user);
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Phone number verified successfully',
+      user: formatUserObject(user)
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// @desc    Upload Driving License for Vehicle Rentals
+// @route   PUT /api/auth/verify-driving-license
+// @access  Private
+exports.uploadDrivingLicense = async (req, res, next) => {
+  try {
+    const { document } = req.body;
+
+    if (!document) {
+      return res.status(400).json({ success: false, error: 'Please provide a document (base64 or URL)' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    user.drivingLicense = document;
+    user.drivingLicenseStatus = 'pending';
+    user.drivingLicenseRemarks = '';
+    
+    updateUserVerificationLevel(user);
+    await user.save();
+
+    // Create a new VerificationRequest record for tracking/admin
+    await VerificationRequest.create({
+      userId: user._id,
+      type: 'driving_license',
+      documentUrl: document,
+      status: 'pending',
+      remarks: ''
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Driving license uploaded successfully. Status is now pending approval.',
+      user: formatUserObject(user)
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Helper function to update verification levels based on status checks
+const updateUserVerificationLevel = (user) => {
+  if (user.isVerified && user.isPhoneVerified) {
+    if (user.verificationStatus === 'approved') {
+      if (user.drivingLicenseStatus === 'approved') {
+        user.verificationLevel = 'Trusted User';
+      } else {
+        user.verificationLevel = 'ID Verified';
+      }
+    } else {
+      user.verificationLevel = 'Basic Verified';
+    }
+  } else {
+    user.verificationLevel = 'none';
+  }
+};
+
+// Format User object to return consistently
+const formatUserObject = (user) => {
+  return {
+    id: user._id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+    avatar: user.avatar,
+    address: user.address,
+    location: user.location,
+    ratings: user.ratings,
+    phone: user.phone,
+    isPhoneVerified: user.isPhoneVerified,
+    isVerified: user.isVerified,
+    verificationStatus: user.verificationStatus,
+    verificationDocument: user.verificationDocument,
+    verificationRemarks: user.verificationRemarks,
+    drivingLicense: user.drivingLicense,
+    drivingLicenseStatus: user.drivingLicenseStatus,
+    drivingLicenseRemarks: user.drivingLicenseRemarks,
+    verificationLevel: user.verificationLevel
+  };
 };
 
 // Helper function to sign JWT and return token response
@@ -298,20 +460,7 @@ const sendTokenResponse = (user, statusCode, res) => {
   res.status(statusCode).json({
     success: true,
     token,
-    user: {
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      avatar: user.avatar,
-      address: user.address,
-      location: user.location,
-      ratings: user.ratings,
-      isVerified: user.isVerified,
-      verificationStatus: user.verificationStatus,
-      verificationDocument: user.verificationDocument,
-      verificationRemarks: user.verificationRemarks
-    }
+    user: formatUserObject(user)
   });
 };
 

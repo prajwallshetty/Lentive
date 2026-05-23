@@ -50,11 +50,21 @@ const UserSchema = new mongoose.Schema({
     average: { type: Number, default: 0 },
     count: { type: Number, default: 0 }
   },
-  isVerified: {
+  phone: {
+    type: String,
+    default: ''
+  },
+  isPhoneVerified: {
     type: Boolean,
     default: false
   },
-  verificationStatus: {
+  phoneOtp: String,
+  phoneOtpExpire: Date,
+  isVerified: { // email verification status
+    type: Boolean,
+    default: false
+  },
+  verificationStatus: { // ID document verification status
     type: String,
     enum: ['none', 'pending', 'approved', 'rejected'],
     default: 'none'
@@ -66,6 +76,24 @@ const UserSchema = new mongoose.Schema({
   verificationRemarks: {
     type: String,
     default: ''
+  },
+  drivingLicense: {
+    type: String,
+    default: ''
+  },
+  drivingLicenseStatus: {
+    type: String,
+    enum: ['none', 'pending', 'approved', 'rejected'],
+    default: 'none'
+  },
+  drivingLicenseRemarks: {
+    type: String,
+    default: ''
+  },
+  verificationLevel: {
+    type: String,
+    enum: ['none', 'Basic Verified', 'ID Verified', 'Trusted User'],
+    default: 'none'
   },
   verificationToken: String,
   verificationTokenExpire: Date,

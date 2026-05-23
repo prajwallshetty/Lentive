@@ -147,8 +147,18 @@ export default function DashboardView({
             <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight flex items-center gap-2">
               Marketplace Dashboard
             </h2>
-            <p className="text-xs text-muted-foreground mt-1.5">
-              Welcome back, <span className="font-bold text-primary">{user?.name || initialUser?.name}</span>. Track your listings, bookings, and earnings.
+            <p className="text-xs text-muted-foreground mt-1.5 flex items-center gap-1.5 flex-wrap">
+              Welcome back, <span className="font-bold text-primary">{user?.name || initialUser?.name}</span>.
+              {user?.verificationLevel && user.verificationLevel !== 'none' && (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border ${
+                  user.verificationLevel === 'Trusted User' ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/25' :
+                  user.verificationLevel === 'ID Verified' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/25' :
+                  'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/25'
+                }`}>
+                  {user.verificationLevel}
+                </span>
+              )}
+              Track your listings, bookings, and earnings.
             </p>
           </div>
           

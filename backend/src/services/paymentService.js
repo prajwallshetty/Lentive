@@ -117,10 +117,36 @@ const verifyWebhookSignature = (body, signatureHeader) => {
   return digest === signatureHeader;
 };
 
+/**
+ * Refund a payment (full or partial)
+ * @param {string} paymentId 
+ * @param {number} [amountInINR] - Optional amount to refund. If omitted, refunds the full amount.
+ * @returns {Promise<object>} Refund details
+ */
+const refundPayment = async (paymentId, amountInINR) => {
+  if (razorpayInstance) {
+    const options = {};
+    if (amountInINR) {
+      options.amount = Math.round(amountInINR * 100); // Convert to paise
+    }
+    return await razorpayInstance.payments.refund(paymentId, options);
+  } else {
+    // Simulated refund
+    return {
+      id: `rfnd_simulated_${crypto.randomBytes(8).toString('hex')}`,
+      payment_id: paymentId,
+      amount: amountInINR ? Math.round(amountInINR * 100) : 0,
+      status: 'processed',
+      created_at: Math.floor(Date.now() / 1000)
+    };
+  }
+};
+
 module.exports = {
   isSimulatedMode,
   getKeyId,
   createPaymentOrder,
   verifyPaymentSignature,
-  verifyWebhookSignature
+  verifyWebhookSignature,
+  refundPayment
 };

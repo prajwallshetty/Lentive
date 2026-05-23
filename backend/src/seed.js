@@ -188,18 +188,41 @@ const seedDB = async () => {
     // Import and clear new models
     const Chat = require('./models/Chat');
     const Payment = require('./models/Payment');
+    const Deposit = require('./models/Deposit');
+    const VerificationRequest = require('./models/VerificationRequest');
+    const Notification = require('./models/Notification');
     await Chat.deleteMany();
     await Payment.deleteMany();
+    await Deposit.deleteMany();
+    await VerificationRequest.deleteMany();
+    await Notification.deleteMany();
     
-    console.log('Cleared existing data (including chats and payments).');
+    console.log('Cleared existing data.');
 
     // 1. Create Users
     const users = [];
     for (const u of usersData) {
+      // Add custom phone, license and verification fields for seeder
+      if (u.name === 'John Doe') {
+        u.phone = '+919876543210';
+        u.isPhoneVerified = true;
+        u.verificationLevel = 'Trusted User';
+        u.drivingLicenseStatus = 'approved';
+        u.drivingLicense = 'https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?auto=format&fit=crop&w=300&q=80';
+      } else if (u.name === 'Sarah Connor') {
+        u.phone = '+919876543211';
+        u.isPhoneVerified = true;
+        u.verificationLevel = 'ID Verified';
+      } else if (u.name === 'Jane Smith') {
+        u.phone = '+919876543212';
+        u.isPhoneVerified = true;
+        u.verificationLevel = 'Basic Verified';
+      }
+
       const createdUser = await User.create(u);
       users.push(createdUser);
     }
-    console.log(`Seeded ${users.length} users.`);
+    console.log(`Seeded ${users.length} users with updated verification levels.`);
 
     // Map owners
     const john = users.find(u => u.name === 'John Doe');
@@ -219,35 +242,148 @@ const seedDB = async () => {
     }
     console.log(`Seeded ${listings.length} listings.`);
 
-    // 3. Create Reviews
+    // 3. Create Completed Bookings for Reviews
+    const bookingsData = [
+      {
+        listingId: listings[0]._id, // Drill (John)
+        renterId: jane._id,
+        ownerId: john._id,
+        startDate: new Date('2026-05-01'),
+        endDate: new Date('2026-05-03'),
+        totalDays: 2,
+        totalAmount: 800,
+        depositAmount: 1500,
+        bookingStatus: 'completed',
+        paymentStatus: 'captured',
+        paymentId: 'pay_seeded_1'
+      },
+      {
+        listingId: listings[0]._id, // Drill (John)
+        renterId: sarah._id,
+        ownerId: john._id,
+        startDate: new Date('2026-05-04'),
+        endDate: new Date('2026-05-05'),
+        totalDays: 1,
+        totalAmount: 400,
+        depositAmount: 1500,
+        bookingStatus: 'completed',
+        paymentStatus: 'captured',
+        paymentId: 'pay_seeded_2'
+      },
+      {
+        listingId: listings[1]._id, // Camera (John)
+        renterId: jane._id,
+        ownerId: john._id,
+        startDate: new Date('2026-05-10'),
+        endDate: new Date('2026-05-14'),
+        totalDays: 4,
+        totalAmount: 10000,
+        depositAmount: 10000,
+        bookingStatus: 'completed',
+        paymentStatus: 'captured',
+        paymentId: 'pay_seeded_3'
+      },
+      {
+        listingId: listings[2]._id, // Scooter (Sarah)
+        renterId: jane._id,
+        ownerId: sarah._id,
+        startDate: new Date('2026-05-08'),
+        endDate: new Date('2026-05-10'),
+        totalDays: 2,
+        totalAmount: 1600,
+        depositAmount: 4000,
+        bookingStatus: 'completed',
+        paymentStatus: 'captured',
+        paymentId: 'pay_seeded_4'
+      },
+      {
+        listingId: listings[3]._id, // Tent (Sarah)
+        renterId: john._id,
+        ownerId: sarah._id,
+        startDate: new Date('2026-05-12'),
+        endDate: new Date('2026-05-15'),
+        totalDays: 3,
+        totalAmount: 1500,
+        depositAmount: 2000,
+        bookingStatus: 'completed',
+        paymentStatus: 'captured',
+        paymentId: 'pay_seeded_5'
+      }
+    ];
+
+    const bookings = [];
+    for (const b of bookingsData) {
+      const createdBooking = await Booking.create(b);
+      bookings.push(createdBooking);
+
+      // Seed Deposit logs (escrow refunded since completed)
+      if (b.depositAmount > 0) {
+        await Deposit.create({
+          bookingId: createdBooking._id,
+          renterId: b.renterId,
+          ownerId: b.ownerId,
+          amount: b.depositAmount,
+          status: 'released'
+        });
+      }
+
+      // Seed Payment logs
+      await Payment.create({
+        bookingId: createdBooking._id,
+        userId: b.renterId,
+        amount: b.totalAmount + b.depositAmount,
+        razorpayOrderId: `order_seeded_${createdBooking._id}`,
+        razorpayPaymentId: b.paymentId,
+        type: 'booking',
+        status: 'captured'
+      });
+    }
+    console.log(`Seeded ${bookings.length} completed booking logs, payments, and deposits.`);
+
+    // 4. Create Reviews (linked to completed bookings)
     const reviewsData = [
       {
+        booking: bookings[0]._id,
         listing: listings[0]._id, // Drill
         reviewer: jane._id,
+        reviewee: john._id,
+        type: 'renter',
         rating: 5,
         comment: 'Great drill, came fully charged and made our mounting task super easy. Highly recommend John!'
       },
       {
+        booking: bookings[1]._id,
         listing: listings[0]._id, // Drill
         reviewer: sarah._id,
+        reviewee: john._id,
+        type: 'renter',
         rating: 4,
         comment: 'Worked perfectly. The user experience was smooth and John was very helpful with instructions.'
       },
       {
+        booking: bookings[2]._id,
         listing: listings[1]._id, // Camera
         reviewer: jane._id,
+        reviewee: john._id,
+        type: 'renter',
         rating: 5,
         comment: 'Amazing camera condition. Used it for a weekend shoot and the footage was professional-grade.'
       },
       {
+        booking: bookings[3]._id,
         listing: listings[2]._id, // Scooter
         reviewer: jane._id,
+        reviewee: sarah._id,
+        type: 'renter',
         rating: 5,
         comment: 'So much fun riding around Bengaluru on this scooter! Batterylife was excellent. Sarah was super nice.'
       },
       {
+        booking: bookings[4]._id,
         listing: listings[3]._id, // Tent
         reviewer: john._id,
+        reviewee: sarah._id,
+        type: 'renter',
         rating: 4,
         comment: 'Nice tent, setup was really easy. Clean and had all instructions. Thank you Sarah!'
       }

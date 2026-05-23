@@ -94,6 +94,36 @@ export const api = {
       if (!res.ok) throw new Error(json.error || 'Failed to upload verification document');
       return json;
     },
+    async verifyDrivingLicense(document: string) {
+      const res = await fetch(`${API_URL}/auth/verify-driving-license`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({ document }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to upload driving license');
+      return json;
+    },
+    async sendPhoneOtp(phone: string) {
+      const res = await fetch(`${API_URL}/auth/send-phone-otp`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ phone }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to send verification SMS');
+      return json;
+    },
+    async verifyPhoneOtp(otp: string) {
+      const res = await fetch(`${API_URL}/auth/verify-phone-otp`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ otp }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to verify OTP code');
+      return json;
+    },
   },
 
   // Listings
@@ -304,6 +334,16 @@ export const api = {
       if (!res.ok) throw new Error(json.error || 'Failed to submit review');
       return json;
     },
+    async createBookingReview(bookingId: string, data: { rating: number; comment: string }) {
+      const res = await fetch(`${API_URL}/reviews/booking/${bookingId}`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to submit booking review');
+      return json;
+    },
   },
 
   // Chats
@@ -371,6 +411,16 @@ export const api = {
       if (!res.ok) throw new Error(json.error || 'Failed to fetch payment history');
       return json;
     },
+    async disputeDeposit(depositId: string, disputeReason: string) {
+      const res = await fetch(`${API_URL}/payments/deposits/${depositId}/dispute`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ disputeReason }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to dispute deposit');
+      return json;
+    },
   },
 
   // Admin
@@ -424,6 +474,42 @@ export const api = {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to fetch bookings');
+      return json;
+    },
+    async getVerificationRequests() {
+      const res = await fetch(`${API_URL}/admin/verification-requests`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch verification requests');
+      return json;
+    },
+    async verifyVerificationRequest(requestId: string, status: 'approved' | 'rejected', remarks?: string) {
+      const res = await fetch(`${API_URL}/admin/verification-requests/${requestId}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({ status, remarks }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to update verification request');
+      return json;
+    },
+    async getDeposits() {
+      const res = await fetch(`${API_URL}/admin/deposits`, {
+        headers: getHeaders(),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to fetch security deposits');
+      return json;
+    },
+    async resolveDepositDispute(depositId: string, resolution: 'release_to_renter' | 'payout_to_owner', remarks?: string) {
+      const res = await fetch(`${API_URL}/admin/deposits/${depositId}/resolve`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({ resolution, remarks }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Failed to resolve deposit dispute');
       return json;
     },
   },
