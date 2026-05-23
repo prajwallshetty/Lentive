@@ -3,6 +3,7 @@ import { Outfit, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "../context/ToastContext";
 import { AuthProvider } from "../context/AuthContext";
+import LayoutWrapper from "../components/layout/LayoutWrapper";
 
 const outfit = Outfit({
   variable: "--font-sans",
@@ -36,12 +37,15 @@ export default function RootLayout({
       <body className={`${outfit.variable} ${geistMono.variable} min-h-full flex flex-col font-sans`}>
         <ToastProvider>
           <AuthProvider>
-            {children}
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
           </AuthProvider>
         </ToastProvider>
       </body>
     </html>
   );
 }
+
 
 

@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
         {/* Back Link */}
         <Link 
           href="/login" 
-          className="inline-flex items-center gap-2 mb-6 text-xs sm:text-sm font-semibold text-emerald-300/60 hover:text-emerald-200 transition group"
+          className="inline-flex items-center gap-2 mb-6 text-xs sm:text-sm font-semibold text-primary/70 hover:text-primary transition group"
         >
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to Login
@@ -70,8 +70,8 @@ export default function ForgotPasswordPage() {
                 <div className="logo-mark mb-4">
                   L
                 </div>
-                <h1 className="text-2xl font-extrabold tracking-tight text-white">Reset Password</h1>
-                <p className="text-xs text-emerald-200/40 mt-1.5 max-w-[260px] leading-relaxed">
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Reset Password</h1>
+                <p className="text-xs text-muted-foreground mt-1.5 max-w-[260px] leading-relaxed">
                   Enter your email and we&apos;ll send you a link to reset your password.
                 </p>
               </div>
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
                 <div className="flex flex-col gap-1.5">
                   <label className="auth-label">Email Address</label>
                   <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                     <input
                       type="email"
                       value={email}
@@ -96,7 +96,7 @@ export default function ForgotPasswordPage() {
                     />
                   </div>
                   {error && (
-                    <span className="text-[10px] text-rose-400 font-medium ml-1">{error}</span>
+                    <span className="text-[10px] text-rose-500 font-medium ml-1">{error}</span>
                   )}
                 </div>
 
@@ -122,22 +122,22 @@ export default function ForgotPasswordPage() {
             </>
           ) : (
             <div className="flex flex-col items-center text-center py-4">
-              <div className="h-16 w-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
-                <CheckCircle2 className="h-8 w-8 text-emerald-400 animate-bounce" />
+              <div className="h-16 w-16 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                <CheckCircle2 className="h-8 w-8 text-primary animate-bounce" />
               </div>
-              <h2 className="text-xl font-extrabold text-white">Reset Link Sent</h2>
-              <p className="text-xs text-emerald-200/40 mt-2 max-w-[280px] leading-relaxed">
-                If an account exists for <span className="text-white font-bold">{email}</span>, we&apos;ve sent instructions to reset your password.
+              <h2 className="text-xl font-extrabold text-foreground">Reset Link Sent</h2>
+              <p className="text-xs text-muted-foreground mt-2 max-w-[280px] leading-relaxed">
+                If an account exists for <span className="text-foreground font-bold">{email}</span>, we&apos;ve sent instructions to reset your password.
               </p>
 
               {/* Dev Simulation Bypass Link */}
               {simulatedLink && (
-                <div className="mt-6 w-full p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex flex-col items-center">
+                <div className="mt-6 w-full p-4 rounded-2xl bg-primary/5 border border-primary/10 flex flex-col items-center">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <Zap className="h-4 w-4 text-emerald-400" />
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-300/60">Simulated Outbox</span>
+                    <Zap className="h-4 w-4 text-primary" />
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-primary/70">Simulated Outbox</span>
                   </div>
-                  <p className="text-[10px] text-emerald-300/40 leading-normal mb-3">
+                  <p className="text-[10px] text-muted-foreground leading-normal mb-3">
                     SMTP is not configured. We logged the token to the terminal, or you can bypass below:
                   </p>
                   <Link
@@ -152,7 +152,7 @@ export default function ForgotPasswordPage() {
 
               <Link
                 href="/login"
-                className="mt-6 py-2.5 px-5 bg-emerald-500/5 hover:bg-emerald-500/10 text-white border border-emerald-500/10 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2"
+                className="mt-6 py-2.5 px-5 bg-primary/5 hover:bg-primary/10 text-primary border border-primary/10 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Return to Login

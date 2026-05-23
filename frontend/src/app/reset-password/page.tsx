@@ -98,7 +98,7 @@ function ResetPasswordFormContent() {
         {/* Back Link */}
         <Link 
           href="/login" 
-          className="inline-flex items-center gap-2 mb-6 text-xs sm:text-sm font-semibold text-emerald-300/60 hover:text-emerald-200 transition group"
+          className="inline-flex items-center gap-2 mb-6 text-xs sm:text-sm font-semibold text-primary/70 hover:text-primary transition group"
         >
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to Login
@@ -111,10 +111,10 @@ function ResetPasswordFormContent() {
           {!token ? (
             <div className="flex flex-col items-center text-center py-4">
               <div className="h-16 w-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-4">
-                <ShieldAlert className="h-8 w-8 text-rose-400 animate-pulse" />
+                <ShieldAlert className="h-8 w-8 text-rose-550 animate-pulse" />
               </div>
-              <h2 className="text-xl font-extrabold text-white">Invalid Reset Link</h2>
-              <p className="text-xs text-emerald-200/40 mt-2 max-w-[280px] leading-relaxed">
+              <h2 className="text-xl font-extrabold text-foreground">Invalid Reset Link</h2>
+              <p className="text-xs text-muted-foreground mt-2 max-w-[280px] leading-relaxed">
                 The password reset token is missing from the URL. Please click the reset link from your email or request a new one.
               </p>
               <Link
@@ -132,8 +132,8 @@ function ResetPasswordFormContent() {
                 <div className="logo-mark mb-4">
                   L
                 </div>
-                <h1 className="text-2xl font-extrabold tracking-tight text-white">Set New Password</h1>
-                <p className="text-xs text-emerald-200/40 mt-1.5 max-w-[260px] leading-relaxed">
+                <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Set New Password</h1>
+                <p className="text-xs text-muted-foreground mt-1.5 max-w-[260px] leading-relaxed">
                   Please enter and confirm your new password below.
                 </p>
               </div>
@@ -145,7 +145,7 @@ function ResetPasswordFormContent() {
                 <div className="flex flex-col gap-1.5">
                   <label className="auth-label">New Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
@@ -159,7 +159,7 @@ function ResetPasswordFormContent() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-400/40 hover:text-emerald-300 transition"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-primary transition"
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -167,11 +167,11 @@ function ResetPasswordFormContent() {
                   {/* Password Strength Meter */}
                   {password && (
                     <div className="flex flex-col gap-1 mt-1 ml-1">
-                      <div className="flex justify-between items-center text-[9px] text-emerald-300/40">
+                      <div className="flex justify-between items-center text-[9px] text-muted-foreground">
                         <span>Password Strength</span>
                         <span className="font-bold">{passwordStrength.label}</span>
                       </div>
-                      <div className="h-1 w-full bg-emerald-500/10 rounded-full overflow-hidden flex gap-0.5">
+                      <div className="h-1 w-full bg-primary/10 rounded-full overflow-hidden flex gap-0.5">
                         {[...Array(5)].map((_, i) => (
                           <div 
                             key={i} 
@@ -184,7 +184,7 @@ function ResetPasswordFormContent() {
                     </div>
                   )}
                   {errors.password && (
-                    <span className="text-[10px] text-rose-400 font-medium ml-1">{errors.password}</span>
+                    <span className="text-[10px] text-rose-550 font-medium ml-1">{errors.password}</span>
                   )}
                 </div>
 
@@ -192,7 +192,7 @@ function ResetPasswordFormContent() {
                 <div className="flex flex-col gap-1.5">
                   <label className="auth-label">Confirm New Password</label>
                   <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                     <input
                       type="password"
                       value={confirmPassword}
@@ -205,7 +205,7 @@ function ResetPasswordFormContent() {
                     />
                   </div>
                   {errors.confirmPassword && (
-                    <span className="text-[10px] text-rose-400 font-medium ml-1">{errors.confirmPassword}</span>
+                    <span className="text-[10px] text-rose-550 font-medium ml-1">{errors.confirmPassword}</span>
                   )}
                 </div>
 
@@ -241,7 +241,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center auth-gradient">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     }>
       <ResetPasswordFormContent />

@@ -48,9 +48,9 @@ function VerifyEmailContent() {
 
           {status === 'verifying' && (
             <div className="flex flex-col items-center text-center py-8">
-              <Loader2 className="h-14 w-14 animate-spin text-emerald-400 mb-5" />
-              <h2 className="text-xl font-extrabold text-white">Verifying Email</h2>
-              <p className="text-xs text-emerald-200/40 mt-2 max-w-[250px] leading-relaxed">
+              <Loader2 className="h-14 w-14 animate-spin text-primary mb-5" />
+              <h2 className="text-xl font-extrabold text-foreground">Verifying Email</h2>
+              <p className="text-xs text-muted-foreground mt-2 max-w-[250px] leading-relaxed">
                 Validating your verification token with our servers. Please wait...
               </p>
             </div>
@@ -59,10 +59,10 @@ function VerifyEmailContent() {
           {status === 'success' && (
             <div className="flex flex-col items-center text-center py-6">
               <div className="h-20 w-20 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-5">
-                <CheckCircle2 className="h-10 w-10 text-emerald-400 animate-bounce" />
+                <CheckCircle2 className="h-10 w-10 text-emerald-500 animate-bounce" />
               </div>
-              <h2 className="text-xl font-extrabold text-white">Email Verified!</h2>
-              <p className="text-xs text-emerald-200/40 mt-2 max-w-[280px] leading-relaxed">
+              <h2 className="text-xl font-extrabold text-foreground">Email Verified!</h2>
+              <p className="text-xs text-muted-foreground mt-2 max-w-[280px] leading-relaxed">
                 Your email has been successfully verified. You can now use all features of Lentive.
               </p>
               <Link
@@ -78,16 +78,16 @@ function VerifyEmailContent() {
           {status === 'error' && (
             <div className="flex flex-col items-center text-center py-6">
               <div className="h-20 w-20 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-5">
-                <ShieldAlert className="h-10 w-10 text-rose-400 animate-pulse" />
+                <ShieldAlert className="h-10 w-10 text-rose-500 animate-pulse" />
               </div>
-              <h2 className="text-xl font-extrabold text-rose-300">Verification Failed</h2>
-              <p className="text-xs text-emerald-200/40 mt-2 max-w-[280px] leading-relaxed">
+              <h2 className="text-xl font-extrabold text-rose-600">Verification Failed</h2>
+              <p className="text-xs text-muted-foreground mt-2 max-w-[280px] leading-relaxed">
                 {errorMessage}
               </p>
               
               <Link
                 href="/"
-                className="mt-6 py-2.5 px-5 bg-emerald-500/5 hover:bg-emerald-500/10 text-white border border-emerald-500/10 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2"
+                className="mt-6 py-2.5 px-5 bg-primary/5 hover:bg-primary/10 text-primary border border-primary/10 rounded-2xl text-xs font-bold transition flex items-center justify-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Go to Homepage
@@ -105,7 +105,7 @@ export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center auth-gradient">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     }>
       <VerifyEmailContent />

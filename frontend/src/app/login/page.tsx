@@ -75,7 +75,7 @@ function LoginFormContent() {
         {/* Back Link */}
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 mb-6 text-xs sm:text-sm font-semibold text-emerald-300/60 hover:text-emerald-200 transition group"
+          className="inline-flex items-center gap-2 mb-6 text-xs sm:text-sm font-semibold text-primary/70 hover:text-primary transition group"
         >
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to Listings
@@ -90,8 +90,8 @@ function LoginFormContent() {
             <div className="logo-mark mb-4">
               L
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-white">Welcome Back</h1>
-            <p className="text-xs text-emerald-200/40 mt-1.5 max-w-[260px] leading-relaxed">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Welcome Back</h1>
+            <p className="text-xs text-muted-foreground mt-1.5 max-w-[260px] leading-relaxed">
               Sign in to rent tools, electronics, and gear from your community.
             </p>
           </div>
@@ -103,7 +103,7 @@ function LoginFormContent() {
             <div className="flex flex-col gap-1.5">
               <label className="auth-label">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                 <input
                   type="email"
                   value={email}
@@ -116,7 +116,7 @@ function LoginFormContent() {
                 />
               </div>
               {errors.email && (
-                <span className="text-[10px] text-rose-400 font-medium ml-1">{errors.email}</span>
+                <span className="text-[10px] text-rose-500 font-medium ml-1">{errors.email}</span>
               )}
             </div>
 
@@ -126,13 +126,13 @@ function LoginFormContent() {
                 <label className="auth-label">Password</label>
                 <Link 
                   href="/forgot-password" 
-                  className="text-[10px] text-emerald-400/50 hover:text-emerald-300 transition font-semibold"
+                  className="text-[10px] text-primary/80 hover:text-primary transition font-semibold"
                 >
                   Forgot Password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -146,7 +146,7 @@ function LoginFormContent() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-400/40 hover:text-emerald-300 transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-primary transition"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -179,9 +179,9 @@ function LoginFormContent() {
 
 
           {/* Footer Navigation */}
-          <p className="text-center text-xs text-emerald-300/40 mt-6 font-medium">
+          <p className="text-center text-xs text-muted-foreground mt-6 font-medium">
             Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-emerald-400 hover:text-emerald-300 hover:underline font-bold transition">
+            <Link href="/signup" className="text-primary hover:text-primary/80 hover:underline font-bold transition">
               Sign up
             </Link>
           </p>
@@ -196,7 +196,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center auth-gradient">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     }>
       <LoginFormContent />

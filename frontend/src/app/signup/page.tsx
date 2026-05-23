@@ -118,7 +118,7 @@ export default function SignupPage() {
         {/* Back Link */}
         <Link 
           href="/" 
-          className="inline-flex items-center gap-2 mb-4 text-xs sm:text-sm font-semibold text-emerald-300/60 hover:text-emerald-200 transition group"
+          className="inline-flex items-center gap-2 mb-4 text-xs sm:text-sm font-semibold text-primary/70 hover:text-primary transition group"
         >
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to Listings
@@ -133,8 +133,8 @@ export default function SignupPage() {
             <div className="logo-mark mb-4">
               L
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight text-white">Create Account</h1>
-            <p className="text-xs text-emerald-200/40 mt-1.5 max-w-[260px] leading-relaxed">
+            <h1 className="text-2xl font-extrabold tracking-tight text-foreground">Create Account</h1>
+            <p className="text-xs text-muted-foreground mt-1.5 max-w-[260px] leading-relaxed">
               Join Lentive and start sharing and renting items in your neighborhood.
             </p>
           </div>
@@ -145,19 +145,19 @@ export default function SignupPage() {
             {/* Role Selector Tabs */}
             <div className="flex flex-col gap-1.5">
               <label className="auth-label">I want to</label>
-              <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-emerald-500/5 border border-emerald-500/10 rounded-2xl">
+              <div className="grid grid-cols-2 gap-2.5 p-1.5 bg-primary/5 border border-primary/10 rounded-2xl">
                 <button
                   type="button"
                   onClick={() => setRole('renter')}
                   className={`flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all duration-200 cursor-pointer text-center ${
                     role === 'renter' 
                       ? 'bg-primary text-white shadow-lg shadow-primary/25' 
-                      : 'hover:bg-emerald-500/5 text-emerald-300/50 hover:text-emerald-200'
+                      : 'hover:bg-primary/5 text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <Package className="h-4 w-4 shrink-0" />
                   <span className="text-xs font-bold leading-none">Rent Gear</span>
-                  <span className={`text-[8px] font-medium leading-none ${role === 'renter' ? 'text-white/70' : 'text-emerald-400/30'}`}>I need items</span>
+                  <span className={`text-[8px] font-medium leading-none ${role === 'renter' ? 'text-white/70' : 'text-muted-foreground/60'}`}>I need items</span>
                 </button>
 
                 <button
@@ -166,12 +166,12 @@ export default function SignupPage() {
                   className={`flex flex-col items-center gap-1.5 py-3 rounded-xl transition-all duration-200 cursor-pointer text-center ${
                     role === 'owner' 
                       ? 'bg-primary text-white shadow-lg shadow-primary/25' 
-                      : 'hover:bg-emerald-500/5 text-emerald-300/50 hover:text-emerald-200'
+                      : 'hover:bg-primary/5 text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <Megaphone className="h-4 w-4 shrink-0" />
                   <span className="text-xs font-bold leading-none">List & Earn</span>
-                  <span className={`text-[8px] font-medium leading-none ${role === 'owner' ? 'text-white/70' : 'text-emerald-400/30'}`}>I have items</span>
+                  <span className={`text-[8px] font-medium leading-none ${role === 'owner' ? 'text-white/70' : 'text-muted-foreground/60'}`}>I have items</span>
                 </button>
               </div>
             </div>
@@ -180,7 +180,7 @@ export default function SignupPage() {
             <div className="flex flex-col gap-1.5">
               <label className="auth-label">Full Name</label>
               <div className="relative">
-                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
+                <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                 <input
                   type="text"
                   value={name}
@@ -193,7 +193,7 @@ export default function SignupPage() {
                 />
               </div>
               {errors.name && (
-                <span className="text-[10px] text-rose-400 font-medium ml-1">{errors.name}</span>
+                <span className="text-[10px] text-rose-500 font-medium ml-1">{errors.name}</span>
               )}
             </div>
 
@@ -201,7 +201,7 @@ export default function SignupPage() {
             <div className="flex flex-col gap-1.5">
               <label className="auth-label">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                 <input
                   type="email"
                   value={email}
@@ -214,7 +214,7 @@ export default function SignupPage() {
                 />
               </div>
               {errors.email && (
-                <span className="text-[10px] text-rose-400 font-medium ml-1">{errors.email}</span>
+                <span className="text-[10px] text-rose-500 font-medium ml-1">{errors.email}</span>
               )}
             </div>
 
@@ -222,7 +222,7 @@ export default function SignupPage() {
             <div className="flex flex-col gap-1.5">
               <label className="auth-label">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -236,7 +236,7 @@ export default function SignupPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-emerald-400/40 hover:text-emerald-300 transition"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 hover:text-primary transition"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -244,11 +244,11 @@ export default function SignupPage() {
               {/* Password Strength Meter */}
               {password && (
                 <div className="flex flex-col gap-1 mt-1 ml-1">
-                  <div className="flex justify-between items-center text-[9px] text-emerald-300/40">
+                  <div className="flex justify-between items-center text-[9px] text-muted-foreground">
                     <span>Password Strength</span>
                     <span className="font-bold">{passwordStrength.label}</span>
                   </div>
-                  <div className="h-1 w-full bg-emerald-500/10 rounded-full overflow-hidden flex gap-0.5">
+                  <div className="h-1 w-full bg-primary/10 rounded-full overflow-hidden flex gap-0.5">
                     {[...Array(5)].map((_, i) => (
                       <div 
                         key={i} 
@@ -261,7 +261,7 @@ export default function SignupPage() {
                 </div>
               )}
               {errors.password && (
-                <span className="text-[10px] text-rose-400 font-medium ml-1">{errors.password}</span>
+                <span className="text-[10px] text-rose-550 font-medium ml-1">{errors.password}</span>
               )}
             </div>
 
@@ -269,7 +269,7 @@ export default function SignupPage() {
             <div className="flex flex-col gap-1.5">
               <label className="auth-label">Confirm Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400/40" />
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                 <input
                   type="password"
                   value={confirmPassword}
@@ -282,7 +282,7 @@ export default function SignupPage() {
                 />
               </div>
               {errors.confirmPassword && (
-                <span className="text-[10px] text-rose-400 font-medium ml-1">{errors.confirmPassword}</span>
+                <span className="text-[10px] text-rose-500 font-medium ml-1">{errors.confirmPassword}</span>
               )}
             </div>
 
@@ -307,9 +307,9 @@ export default function SignupPage() {
           </form>
 
           {/* Footer Navigation */}
-          <p className="text-center text-xs text-emerald-300/40 mt-6 font-medium">
+          <p className="text-center text-xs text-muted-foreground mt-6 font-medium">
             Already have an account?{' '}
-            <Link href="/login" className="text-emerald-400 hover:text-emerald-300 hover:underline font-bold transition">
+            <Link href="/login" className="text-primary hover:text-primary/80 hover:underline font-bold transition">
               Log in
             </Link>
           </p>

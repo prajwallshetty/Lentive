@@ -182,7 +182,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
             email: user?.email,
           },
           theme: {
-            color: '#3b82f6',
+            color: '#006c49',
           },
         };
         const rzp = new (window as any).Razorpay(options);
