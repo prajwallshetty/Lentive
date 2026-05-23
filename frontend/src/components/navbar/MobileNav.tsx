@@ -1,24 +1,27 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { Compass, Plus, ClipboardList, LayoutDashboard, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useDashboardStore } from '../../store/dashboardStore';
 import { useBookingStore } from '../../store/bookingStore';
 
-export default function MobileNav() {
+function MobileNavContent() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const { notifications } = useDashboardStore();
   const { renterBookings, ownerBookings } = useBookingStore();
 
+  const tab = searchParams ? searchParams.get('tab') || '' : '';
+
   const isExplore = pathname === '/' || pathname === '/listings';
-  const isBookings = pathname === '/bookings' || pathname.startsWith('/booking/');
+  const isBookings = pathname === '/bookings' || (pathname === '/dashboard' && tab === 'rentals') || pathname.startsWith('/booking/');
   const isCreateListing = pathname === '/create-listing';
-  const isDashboard = pathname === '/dashboard';
-  const isProfile = pathname === '/profile' || pathname === '/settings';
+  const isDashboard = pathname === '/dashboard' && (tab === 'overview' || tab === 'listings' || tab === 'requests' || tab === 'chats' || tab === 'admin' || !tab);
+  const isProfile = pathname === '/profile' || (pathname === '/dashboard' && tab === 'profile') || pathname === '/settings';
 
   const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
   const pendingRequestsCount = ownerBookings.filter(b => (b.status || b.bookingStatus || '').toLowerCase() === 'pending').length;
@@ -57,7 +60,7 @@ export default function MobileNav() {
 
         {/* Bookings/Rentals Route Button */}
         <Link
-          href="/bookings"
+          href="/dashboard?tab=rentals"
           className={`flex flex-col items-center justify-center transition-all duration-300 active:scale-95 group relative w-14 ${
             isBookings ? 'text-primary dark:text-[#34d399]' : 'text-muted-foreground hover:text-foreground'
           }`}
@@ -137,7 +140,7 @@ export default function MobileNav() {
 
         {/* Profile Route Button */}
         <Link
-          href="/profile"
+          href="/dashboard?tab=profile"
           className={`flex flex-col items-center justify-center transition-all duration-300 active:scale-95 group relative w-14 ${
             isProfile ? 'text-primary dark:text-[#34d399]' : 'text-muted-foreground hover:text-foreground'
           }`}
@@ -172,5 +175,13 @@ export default function MobileNav() {
 
       </div>
     </div>
+  );
+}
+
+export default function MobileNav() {
+  return (
+    <Suspense fallback={null}>
+      <MobileNavContent />
+    </Suspense>
   );
 }

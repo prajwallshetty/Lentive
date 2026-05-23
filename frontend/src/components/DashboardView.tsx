@@ -16,15 +16,16 @@ import BookingRequests from './dashboard/BookingRequests';
 import MyRentals from './dashboard/MyRentals';
 import Chats from './dashboard/Chats';
 import AdminConsole from './dashboard/AdminConsole';
+import ProfileView from './dashboard/ProfileView';
 
 interface DashboardViewProps {
   user: any;
   currentLocation: MockLocation;
   initialShowAddForm?: boolean;
   onCloseAddForm?: () => void;
-  initialTab?: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin';
+  initialTab?: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin' | 'profile';
   onStatsUpdate?: (unread: number, pending: number) => void;
-  onTabChange?: (tab: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin') => void;
+  onTabChange?: (tab: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin' | 'profile') => void;
   chatRecipientId?: string | null;
   onClearChatRecipient?: () => void;
 }
@@ -129,6 +130,8 @@ export default function DashboardView({
         return <MyRentals />;
       case 'chats':
         return <Chats chatRecipientId={chatRecipientId} onClearChatRecipient={onClearChatRecipient} />;
+      case 'profile':
+        return <ProfileView />;
       case 'admin':
         return user?.role === 'admin' ? <AdminConsole /> : null;
       default:
@@ -246,6 +249,16 @@ export default function DashboardView({
           >
             <MessageSquare className="h-3.5 w-3.5" />
             Chats
+          </button>
+          <button
+            onClick={() => handleTabChange('profile')}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
+              activeTab === 'profile' 
+                ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
+                : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
+            }`}
+          >
+            My Profile
           </button>
           {user && user.role === 'admin' && (
             <button
