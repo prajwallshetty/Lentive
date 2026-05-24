@@ -36,6 +36,8 @@ const defaultFilters: ListingFilters = {
   maxPrice: 50000,
 };
 
+let fetchTimeout: any = null;
+
 export const useListingStore = create<ListingState>((set, get) => ({
   listings: [],
   myListings: [],
@@ -47,11 +49,28 @@ export const useListingStore = create<ListingState>((set, get) => ({
     set((state) => ({
       filters: { ...state.filters, ...newFilters },
     }));
-    // Fetch listings automatically after changing filters
-    get().fetchListings();
+
+    const shouldDebounce = 'query' in newFilters || 'minPrice' in newFilters || 'maxPrice' in newFilters;
+
+    if (fetchTimeout) {
+      clearTimeout(fetchTimeout);
+      fetchTimeout = null;
+    }
+
+    if (shouldDebounce) {
+      fetchTimeout = setTimeout(() => {
+        get().fetchListings();
+      }, 450); // 450ms debounce for typing
+    } else {
+      get().fetchListings();
+    }
   },
 
   resetFilters: () => {
+    if (fetchTimeout) {
+      clearTimeout(fetchTimeout);
+      fetchTimeout = null;
+    }
     set({ filters: defaultFilters });
     get().fetchListings();
   },

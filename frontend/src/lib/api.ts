@@ -356,19 +356,22 @@ export const api = {
       if (!res.ok) throw new Error(json.error || 'Failed to fetch chats');
       return json;
     },
-    async getHistory(userId: string) {
-      const res = await fetch(`${API_URL}/chats/${userId}`, {
+    async getHistory(userId: string, listingId?: string) {
+      const url = listingId 
+        ? `${API_URL}/chats/${userId}?listingId=${listingId}`
+        : `${API_URL}/chats/${userId}`;
+      const res = await fetch(url, {
         headers: getHeaders(),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to fetch chat history');
       return json;
     },
-    async sendMessage(recipientId: string, message: string) {
+    async sendMessage(recipientId: string, message: string, listingId?: string) {
       const res = await fetch(`${API_URL}/chats`, {
         method: 'POST',
         headers: getHeaders(),
-        body: JSON.stringify({ recipientId, message }),
+        body: JSON.stringify({ recipientId, message, listingId }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || 'Failed to send message');

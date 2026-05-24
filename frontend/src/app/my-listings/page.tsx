@@ -2,13 +2,15 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useDashboardStore } from '../../store/dashboardStore';
 import { Loader2 } from 'lucide-react';
 
 export default function MyListingsRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/dashboard?tab=listings');
+    useDashboardStore.getState().setActiveTab('listings');
+    router.replace('/dashboard');
   }, [router]);
 
   return (

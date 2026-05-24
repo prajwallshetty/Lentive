@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useListingStore } from '../../store/listingStore';
+import { useDashboardStore } from '../../store/dashboardStore';
 import { useToast } from '../../context/ToastContext';
 import { MOCK_LOCATIONS } from '../../lib/constants';
 import { PlusCircle, AlertCircle, Upload, X, CheckCircle2, ArrowLeft } from 'lucide-react';
@@ -93,7 +94,8 @@ export default function CreateListingPage() {
       setFormSuccess(true);
       showToast('Item listed successfully!', 'success');
       setTimeout(() => {
-        router.push('/dashboard?tab=listings');
+        useDashboardStore.getState().setActiveTab('listings');
+        router.push('/dashboard');
       }, 1500);
     } catch (err: any) {
       setFormError(err.message || 'Failed to save listing.');

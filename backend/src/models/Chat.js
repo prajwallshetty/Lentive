@@ -25,6 +25,10 @@ const ChatSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User'
   }],
+  listing: {
+    type: mongoose.Schema.ObjectId,
+    ref: 'Listing'
+  },
   messages: [MessageSchema]
 }, {
   timestamps: true

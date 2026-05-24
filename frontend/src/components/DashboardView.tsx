@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useAuthStore } from '../store/authStore';
 import { useListingStore } from '../store/listingStore';
 import { useBookingStore } from '../store/bookingStore';
@@ -16,16 +17,15 @@ import BookingRequests from './dashboard/BookingRequests';
 import MyRentals from './dashboard/MyRentals';
 import Chats from './dashboard/Chats';
 import AdminConsole from './dashboard/AdminConsole';
-import ProfileView from './dashboard/ProfileView';
 
 interface DashboardViewProps {
   user: any;
   currentLocation: MockLocation;
   initialShowAddForm?: boolean;
   onCloseAddForm?: () => void;
-  initialTab?: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin' | 'profile';
+  initialTab?: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin';
   onStatsUpdate?: (unread: number, pending: number) => void;
-  onTabChange?: (tab: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin' | 'profile') => void;
+  onTabChange?: (tab: 'overview' | 'listings' | 'requests' | 'rentals' | 'chats' | 'admin') => void;
   chatRecipientId?: string | null;
   onClearChatRecipient?: () => void;
 }
@@ -130,8 +130,6 @@ export default function DashboardView({
         return <MyRentals />;
       case 'chats':
         return <Chats chatRecipientId={chatRecipientId} onClearChatRecipient={onClearChatRecipient} />;
-      case 'profile':
-        return <ProfileView />;
       case 'admin':
         return user?.role === 'admin' ? <AdminConsole /> : null;
       default:
@@ -239,27 +237,13 @@ export default function DashboardView({
           >
             My Rentals ({renterBookings.length})
           </button>
-          <button
-            onClick={() => handleTabChange('chats')}
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5 ${
-              activeTab === 'chats' 
-                ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
-                : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
-            }`}
+          <Link
+            href="/chats"
+            className="px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer flex items-center gap-1.5 text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted"
           >
             <MessageSquare className="h-3.5 w-3.5" />
             Chats
-          </button>
-          <button
-            onClick={() => handleTabChange('profile')}
-            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all duration-200 cursor-pointer ${
-              activeTab === 'profile' 
-                ? 'bg-primary text-white border border-primary shadow-sm shadow-primary/10' 
-                : 'text-muted-foreground border border-transparent hover:text-foreground hover:bg-muted'
-            }`}
-          >
-            My Profile
-          </button>
+          </Link>
           {user && user.role === 'admin' && (
             <button
               onClick={() => handleTabChange('admin')}

@@ -12,7 +12,7 @@ interface ListingDetailModalProps {
   user: any;
   onClose: () => void;
   onBookingSuccess: () => void;
-  onStartChat?: (ownerId: string) => void;
+  onStartChat?: (ownerId: string, listingId?: string) => void;
 }
 
 export default function ListingDetailModal({ listing, user, onClose, onBookingSuccess, onStartChat }: ListingDetailModalProps) {
@@ -303,7 +303,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
               {!isOwner && user && onStartChat && (
                 <button
                   type="button"
-                  onClick={() => onStartChat(listing.owner?._id || listing.owner)}
+                  onClick={() => onStartChat(listing.owner?._id || listing.owner, listing._id)}
                   className="w-full py-2 bg-secondary hover:brightness-110 text-secondary-foreground font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer text-center"
                 >
                   Message Owner

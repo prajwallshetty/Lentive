@@ -1,18 +1,19 @@
 'use client';
 
 import React, { useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import DashboardView from '../../components/DashboardView';
 import { useListingStore } from '../../store/listingStore';
+import { useDashboardStore } from '../../store/dashboardStore';
 import { MOCK_LOCATIONS } from '../../lib/constants';
 import { Loader2 } from 'lucide-react';
 
 function DashboardContent() {
   const { user, loading: authLoading } = useAuth();
   const { filters } = useListingStore();
+  const { activeTab } = useDashboardStore();
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   // Route protection
   useEffect(() => {
@@ -30,10 +31,6 @@ function DashboardContent() {
     );
   }
 
-  // Read query filters from search params
-  const tabParam = searchParams.get('tab') as any;
-  const chatRecipientId = searchParams.get('chatRecipientId');
-
   // Find active location object in constants based on current store coordinates
   const currentLocation = MOCK_LOCATIONS.find(
     (loc) => loc.coordinates[0] === filters.coordinates[0] && loc.coordinates[1] === filters.coordinates[1]
@@ -44,12 +41,7 @@ function DashboardContent() {
       <DashboardView 
         user={user}
         currentLocation={currentLocation}
-        initialTab={tabParam || 'overview'}
-        chatRecipientId={chatRecipientId}
-        onClearChatRecipient={() => {
-          // Clear query params elegantly when chat is cleared
-          router.replace('/dashboard?tab=chats');
-        }}
+        initialTab={activeTab as any}
       />
     </div>
   );

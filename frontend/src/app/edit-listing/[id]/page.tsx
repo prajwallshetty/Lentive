@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '../../../context/AuthContext';
 import { useListingStore } from '../../../store/listingStore';
+import { useDashboardStore } from '../../../store/dashboardStore';
 import { useToast } from '../../../context/ToastContext';
 import { api } from '../../../lib/api';
 import { PlusCircle, AlertCircle, Upload, X, CheckCircle2, ArrowLeft, Loader2 } from 'lucide-react';
@@ -129,7 +130,8 @@ export default function EditListingPage() {
       setFormSuccess(true);
       showToast('Item updated successfully!', 'success');
       setTimeout(() => {
-        router.push('/dashboard?tab=listings');
+        useDashboardStore.getState().setActiveTab('listings');
+        router.push('/dashboard');
       }, 1500);
     } catch (err: any) {
       setFormError(err.message || 'Failed to update listing.');
@@ -152,7 +154,8 @@ export default function EditListingPage() {
     <div className="max-w-xl mx-auto w-full px-2 py-4 mt-20">
       
       <Link 
-        href="/dashboard?tab=listings"
+        href="/dashboard"
+        onClick={() => useDashboardStore.getState().setActiveTab('listings')}
         className="inline-flex items-center gap-2 mb-6 text-xs sm:text-sm font-bold text-muted-foreground hover:text-primary transition group"
       >
         <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />

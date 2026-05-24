@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
 import { useToast } from './ToastContext';
+import { useAuthStore } from '../store/authStore';
 
 interface AuthContextType {
   user: any;
@@ -52,6 +53,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     refreshUser();
   }, [refreshUser]);
+
+  // Keep useAuthStore and AuthContext in sync (bidirectional)
+  useEffect(() => {
+    useAuthStore.setState({ user, loading, initialized: !loading });
+  }, [user, loading]);
+
+  useEffect(() => {
+    const unsubscribe = useAuthStore.subscribe((state) => {
+      setUser((currentVal: any) => {
+        if (JSON.stringify(currentVal) !== JSON.stringify(state.user)) {
+          return state.user;
+        }
+        return currentVal;
+      });
+      setLoading((currentVal) => {
+        if (currentVal !== state.loading) {
+          return state.loading;
+        }
+        return currentVal;
+      });
+    });
+
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (token && !useAuthStore.getState().user) {
+      useAuthStore.getState().refreshUser();
+    }
+
+    return () => unsubscribe();
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {

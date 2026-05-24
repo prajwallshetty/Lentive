@@ -4,22 +4,33 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
-import { LogOut, User, Bell, Settings, CreditCard, ClipboardList } from 'lucide-react';
-import { useDashboardStore } from '../../store/dashboardStore';
+import { LogOut, User, Settings, CreditCard, ClipboardList, MessageSquare } from 'lucide-react';
+import { api } from '../../lib/api';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
-  const { notifications, fetchNotifications } = useDashboardStore();
   const pathname = usePathname();
   const router = useRouter();
 
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [chatThreads, setChatThreads] = useState<any[]>([]);
 
-  // Sync notifications on mount/auth
+  // Sync and poll chats on mount/auth
   useEffect(() => {
     if (user) {
-      fetchNotifications().catch(() => {});
+      const fetchChats = async () => {
+        try {
+          const res = await api.chats.getAll();
+          setChatThreads(res.chats || res.data || []);
+        } catch (err) {
+          console.error('Failed to load navbar chats:', err);
+        }
+      };
+      fetchChats();
+      const interval = setInterval(fetchChats, 10000); // Poll every 10 seconds
+      return () => clearInterval(interval);
+    } else {
+      setChatThreads([]);
     }
   }, [user]);
 
@@ -28,7 +39,14 @@ export default function Navbar() {
     router.push('/');
   };
 
-  const unreadNotificationsCount = notifications.filter(n => !n.isRead).length;
+  // Calculate total unread messages count
+  const unreadMessagesCount = chatThreads.reduce((acc, thread) => {
+    const unreadInThread = thread.messages?.filter((msg: any) => {
+      const msgSenderId = msg.sender?._id || msg.sender;
+      return msgSenderId !== user?.id && msgSenderId !== user?._id && !msg.isRead;
+    }).length || 0;
+    return acc + unreadInThread;
+  }, 0);
 
   return (
     <nav className="floating-nav sticky top-3 mt-3">
@@ -55,57 +73,20 @@ export default function Navbar() {
         {/* User Auth, theme & notifications icons */}
         <div className="flex items-center gap-2 md:gap-3">
 
-          {/* Notifications Dropdown (User Only) */}
+          {/* Messages Link (User Only) */}
           {user && (
-            <div className="relative">
-              <button
-                onClick={() => {
-                  setShowNotificationDropdown(!showNotificationDropdown);
-                  setShowProfileDropdown(false);
-                }}
-                className="relative text-primary hover:bg-primary/10 p-2 rounded-full transition-all active:scale-90 cursor-pointer flex items-center justify-center"
-                aria-label="Notifications"
-              >
-                <Bell className="h-5 w-5" />
-                {unreadNotificationsCount > 0 && (
-                  <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-extrabold text-white">
-                    {unreadNotificationsCount}
-                  </span>
-                )}
-              </button>
-
-              {showNotificationDropdown && (
-                <div className="absolute right-0 mt-3 w-80 rounded-2xl border border-border bg-card p-3 shadow-xl animate-scaleIn z-50">
-                  <div className="flex justify-between items-center px-2 py-1.5 border-b border-border/40">
-                    <p className="text-[10px] font-extrabold text-primary uppercase tracking-widest">
-                      Notifications
-                    </p>
-                    <Link 
-                      href="/notifications" 
-                      onClick={() => setShowNotificationDropdown(false)}
-                      className="text-[10px] text-muted-foreground hover:text-primary transition font-bold"
-                    >
-                      View All
-                    </Link>
-                  </div>
-                  <div className="max-h-[300px] overflow-y-auto mt-2 pr-0.5 flex flex-col gap-1 hide-scrollbar">
-                    {notifications.length === 0 ? (
-                      <p className="text-center py-6 text-xs text-muted-foreground">No new notifications</p>
-                    ) : (
-                      notifications.slice(0, 5).map((noti) => (
-                        <div 
-                          key={noti._id} 
-                          className={`p-2.5 rounded-xl text-left border border-transparent hover:border-border/30 hover:bg-muted/30 transition text-xs flex flex-col gap-0.5 ${!noti.isRead ? 'bg-primary/5 font-semibold' : 'text-muted-foreground'}`}
-                        >
-                          <p className="text-foreground text-[11px] leading-snug">{noti.message}</p>
-                          <span className="text-[9px] text-muted-foreground/60">{new Date(noti.createdAt).toLocaleDateString()}</span>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
+            <Link
+              href="/chats"
+              className="relative text-primary hover:bg-primary/10 p-2 rounded-full transition-all active:scale-90 cursor-pointer flex items-center justify-center"
+              aria-label="Messages"
+            >
+              <MessageSquare className="h-5 w-5" />
+              {unreadMessagesCount > 0 && (
+                <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-extrabold text-white animate-pulse">
+                  {unreadMessagesCount}
+                </span>
               )}
-            </div>
+            </Link>
           )}
 
           {/* User Profile avatar dropdown */}
@@ -114,7 +95,6 @@ export default function Navbar() {
               <button
                 onClick={() => {
                   setShowProfileDropdown(!showProfileDropdown);
-                  setShowNotificationDropdown(false);
                 }}
                 className="flex items-center gap-1.5 rounded-xl border border-border/40 bg-white/50 dark:bg-black/25 pl-1 pr-2.5 py-1 hover:bg-muted hover:border-primary/20 transition-all duration-200 cursor-pointer shadow-xs active:scale-95 group"
               >

@@ -252,7 +252,7 @@ export default function ListingDetailPage() {
       return;
     }
     const ownerId = listing.owner?._id || listing.owner;
-    router.push(`/dashboard?tab=chats&chatRecipientId=${ownerId}`);
+    router.push(`/chats?chatRecipientId=${ownerId}&listingId=${id}`);
   };
 
   if (loading) {

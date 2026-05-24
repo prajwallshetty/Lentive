@@ -11,6 +11,7 @@ exports.getChats = async (req, res, next) => {
     })
       .populate('participants', 'name avatar role isVerified verificationStatus')
       .populate('messages.sender', 'name avatar')
+      .populate('listing', 'title images pricePerDay owner address')
       .sort({ updatedAt: -1 });
 
     res.status(200).json({
@@ -29,6 +30,7 @@ exports.getChats = async (req, res, next) => {
 exports.getChatWithUser = async (req, res, next) => {
   try {
     const recipientId = req.params.userId;
+    const { listingId } = req.query;
 
     // Check if recipient exists
     const recipient = await User.findById(recipientId);
@@ -39,19 +41,32 @@ exports.getChatWithUser = async (req, res, next) => {
       });
     }
 
-    let chat = await Chat.findOne({
+    let query = {
       participants: { $all: [req.user._id, recipientId] }
-    })
+    };
+    if (listingId) {
+      query.listing = listingId;
+    }
+
+    let chat = await Chat.findOne(query)
       .populate('participants', 'name avatar role isVerified verificationStatus')
-      .populate('messages.sender', 'name avatar');
+      .populate('messages.sender', 'name avatar')
+      .populate('listing', 'title images pricePerDay owner address');
 
     // If no chat exists yet, we return an empty chat template or success response
     if (!chat) {
+      let populatedListing = null;
+      if (listingId) {
+        const Listing = require('../models/Listing');
+        populatedListing = await Listing.findById(listingId).select('title images pricePerDay owner address');
+      }
+
       return res.status(200).json({
         success: true,
         data: {
           participants: [req.user, recipient],
-          messages: []
+          messages: [],
+          listing: populatedListing
         }
       });
     }
@@ -59,7 +74,7 @@ exports.getChatWithUser = async (req, res, next) => {
     // Mark other user's messages as read
     let updated = false;
     chat.messages.forEach(msg => {
-      if (msg.sender._id.toString() !== req.user._id.toString() && !msg.isRead) {
+      if (msg.sender && msg.sender._id.toString() !== req.user._id.toString() && !msg.isRead) {
         msg.isRead = true;
         updated = true;
       }
@@ -83,7 +98,7 @@ exports.getChatWithUser = async (req, res, next) => {
 // @access  Private
 exports.sendMessage = async (req, res, next) => {
   try {
-    const { recipientId, message } = req.body;
+    const { recipientId, message, listingId } = req.body;
 
     if (!recipientId || !message) {
       return res.status(400).json({
@@ -109,9 +124,14 @@ exports.sendMessage = async (req, res, next) => {
     }
 
     // Find existing chat or create new
-    let chat = await Chat.findOne({
+    let query = {
       participants: { $all: [req.user._id, recipientId] }
-    });
+    };
+    if (listingId) {
+      query.listing = listingId;
+    }
+
+    let chat = await Chat.findOne(query);
 
     const newMessage = {
       sender: req.user._id,
@@ -128,14 +148,16 @@ exports.sendMessage = async (req, res, next) => {
     } else {
       chat = await Chat.create({
         participants: [req.user._id, recipientId],
-        messages: [newMessage]
+        messages: [newMessage],
+        listing: listingId || undefined
       });
     }
 
     // Populate and return updated chat
     const populatedChat = await Chat.findById(chat._id)
       .populate('participants', 'name avatar role isVerified verificationStatus')
-      .populate('messages.sender', 'name avatar');
+      .populate('messages.sender', 'name avatar')
+      .populate('listing', 'title images pricePerDay owner address');
 
     res.status(201).json({
       success: true,

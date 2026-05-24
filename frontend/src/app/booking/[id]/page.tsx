@@ -483,7 +483,7 @@ export default function BookingDetailPage() {
 
             {/* Quick chat messaging */}
             <button
-              onClick={() => router.push(`/dashboard?tab=chats&chatRecipientId=${otherParty?._id}`)}
+              onClick={() => router.push(`/chats?chatRecipientId=${otherParty?._id}&listingId=${listing?._id || listing}`)}
               className="w-full py-2.5 bg-primary hover:brightness-110 text-white font-extrabold rounded-xl transition-all duration-200 text-[11px] tracking-wide active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
             >
               <MessageSquare className="h-3.5 w-3.5" />
