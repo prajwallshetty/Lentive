@@ -355,7 +355,7 @@ export default function MapPage() {
         </div>
 
         {/* Mobile Floating Listings swipeable carousel (at bottom) */}
-        <div className="md:hidden absolute bottom-28 left-0 right-0 z-10 pointer-events-none">
+        <div className="md:hidden absolute bottom-[calc(128px+env(safe-area-inset-bottom))] left-0 right-0 z-10 pointer-events-none">
           <div className="flex gap-3 overflow-x-auto hide-scrollbar px-4 py-2 snap-x snap-mandatory scroll-px-4 pointer-events-auto">
             {listings.length === 0 ? (
               <div className="snap-center shrink-0 w-[290px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-4 rounded-2xl border border-border/40 shadow-xl text-center space-y-1">
