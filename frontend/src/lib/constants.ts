@@ -29,6 +29,16 @@ export const MOCK_LOCATIONS: MockLocation[] = [
     name: 'Malleshwaram (Bengaluru North)',
     address: 'Malleshwaram, Bengaluru, Karnataka, India',
     coordinates: [77.5736, 12.9961]
+  },
+  {
+    name: 'Mangalore (Central)',
+    address: 'Hampankatta, Mangalore, Karnataka, India',
+    coordinates: [74.8560, 12.9141]
+  },
+  {
+    name: 'Manjeshwar (Kasaragod)',
+    address: 'Manjeshwar, Kasaragod, Kerala, India',
+    coordinates: [74.8876, 12.7161]
   }
 ];
 

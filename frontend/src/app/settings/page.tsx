@@ -11,12 +11,14 @@ import {
   Map, Sparkles, Loader2, ArrowLeft, Check, CheckCircle2 
 } from 'lucide-react';
 
-const BENGALURU_PRESETS = [
+const LOCATION_PRESETS = [
   { name: 'Indiranagar (East)', coordinates: [77.6412, 12.9719], description: 'Startup hub, central commercial area' },
   { name: 'Koramangala (South)', coordinates: [77.6245, 12.9352], description: 'High density student and tech worker zone' },
   { name: 'Jayanagar (South-West)', coordinates: [77.5824, 12.9250], description: 'Quiet residential neighborhood' },
   { name: 'Whitefield (East)', coordinates: [77.7499, 12.9698], description: 'Major IT park and tech corridor' },
   { name: 'Malleshwaram (North-West)', coordinates: [77.5684, 12.9982], description: 'Traditional historic commercial center' },
+  { name: 'Mangalore (Central)', coordinates: [74.8560, 12.9141], description: 'Port city commercial hub, coastal region' },
+  { name: 'Manjeshwar (Kasaragod)', coordinates: [74.8876, 12.7161], description: 'Border town, educational and residential region' },
 ];
 
 export default function SettingsPage() {
@@ -37,7 +39,7 @@ export default function SettingsPage() {
     setDistance(filters.distance);
     
     // Check if current coordinates match a preset
-    const preset = BENGALURU_PRESETS.find(
+    const preset = LOCATION_PRESETS.find(
       p => Math.abs(p.coordinates[0] - filters.coordinates[0]) < 0.0001 &&
            Math.abs(p.coordinates[1] - filters.coordinates[1]) < 0.0001
     );
@@ -55,7 +57,7 @@ export default function SettingsPage() {
     showToast('Simulation location updated successfully. Nearby listings will refresh.', 'success');
   };
 
-  const handleSelectPreset = (preset: typeof BENGALURU_PRESETS[0]) => {
+  const handleSelectPreset = (preset: typeof LOCATION_PRESETS[0]) => {
     setLng(preset.coordinates[0]);
     setLat(preset.coordinates[1]);
     setSelectedPreset(preset.name);
@@ -150,7 +152,7 @@ export default function SettingsPage() {
             <div>
               <h3 className="text-sm font-extrabold text-foreground flex items-center gap-1.5">
                 <Sparkles className="h-4 w-4 text-primary" />
-                Bengaluru Geolocation Simulation
+                Hyperlocal Geolocation Simulation
               </h3>
               <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold leading-relaxed">
                 Configure your coordinates to simulate distance queries. In Lentive, searches calculate hyperlocal distance between listings and your coordinates.
@@ -161,7 +163,7 @@ export default function SettingsPage() {
             <div className="flex flex-col gap-2.5">
               <h4 className="text-[10px] font-black uppercase text-muted-foreground tracking-wider">Active Preset Geocodes</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {BENGALURU_PRESETS.map((preset) => {
+                {LOCATION_PRESETS.map((preset) => {
                   const isActive = selectedPreset === preset.name;
                   return (
                     <button

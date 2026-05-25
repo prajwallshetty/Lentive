@@ -171,6 +171,70 @@ const listingsData = [
       coordinates: [77.6412, 12.9719] // Owned by John Doe
     },
     isAvailable: true
+  },
+  {
+    title: 'Bosch Professional Demolition Hammer',
+    description: 'Heavy duty demolition hammer, great for breaking concrete, tiles, or wall masonry. Supplied with safety goggles and 2 chisels.',
+    category: 'Tools',
+    pricePerDay: 1200,
+    securityDeposit: 5000,
+    images: [
+      'https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&w=600&q=80'
+    ],
+    address: 'Hampankatta, Mangalore, Karnataka, India',
+    location: {
+      type: 'Point',
+      coordinates: [74.8560, 12.9141]
+    },
+    isAvailable: true
+  },
+  {
+    title: 'GoPro Hero 11 Black Creator Edition',
+    description: 'Excellent action camera for travel vlogging and underwater shoots. Comes with Volta battery grip, Media Mod, Light Mod, and carrying case.',
+    category: 'Electronics',
+    pricePerDay: 1800,
+    securityDeposit: 8000,
+    images: [
+      'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=600&q=80'
+    ],
+    address: 'Lalbagh, Mangalore, Karnataka, India',
+    location: {
+      type: 'Point',
+      coordinates: [74.8436, 12.8912]
+    },
+    isAvailable: true
+  },
+  {
+    title: 'Double Kayak with Paddles and Lifevests',
+    description: 'Two-person sit-on-top ocean/lake kayak. Stable, durable, and perfect for exploring coastal waters near Manjeshwar.',
+    category: 'Outdoor',
+    pricePerDay: 1500,
+    securityDeposit: 6000,
+    images: [
+      'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'
+    ],
+    address: 'Manjeshwar Beach, Kasaragod, Kerala, India',
+    location: {
+      type: 'Point',
+      coordinates: [74.8850, 12.7120]
+    },
+    isAvailable: true
+  },
+  {
+    title: 'Royal Enfield Classic 350',
+    description: 'Legendary cruiser motorcycle. Perfect condition, serviced regularly. Ideal for coastal highway rides and exploring Kasaragod.',
+    category: 'Vehicles',
+    pricePerDay: 1000,
+    securityDeposit: 5000,
+    images: [
+      'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80'
+    ],
+    address: 'Manjeshwar, Kasaragod, Kerala, India',
+    location: {
+      type: 'Point',
+      coordinates: [74.8876, 12.7161]
+    },
+    isAvailable: true
   }
 ];
 
