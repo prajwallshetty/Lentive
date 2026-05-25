@@ -26,14 +26,14 @@ export default function CategoryBar({ selectedCategory, setSelectedCategory }: C
               >
                 {/* Circular Icon Container */}
                 <div 
-                  className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 ${
+                  className={`w-12 h-12 rounded-full aspect-square shrink-0 flex items-center justify-center overflow-hidden transition-all duration-300 ${
                     isSelected
                       ? 'bg-gradient-to-tr from-primary to-[#10b981] text-white shadow-md shadow-primary/20 scale-105 border-transparent'
                       : 'bg-primary/5 dark:bg-white/5 border border-primary/5 dark:border-white/5 text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary group-hover:border-primary/10 dark:group-hover:text-primary-foreground group-hover:scale-105'
                   }`}
                 >
                   <IconComponent 
-                    className={`h-4.5 w-4.5 transition-all duration-300 group-hover:rotate-6 ${
+                    className={`h-5 w-5 transition-all duration-300 group-hover:rotate-6 ${
                       isSelected ? 'stroke-[2.5px] scale-110 text-white' : 'stroke-[2px]'
                     }`} 
                   />
