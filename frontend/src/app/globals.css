@@ -179,6 +179,11 @@ body {
   z-index: 40;
 }
 
+/* Mobile Floating Listings Carousel for Map */
+.mobile-map-carousel {
+  bottom: calc(136px + env(safe-area-inset-bottom));
+}
+
 /* Glass card treatment */
 .glass-card {
   background: rgba(255, 255, 255, 0.75);
