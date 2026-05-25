@@ -137,42 +137,42 @@ export default function MyRentals() {
           {renterBookings.map((b) => {
             const status = (b.status || b.bookingStatus || '').toLowerCase();
             return (
-              <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:border-primary/25 hover:bg-muted/40 md:flex-row md:items-center transition-all duration-300">
+              <div key={b._id} className="flex flex-col justify-between items-start gap-4 p-5 rounded-2xl border border-border/80 bg-white hover:border-primary/25 hover:shadow-md md:flex-row md:items-center transition-all duration-300">
                 
                 {/* Left side details */}
                 <div className="flex items-start gap-4">
                   <img 
                     src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
                     alt="" 
-                    className="h-12 w-12 rounded-lg object-cover border border-border/20 shrink-0 bg-muted"
+                    className="h-14 w-14 rounded-xl object-cover border border-border/10 shrink-0 bg-muted"
                   />
                   <div>
-                    <p className="text-sm font-extrabold text-foreground">{b.listing?.title}</p>
+                    <p className="text-sm font-extrabold text-foreground group-hover:text-primary transition-colors">{b.listing?.title}</p>
                     
                     {/* Owner Profile details */}
-                    <div className="flex items-center gap-2 mt-1 bg-white/50 dark:bg-black/10 px-2.5 py-1 rounded-lg border border-border/30 w-fit">
+                    <div className="flex items-center gap-2 mt-1.5 bg-muted/65 px-2.5 py-1 rounded-xl border border-border/30 w-fit">
                       <img
                         src={b.owner?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=40&h=40&q=80'}
                         alt=""
-                        className="h-4.5 w-4.5 rounded-full object-cover border border-border/20 shrink-0"
+                        className="h-4 w-4 rounded-full object-cover border border-border/20 shrink-0"
                       />
                       <p className="text-[10px] font-semibold text-muted-foreground leading-none">
-                        Owner: <span className="font-bold text-foreground">{b.owner?.name}</span> ({b.owner?.email})
+                        Owner: <span className="font-bold text-foreground">{b.owner?.name}</span>
                       </p>
                     </div>
 
-                    <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-1.5 font-semibold">
-                      <Calendar className="h-3 w-3 text-primary shrink-0" />
-                      {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
+                    <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-2 font-bold">
+                      <Calendar className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span>{new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}</span>
                     </p>
                   </div>
                 </div>
                 
                 {/* Right side pricing & actions */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t border-border/20 pt-3 md:border-t-0 md:pt-0">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto justify-between md:justify-end border-t border-border/10 pt-4 md:border-t-0 md:pt-0">
                   <div className="text-xs md:text-right font-semibold">
                     <p className="text-sm font-black text-foreground">{formatCurrency(b.totalPrice || b.totalAmount)}</p>
-                    <span className="text-[10px] text-muted-foreground">Deposit: {formatCurrency(b.securityDeposit || b.depositAmount)}</span>
+                    <span className="text-[9px] text-muted-foreground font-bold">Deposit: {formatCurrency(b.securityDeposit || b.depositAmount)} (Protected Escrow)</span>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0 self-stretch sm:self-auto justify-end">
@@ -180,7 +180,7 @@ export default function MyRentals() {
                     {['pending', 'accepted'].includes(status) && (
                       <button
                         onClick={() => handleCancelBooking(b._id)}
-                        className="px-5 py-2.5 bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 hover:border-rose-500/35 active:scale-95 text-xs font-black tracking-wide rounded-full transition-all duration-200 cursor-pointer flex items-center gap-1.5 min-h-[40px] hover:scale-[1.02]"
+                        className="px-4 py-2 bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100 hover:border-rose-350 hover:text-rose-700 active:scale-95 text-xs font-black tracking-wide rounded-xl transition-all duration-200 cursor-pointer flex items-center gap-1.5"
                       >
                         <XCircle className="h-4 w-4 shrink-0" />
                         Cancel Request
@@ -190,19 +190,14 @@ export default function MyRentals() {
                     {status === 'completed' && (
                       <button
                         onClick={() => handleOpenReviewModal(b)}
-                        className="px-5 py-2.5 bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/35 active:scale-95 text-xs font-black tracking-wide rounded-full transition-all duration-200 cursor-pointer hover:scale-[1.02] flex items-center gap-1.5 min-h-[40px]"
+                        className="px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 active:scale-95 text-xs font-black tracking-wide rounded-xl transition-all duration-200 cursor-pointer flex items-center gap-1.5"
                       >
                         <Star className="h-4 w-4 fill-amber-500 text-amber-500 shrink-0" />
                         Write Review
                       </button>
                     )}
 
-                    {status !== 'completed' && !['pending', 'accepted'].includes(status) && (
-                      renderStatusBadge(b.status || b.bookingStatus)
-                    )}
-                    {['pending', 'accepted'].includes(status) && (
-                      renderStatusBadge(b.status || b.bookingStatus)
-                    )}
+                    {renderStatusBadge(b.status || b.bookingStatus)}
                   </div>
                 </div>
 

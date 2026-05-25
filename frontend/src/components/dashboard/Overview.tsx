@@ -81,67 +81,120 @@ export default function Overview() {
       <div className="lg:col-span-2 flex flex-col gap-6">
         
         {/* Stat Cards Row */}
-        <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-4 pb-3 md:pb-0 hide-scrollbar snap-x snap-mandatory">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Total Earnings */}
-          <div className="min-w-[260px] md:min-w-0 flex-1 shrink-0 md:shrink md:flex-initial snap-start relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
-            <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+          <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-white p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/25 hover:shadow-md shadow-xs">
+            <div className="absolute top-0 right-0 h-20 w-20 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/25 shrink-0">
               <DollarSign className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Total Earnings</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-black">Total Earnings</p>
               <p className="text-xl font-black text-foreground mt-0.5">{formatCurrency(totalEarnings)}</p>
             </div>
           </div>
 
           {/* My Listed Items */}
-          <div className="min-w-[260px] md:min-w-0 flex-1 shrink-0 md:shrink md:flex-initial snap-start relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
-            <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+          <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-white p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/25 hover:shadow-md shadow-xs">
+            <div className="absolute top-0 right-0 h-20 w-20 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/25 shrink-0">
               <Package className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">My Listed Items</p>
-              <p className="text-xl font-black text-foreground mt-0.5">{myListings.length}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-black">My Inventory</p>
+              <p className="text-xl font-black text-foreground mt-0.5">{myListings.length} items</p>
             </div>
           </div>
 
           {/* Active Bookings (Both) */}
-          <div className="min-w-[260px] md:min-w-0 flex-1 shrink-0 md:shrink md:flex-initial snap-start relative overflow-hidden rounded-2xl border border-border/40 bg-card p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/30 shadow-sm">
-            <div className="absolute top-0 right-0 h-24 w-24 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/20 shrink-0">
+          <div className="relative overflow-hidden rounded-2xl border border-border/80 bg-white p-5 flex items-center gap-4 transition-all duration-300 hover:border-primary/25 hover:shadow-md shadow-xs">
+            <div className="absolute top-0 right-0 h-20 w-20 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary border border-primary/25 shrink-0">
               <ShoppingBag className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-extrabold">Active Rentals</p>
-              <p className="text-xl font-black text-foreground mt-0.5">{activeRentalsCount}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-black">Active Handovers</p>
+              <p className="text-xl font-black text-foreground mt-0.5">{activeRentalsCount} bookings</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Weekly Earnings Trend SVG Chart */}
+        <div className="rounded-2xl border border-border/80 bg-white p-6 shadow-xs flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">Earnings Analysis</h3>
+              <p className="text-sm font-extrabold text-foreground mt-0.5">Weekly Performance Trends</p>
+            </div>
+            <span className="text-[9px] text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full font-black uppercase tracking-wide">
+              +14.8% vs last month
+            </span>
+          </div>
+          
+          <div className="relative w-full h-36 mt-2 bg-[#f8faf9] border border-border/60 rounded-2xl overflow-hidden flex items-end px-2 py-5">
+            <div className="absolute inset-0 grid grid-cols-7 gap-1 px-4 py-2 pointer-events-none">
+              {[...Array(7)].map((_, i) => (
+                <div key={i} className="h-full border-r border-dashed border-border/30" />
+              ))}
+            </div>
+            
+            <svg className="w-full h-24 overflow-visible" viewBox="0 0 100 30" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#059669" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#059669" stopOpacity="0.0" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M 0,25 Q 15,18 30,10 T 60,16 T 90,8 T 100,12 L 100,30 L 0,30 Z"
+                fill="url(#chart-grad)"
+              />
+              <path
+                d="M 0,25 Q 15,18 30,10 T 60,16 T 90,8 T 100,12"
+                fill="none"
+                stroke="#059669"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+              <circle cx="30" cy="10" r="1.2" fill="#059669" stroke="#ffffff" strokeWidth="0.5" />
+              <circle cx="90" cy="8" r="1.2" fill="#059669" stroke="#ffffff" strokeWidth="0.5" />
+            </svg>
+            
+            <div className="absolute bottom-2 left-0 right-0 px-4 flex justify-between text-[8px] font-black text-muted-foreground uppercase tracking-widest select-none">
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Sun</span>
             </div>
           </div>
         </div>
 
         {/* Quick Status / Calendar list */}
-        <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
-          <h3 className="text-base font-extrabold text-foreground border-b border-border/40 pb-3 mb-4 flex items-center justify-between">
+        <div className="rounded-2xl border border-border/80 bg-white p-6 shadow-xs">
+          <h3 className="text-sm font-extrabold text-foreground border-b border-border/10 pb-3 mb-4 flex items-center justify-between">
             <span>Active & Upcoming Rentals</span>
-            <span className="text-[10px] bg-primary/15 text-primary border border-primary/25 font-bold px-2 py-0.5 rounded-full">
+            <span className="text-[9px] bg-primary/10 text-primary border border-primary/20 font-black uppercase tracking-wider px-2 py-0.5 rounded-full select-none">
               Unified Tracker
             </span>
           </h3>
 
           {activeRentalsList.length === 0 ? (
             <div className="py-12 flex flex-col items-center justify-center text-center gap-2">
-              <div className="h-12 w-12 rounded-full bg-primary/5 flex items-center justify-center text-primary/40 border border-primary/10 mb-1">
+              <div className="h-12 w-12 rounded-full bg-primary/5 flex items-center justify-center text-primary/45 border border-primary/15 mb-1">
                 <Calendar className="h-5 w-5" />
               </div>
-              <h4 className="font-bold text-xs text-foreground">No Active Rentals</h4>
-              <p className="text-[10px] text-muted-foreground max-w-[200px] leading-relaxed">
+              <h4 className="font-extrabold text-xs text-foreground">No Active Rentals</h4>
+              <p className="text-[10px] text-muted-foreground max-w-[200px] leading-relaxed font-semibold">
                 You don't have any active handovers or confirmed rentals currently.
               </p>
             </div>
           ) : (
             <div className="flex flex-col gap-3">
               {activeRentalsList.map((b) => (
-                <div key={b._id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-border/30 bg-muted/20 hover:bg-muted/40 transition-all duration-200">
+                <div key={b._id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-border/50 bg-muted/15 hover:bg-muted/30 transition-all duration-200">
                   <div className="flex items-center gap-3">
                     <img
                       src={b.listing?.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'}
@@ -153,13 +206,13 @@ export default function Overview() {
                         <p className="text-xs font-bold text-foreground truncate max-w-[200px]">{b.listing?.title}</p>
                         <span className={`text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${
                           b.role === 'renter' 
-                            ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20' 
-                            : 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                            ? 'bg-blue-50 text-blue-600 border border-blue-200' 
+                            : 'bg-emerald-50 text-emerald-600 border border-emerald-200'
                         }`}>
                           {b.role === 'renter' ? 'Renting' : 'Lending'}
                         </span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">
+                      <p className="text-[10px] text-muted-foreground mt-0.5 font-semibold">
                         {b.role === 'renter' ? `Owner: ${b.owner?.name}` : `Renter: ${b.renter?.name}`} • {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
                       </p>
                     </div>
@@ -168,7 +221,7 @@ export default function Overview() {
                   <div className="flex items-center gap-4 self-stretch sm:self-auto justify-between sm:justify-end">
                     <div className="text-xs">
                       <p className="font-extrabold text-foreground">{formatCurrency(b.totalPrice || b.totalAmount)}</p>
-                      <p className="text-[9px] text-muted-foreground">{b.totalDays || Math.ceil((new Date(b.endDate).getTime() - new Date(b.startDate).getTime()) / (1000 * 3600 * 24))} days</p>
+                      <p className="text-[9px] text-muted-foreground font-bold">{b.totalDays || Math.ceil((new Date(b.endDate).getTime() - new Date(b.startDate).getTime()) / (1000 * 3600 * 24))} days</p>
                     </div>
                     {renderStatusBadge(b.status || b.bookingStatus)}
                   </div>
@@ -179,10 +232,10 @@ export default function Overview() {
         </div>
 
         {/* Escrow & Transaction History */}
-        <div className="rounded-2xl border border-border/40 bg-card p-6 shadow-sm">
-          <h3 className="text-base font-extrabold text-foreground border-b border-border/40 pb-3 mb-4 flex items-center justify-between font-sans">
+        <div className="rounded-2xl border border-border/80 bg-white p-6 shadow-xs">
+          <h3 className="text-sm font-extrabold text-foreground border-b border-border/10 pb-3 mb-4 flex items-center justify-between">
             <span>Escrow & Transaction History</span>
-            <span className="text-[10px] bg-emerald-500/15 text-emerald-600 border border-emerald-500/25 font-bold px-2 py-0.5 rounded-full">
+            <span className="text-[9px] bg-primary/10 text-primary border border-primary/20 font-black uppercase tracking-wider px-2 py-0.5 rounded-full select-none">
               Safe Escrow Logs
             </span>
           </h3>
@@ -210,11 +263,11 @@ export default function Overview() {
                       <td className="py-2.5 capitalize">{tx.type}</td>
                       <td className="py-2.5 font-bold">{formatCurrency(tx.amount)}</td>
                       <td className="py-2.5">
-                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                          tx.status === 'captured' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/15' :
-                          tx.status === 'refunded' ? 'bg-blue-500/10 text-blue-600 border border-blue-500/15' :
-                          tx.status === 'pending' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/15' :
-                          'bg-rose-500/10 text-rose-600 border border-rose-500/15'
+                        <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase border ${
+                          tx.status === 'captured' ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                          tx.status === 'refunded' ? 'bg-blue-50 text-blue-600 border border-blue-200' :
+                          tx.status === 'pending' ? 'bg-amber-50 text-amber-600 border border-amber-200' :
+                          'bg-rose-50 text-rose-600 border border-rose-200'
                         }`}>
                           {tx.status === 'captured' ? 'success' : tx.status}
                         </span>

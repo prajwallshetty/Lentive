@@ -38,6 +38,17 @@ export const api = {
       if (!res.ok) throw new Error(json.error || 'Login failed');
       return json;
     },
+    async googleLogin(idToken: string) {
+      const res = await fetch(`${API_URL}/auth/google`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ idToken }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || 'Google Login failed');
+      return json;
+    },
+
     async me() {
       const res = await fetch(`${API_URL}/auth/me`, {
         headers: getHeaders(),

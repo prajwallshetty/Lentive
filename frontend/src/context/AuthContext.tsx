@@ -10,6 +10,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<any>;
   signup: (data: any) => Promise<any>;
+  googleLogin: (idToken: string) => Promise<any>;
   logout: () => void;
   forgotPassword: (email: string) => Promise<any>;
   resetPassword: (token: string, data: any) => Promise<any>;
@@ -98,6 +99,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const googleLogin = async (idToken: string) => {
+    try {
+      const res = await api.auth.googleLogin(idToken);
+      if (res.success) {
+        localStorage.setItem('token', res.token);
+        setUser(res.user);
+        showToast(`Welcome to Lentive, ${res.user.name}!`, 'success');
+        return res;
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Google Sign-In failed.', 'error');
+      throw err;
+    }
+  };
+
   const signup = async (data: any) => {
     try {
       const res = await api.auth.register(data);
@@ -112,6 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw err;
     }
   };
+
 
   const logout = () => {
     localStorage.removeItem('token');
@@ -181,6 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         loading,
         login,
         signup,
+        googleLogin,
         logout,
         forgotPassword,
         resetPassword,
@@ -193,6 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </AuthContext.Provider>
   );
 };
+
 
 export const useAuth = () => {
   const context = useContext(AuthContext);

@@ -2,66 +2,82 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { ShieldCheck, Heart, Info, PhoneCall, HelpCircle, Lock } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border/20 bg-white/40 dark:bg-[#080c0a]/40 backdrop-blur-md mt-auto py-12 pb-28 md:pb-12 relative z-10 w-full">
+    <footer className="border-t border-border/80 bg-white dark:bg-[#070c0a] mt-auto py-12 pb-28 md:pb-12 relative z-10 w-full">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Upper Column Footer Layout */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6 border-b border-border/10 pb-8 mb-8">
+        {/* Responsive Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-border/20 mb-8">
           
-          {/* Brand & Mission Statement */}
-          <div className="flex flex-col items-center md:items-start text-center md:text-left gap-2.5">
+          {/* Brand Info */}
+          <div className="md:col-span-1 flex flex-col items-start gap-3">
             <Link href="/" className="flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary to-[#059669] flex items-center justify-center text-white text-xs font-black shadow-xs">
+              <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-primary to-[#10b981] flex items-center justify-center text-white text-base font-black shadow-sm shadow-primary/25">
                 L
               </div>
-              <span className="font-display text-lg font-black text-primary tracking-tight">lentive</span>
+              <span className="font-sans text-lg font-black text-foreground tracking-tight">Lentive</span>
             </Link>
-            <p className="text-[10px] text-muted-foreground max-w-xs leading-relaxed font-semibold">
-              Empowering communities to share resources hyperlocal, reducing waste, and building local trust.
+            <p className="text-[11px] text-muted-foreground leading-relaxed font-semibold max-w-xs">
+              Empowering local communities to share resources. Rent tools, electronics, or gear directly from verified neighbors.
             </p>
+            {/* Secure Payments Badge */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted/60 border border-border/40 text-[9px] text-muted-foreground font-bold mt-2">
+              <Lock className="h-3 w-3 text-primary" />
+              <span>Razorpay Secure Escrow</span>
+            </div>
           </div>
 
-          {/* Social Links and Guidelines */}
-          <div className="flex flex-col items-center md:items-end gap-3.5">
-            <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] font-bold text-muted-foreground">
-              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
-              <span>•</span>
-              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
-              <span>•</span>
-              <a href="#" className="hover:text-primary transition-colors">Safety Guide</a>
-              <span>•</span>
-              <a href="#" className="hover:text-primary transition-colors">Contact Support</a>
-            </div>
-            
-            {/* Social icons */}
-            <div className="flex items-center gap-3">
-              {['facebook', 'twitter', 'instagram', 'linkedin'].map((social) => (
-                <a
-                  key={social}
-                  href="#"
-                  className="h-8 w-8 rounded-full border border-border/30 bg-muted/25 hover:bg-primary hover:border-primary/20 hover:text-white text-muted-foreground flex items-center justify-center transition-all duration-300 active:scale-90"
-                  title={social}
-                >
-                  <span className="material-symbols-outlined text-[13px] font-bold">
-                    {social === 'facebook' ? 'share' : social === 'twitter' ? 'chat' : social === 'instagram' ? 'photo_camera' : 'group'}
-                  </span>
-                </a>
-              ))}
+          {/* Column 1: Marketplace */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-foreground">Marketplace</h4>
+            <div className="flex flex-col gap-2 text-xs font-bold text-muted-foreground">
+              <Link href="/" className="hover:text-primary transition-colors">Browse Rentals</Link>
+              <Link href="/search" className="hover:text-primary transition-colors">Search Map</Link>
+              <Link href="/create-listing" className="hover:text-primary transition-colors">Post an Item</Link>
+              <Link href="/verification" className="hover:text-primary transition-colors">Verification center</Link>
             </div>
           </div>
+
+          {/* Column 2: Safety & Trust */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-foreground">Safety & Trust</h4>
+            <div className="flex flex-col gap-2 text-xs font-bold text-muted-foreground">
+              <a href="#" className="hover:text-primary transition-colors flex items-center gap-1.5">
+                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                <span>SafeRent™ Guarantee</span>
+              </a>
+              <a href="#" className="hover:text-primary transition-colors">Verification Rules</a>
+              <a href="#" className="hover:text-primary transition-colors">Escrow Protection</a>
+              <a href="#" className="hover:text-primary transition-colors">Community Guidelines</a>
+            </div>
+          </div>
+
+          {/* Column 3: Contact & Legal */}
+          <div className="flex flex-col gap-3">
+            <h4 className="text-xs font-black uppercase tracking-wider text-foreground">Help & Support</h4>
+            <div className="flex flex-col gap-2 text-xs font-bold text-muted-foreground">
+              <a href="#" className="hover:text-primary transition-colors">Help Center</a>
+              <a href="#" className="hover:text-primary transition-colors">Contact Support</a>
+              <a href="#" className="hover:text-primary transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-primary transition-colors">Terms of Service</a>
+            </div>
+          </div>
+
         </div>
 
         {/* Lower Row Copyright Info */}
-        <div className="text-center text-[10px] text-muted-foreground/80 font-semibold flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 Lentive. Hyperlocal Sharing Economy Marketplace Platform.</p>
-          <p className="flex items-center gap-1.5 justify-center">
-            <span>Built with Next.js, Express, MongoDB and Tailwind CSS</span>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left text-[10px] text-muted-foreground font-semibold">
+          <p>© 2026 Lentive Inc. Built for a cleaner, greener hyperlocal sharing economy.</p>
+          <div className="flex items-center gap-1.5">
+            <span>Made with</span>
+            <Heart className="h-3 w-3 text-rose-500 fill-rose-500" />
+            <span>in your neighborhood</span>
             <span>•</span>
             <span className="text-primary font-bold">SafeRent™ Certified</span>
-          </p>
+          </div>
         </div>
 
       </div>

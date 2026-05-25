@@ -137,7 +137,7 @@ export default function MobileNav() {
 
         {/* Profile Route Button */}
         <Link
-          href="/profile"
+          href="/dashboard"
           className={`flex flex-col items-center justify-center transition-all duration-300 active:scale-95 group relative w-14 ${
             isProfile ? 'text-primary dark:text-[#34d399]' : 'text-muted-foreground hover:text-foreground'
           }`}
@@ -149,9 +149,19 @@ export default function MobileNav() {
                 ? 'bg-primary/10 dark:bg-[#34d399]/15 scale-110 shadow-[0_4px_12px_rgba(0,108,73,0.08)]' 
                 : 'bg-transparent group-hover:bg-muted/50 dark:group-hover:bg-white/5'
             }`}>
-              <User className={`h-5 w-5 transition-all duration-300 ${
-                isProfile ? 'stroke-[2.5px] text-primary dark:text-[#34d399]' : 'stroke-[2px]'
-              }`} />
+              {user && user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className={`h-5 w-5 rounded-full object-cover border transition-all duration-300 ${
+                    isProfile ? 'border-primary dark:border-[#34d399] scale-105' : 'border-border/30'
+                  }`}
+                />
+              ) : (
+                <User className={`h-5 w-5 transition-all duration-300 ${
+                  isProfile ? 'stroke-[2.5px] text-primary dark:text-[#34d399]' : 'stroke-[2px]'
+                }`} />
+              )}
             </div>
             {unreadNotificationsCount > 0 && (
               <span className="absolute top-0 right-0 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[8px] font-black text-white animate-pulse shadow-md border border-white dark:border-[#070c0a]">

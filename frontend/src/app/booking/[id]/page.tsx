@@ -245,20 +245,20 @@ export default function BookingDetailPage() {
         <div className="md:col-span-2 flex flex-col gap-6">
           
           {/* Tracker Block */}
-          <div className="rounded-3xl border border-border/40 bg-card p-6 shadow-sm flex flex-col gap-6">
-            <div className="flex items-center justify-between border-b border-border/20 pb-4">
+          <div className="rounded-3xl border border-border/80 bg-white p-6 shadow-xs flex flex-col gap-6">
+            <div className="flex items-center justify-between border-b border-border/10 pb-4">
               <div>
-                <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Booking ID</span>
-                <h2 className="text-sm font-black text-foreground font-mono mt-0.5">{booking._id}</h2>
+                <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider">Booking Transaction</span>
+                <h2 className="text-xs font-mono font-extrabold text-foreground mt-0.5">{booking._id}</h2>
               </div>
               <div className="text-right">
                 <span className="text-[10px] text-muted-foreground font-black uppercase tracking-wider block">Status</span>
-                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-extrabold uppercase mt-1 border ${
-                  status === 'pending' ? 'bg-amber-500/10 text-amber-700 border-amber-500/20' :
-                  status === 'accepted' ? 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20' :
-                  status === 'active' ? 'bg-indigo-500/10 text-indigo-700 border-indigo-500/20' :
-                  status === 'completed' ? 'bg-primary/10 text-primary border-primary/20' :
-                  'bg-rose-500/10 text-rose-700 border-rose-500/20'
+                <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase mt-1 border ${
+                  status === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                  status === 'accepted' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                  status === 'active' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
+                  status === 'completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                  'bg-rose-50 text-rose-700 border-rose-200'
                 }`}>
                   {status}
                 </span>
@@ -273,7 +273,7 @@ export default function BookingDetailPage() {
                 {/* Horizontal steps on desktop, vertical on mobile */}
                 <div className="hidden sm:grid grid-cols-4 relative items-start gap-4">
                   {/* Progress Line */}
-                  <div className="absolute top-4 left-[12%] right-[12%] h-[2px] bg-border/40 -z-0">
+                  <div className="absolute top-4 left-[12%] right-[12%] h-[2px] bg-border/60 -z-0">
                     <div 
                       className="h-full bg-primary transition-all duration-500" 
                       style={{ width: `${((currentStep - 1) / 3) * 100}%` }}
@@ -284,13 +284,13 @@ export default function BookingDetailPage() {
                     <div key={st.step} className="flex flex-col items-center text-center gap-2 relative z-10">
                       <div className={`h-8 w-8 rounded-full flex items-center justify-center border font-bold text-xs transition-all duration-300 ${
                         currentStep >= st.step 
-                          ? 'bg-primary text-white border-primary shadow-sm shadow-primary/20' 
-                          : 'bg-background text-muted-foreground border-border/40'
+                          ? 'bg-primary text-white border-primary shadow-md shadow-primary/10' 
+                          : 'bg-white text-muted-foreground border-border'
                       }`}>
                         {currentStep > st.step ? <CheckCircle2 className="h-4.5 w-4.5 text-white" /> : st.step}
                       </div>
                       <div>
-                        <p className={`text-xs font-extrabold ${currentStep >= st.step ? 'text-foreground' : 'text-muted-foreground'}`}>{st.title}</p>
+                        <p className={`text-xs font-extrabold ${currentStep >= st.step ? 'text-foreground font-black' : 'text-muted-foreground'}`}>{st.title}</p>
                         <p className="text-[9px] text-muted-foreground font-semibold leading-tight mt-0.5">{st.desc}</p>
                       </div>
                     </div>
@@ -298,13 +298,13 @@ export default function BookingDetailPage() {
                 </div>
 
                 {/* Vertical timeline for mobile */}
-                <div className="flex sm:hidden flex-col gap-4 pl-2 relative border-l-2 border-border/30 ml-4 py-1">
+                <div className="flex sm:hidden flex-col gap-4 pl-2 relative border-l-2 border-border ml-4 py-1">
                   {steps.map((st) => (
                     <div key={st.step} className="flex gap-4 items-start relative">
                       <div className={`absolute left-[-21px] h-6 w-6 rounded-full flex items-center justify-center border font-black text-[10px] transition-all duration-300 ${
                         currentStep >= st.step 
                           ? 'bg-primary text-white border-primary' 
-                          : 'bg-background text-muted-foreground border-border/40'
+                          : 'bg-white text-muted-foreground border-border'
                       }`}>
                         {currentStep > st.step ? '✓' : st.step}
                       </div>
@@ -317,11 +317,11 @@ export default function BookingDetailPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-3 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-600 rounded-2xl text-xs font-semibold">
-                <XCircle className="h-5 w-5 shrink-0" />
+              <div className="flex items-center gap-3 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl text-xs font-semibold">
+                <XCircle className="h-5 w-5 shrink-0 text-rose-500" />
                 <div>
-                  <p className="font-extrabold">Rental Request Terminated</p>
-                  <p className="text-[10px] mt-0.5 text-rose-500">This request has been cancelled by the user or rejected by the owner.</p>
+                  <p className="font-extrabold text-rose-800">Rental Request Terminated</p>
+                  <p className="text-[10px] mt-0.5 text-rose-600">This request has been cancelled by the user or rejected by the owner.</p>
                 </div>
               </div>
             )}

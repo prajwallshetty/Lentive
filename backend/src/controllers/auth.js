@@ -464,3 +464,77 @@ const sendTokenResponse = (user, statusCode, res) => {
   });
 };
 
+// @desc    Google Sign In / Sign Up
+// @route   POST /api/auth/google
+// @access  Public
+exports.googleLogin = async (req, res, next) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ success: false, error: 'Please provide Google ID Token' });
+    }
+
+    // Verify token via Google API tokeninfo endpoint
+    const verifyGoogleToken = (token) => {
+      return new Promise((resolve, reject) => {
+        const https = require('https');
+        https.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`, (response) => {
+          let data = '';
+          response.on('data', (chunk) => { data += chunk; });
+          response.on('end', () => {
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.error_description || parsed.error) {
+                reject(new Error(parsed.error_description || parsed.error || 'Token verification failed'));
+              } else {
+                resolve(parsed);
+              }
+            } catch (err) {
+              reject(err);
+            }
+          });
+        }).on('error', (err) => {
+          reject(err);
+        });
+      });
+    };
+
+    const payload = await verifyGoogleToken(idToken);
+    const { email, name, picture, email_verified } = payload;
+
+    // Find or create user
+    let user = await User.findOne({ email });
+
+    if (user) {
+      // User exists, update avatar if not set
+      if (!user.avatar && picture) {
+        user.avatar = picture;
+      }
+      if (email_verified === 'true' || email_verified === true) {
+        user.isVerified = true;
+      }
+      updateUserVerificationLevel(user);
+      await user.save();
+    } else {
+      // Create user with random secure password since it's Google Auth
+      const randomPassword = crypto.randomBytes(16).toString('hex');
+      user = new User({
+        name: name || email.split('@')[0],
+        email,
+        password: randomPassword,
+        avatar: picture || '',
+        isVerified: email_verified === 'true' || email_verified === true,
+        role: 'renter'
+      });
+      updateUserVerificationLevel(user);
+      await user.save();
+    }
+
+    sendTokenResponse(user, 200, res);
+  } catch (err) {
+    console.error('Google Sign In Error:', err.message);
+    res.status(400).json({ success: false, error: err.message || 'Google Auth Token is invalid' });
+  }
+};
+
+

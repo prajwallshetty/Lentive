@@ -39,10 +39,10 @@ export default function ListingCard({ listing }: ListingCardProps) {
   return (
     <Link
       href={`/listing/${listing._id || listing.id}`}
-      className="group flex flex-col gap-3 rounded-[28px] bg-white dark:bg-[#101613] border border-[#d2ded7] dark:border-white/10 p-3.5 cursor-pointer relative overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.02)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.4)] hover:shadow-[0_20px_40px_rgba(0,108,73,0.08)] dark:hover:shadow-[0_20px_40px_rgba(0,0,0,0.55)] hover:border-primary/35 dark:hover:border-[#34d399]/30 transition-all duration-300 active:scale-[0.98] select-none hover:-translate-y-1"
+      className="group flex flex-col gap-3 rounded-[24px] bg-white border border-border/80 p-3 cursor-pointer relative overflow-hidden shadow-xs hover:shadow-lg hover:border-primary/25 transition-all duration-300 active:scale-[0.99] select-none hover:-translate-y-1"
     >
       {/* Listing Image Container */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[20px] bg-muted border border-border/10">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-[18px] bg-muted border border-border/10">
         {!imageLoaded && (
           <div className="absolute inset-0 bg-muted animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
         )}
@@ -57,7 +57,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
         />
         
         {/* Category Badge overlay (top-left) */}
-        <span className="absolute left-3.5 top-3.5 rounded-full bg-white/90 dark:bg-[#070c0a]/90 backdrop-blur-md px-3 py-1 text-[9px] font-black text-primary dark:text-[#34d399] border border-white/15 uppercase tracking-wider shadow-sm select-none">
+        <span className="absolute left-3 top-3 rounded-full bg-white/90 backdrop-blur-md px-2.5 py-1 text-[9px] font-black text-primary border border-white/10 uppercase tracking-wider shadow-sm select-none">
           {listing.category}
         </span>
 
@@ -68,7 +68,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             e.stopPropagation();
             setIsFavorite(!isFavorite);
           }}
-          className="absolute right-3.5 top-3.5 h-8.5 w-8.5 rounded-full bg-white/90 dark:bg-[#070c0a]/90 backdrop-blur-md flex items-center justify-center border border-white/15 text-muted-foreground hover:text-rose-500 transition-all duration-300 shadow-sm active:scale-75 z-10"
+          className="absolute right-3 top-3 h-8 w-8 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center border border-white/10 text-muted-foreground hover:text-rose-500 transition shadow-sm active:scale-75 z-10"
         >
           <Heart
             className={`h-4 w-4 transition-all duration-300 ${
@@ -79,7 +79,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
 
         {/* Rating Badge overlay (bottom-left) */}
         {listing.ratings && listing.ratings.count > 0 && (
-          <div className="absolute left-3.5 bottom-3.5 flex items-center gap-1.5 rounded-full bg-black/60 dark:bg-black/75 backdrop-blur-md px-2.5 py-1 text-[10px] font-extrabold text-amber-400 border border-white/10 shadow-sm">
+          <div className="absolute left-3 bottom-3 flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md px-2 py-0.5 text-[9px] font-black text-amber-400 border border-white/10 shadow-sm">
             <Star className="h-3 w-3 fill-amber-400 text-amber-400 shrink-0" />
             <span>{listing.ratings.average.toFixed(1)}</span>
             <span className="text-white/40 font-normal">({listing.ratings.count})</span>
@@ -91,47 +91,46 @@ export default function ListingCard({ listing }: ListingCardProps) {
       <div className="flex flex-col flex-grow justify-between gap-2 px-1 pb-1">
         <div>
           <div className="flex items-start justify-between gap-2">
-            <h3 className="font-extrabold text-foreground text-[15px] leading-tight line-clamp-1 group-hover:text-primary dark:group-hover:text-[#34d399] transition-colors duration-300">
+            <h3 className="font-extrabold text-foreground text-sm leading-tight line-clamp-1 group-hover:text-primary transition-colors duration-300">
               {listing.title}
             </h3>
           </div>
 
-          <div className="flex items-center gap-1.5 mt-1.5 text-xs text-muted-foreground">
-            <MapPin className="h-3.5 w-3.5 text-primary dark:text-[#34d399] shrink-0" />
-            <span className="truncate max-w-[130px] font-medium">{listing.address.split(',')[0]}</span>
+          <div className="flex items-center gap-1 mt-1 text-[11px] text-muted-foreground">
+            <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span className="truncate max-w-[130px] font-semibold">{listing.address.split(',')[0]}</span>
             {distanceStr && (
               <>
                 <span className="text-[10px] text-muted-foreground/40 font-black">•</span>
-                <span className="font-bold text-[9px] text-primary dark:text-[#34d399] bg-primary/8 dark:bg-[#34d399]/10 px-2 py-0.5 rounded-full border border-primary/10 dark:border-[#34d399]/15">{distanceStr}</span>
+                <span className="font-black text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-md border border-primary/10">{distanceStr}</span>
               </>
             )}
           </div>
         </div>
 
         {/* Card Footer: Host details + Pricing/Rent FAB */}
-        <div className="flex items-center justify-between border-t border-border/15 pt-3 mt-1.5">
+        <div className="flex items-center justify-between border-t border-border/15 pt-2.5 mt-1">
           <div className="flex items-center gap-2">
-            {/* Host info and verification status */}
             <div className="flex flex-col">
               <span className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold leading-none">Host</span>
               <div className="flex items-center gap-1 mt-0.5">
                 <span className="text-xs font-extrabold text-foreground truncate max-w-[90px]">
                   {listing.owner?.name?.split(' ')[0] || 'Local Owner'}
                 </span>
-                <ShieldCheck className="h-3.5 w-3.5 text-accent shrink-0 fill-accent/5" />
+                <ShieldCheck className="h-3.5 w-3.5 text-primary shrink-0 fill-primary/5" />
               </div>
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <div className="text-right">
-              <span className="text-base font-black text-primary dark:text-[#34d399]">{formatCurrency(listing.pricePerDay)}</span>
+              <span className="text-sm font-black text-primary">{formatCurrency(listing.pricePerDay)}</span>
               <span className="text-[10px] font-bold text-muted-foreground">/day</span>
             </div>
             
             {/* Rent action element */}
-            <div className="h-8.5 w-8.5 rounded-full bg-primary dark:bg-[#34d399] hover:bg-[#005c3e] dark:hover:bg-[#34d399]/90 text-white dark:text-[#002c1b] flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 active:scale-90 group-hover:shadow-[0_4px_12px_rgba(0,108,73,0.15)] shrink-0">
-              <ArrowUpRight className="h-4.5 w-4.5 stroke-[2.5px]" />
+            <div className="h-8 w-8 rounded-full bg-primary text-white flex items-center justify-center shadow-md transition duration-300 group-hover:scale-105 active:scale-95">
+              <ArrowUpRight className="h-4 w-4 stroke-[2.5px]" />
             </div>
           </div>
         </div>

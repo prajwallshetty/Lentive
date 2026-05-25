@@ -53,11 +53,11 @@ export default function MyListings({ onEditListing, onAddListing }: MyListingsPr
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {myListings.map((item) => (
-            <div key={item._id} className="rounded-xl border border-border/30 p-3.5 bg-muted/20 hover:border-primary/35 hover:bg-muted/40 flex flex-col justify-between gap-3.5 transition-all duration-300 group shadow-sm">
+            <div key={item._id} className="rounded-2xl border border-border/80 p-4 bg-white hover:border-primary/25 hover:shadow-md flex flex-col justify-between gap-4 transition-all duration-300 group shadow-xs">
               <div className="flex gap-3">
-                <div className="relative h-16 w-16 rounded-lg overflow-hidden border border-border/20 shrink-0 bg-muted">
+                <div className="relative h-16 w-16 rounded-xl overflow-hidden border border-border/10 shrink-0 bg-muted">
                   <img 
                     src={item.images?.[0] || 'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?auto=format&fit=crop&w=80&h=80&q=80'} 
                     alt="" 
@@ -66,34 +66,34 @@ export default function MyListings({ onEditListing, onAddListing }: MyListingsPr
                 </div>
                 <div className="flex flex-col justify-between overflow-hidden">
                   <div>
-                    <p className="text-xs font-bold text-foreground truncate group-hover:text-primary transition-colors duration-200">{item.title}</p>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">{item.category}</p>
+                    <p className="text-xs font-extrabold text-foreground truncate group-hover:text-primary transition-colors duration-200">{item.title}</p>
+                    <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-bold mt-0.5">{item.category}</p>
                   </div>
-                  <p className="text-sm font-extrabold text-primary mt-1">
+                  <p className="text-sm font-black text-primary mt-1">
                     {formatCurrency(item.pricePerDay)}<span className="text-[10px] text-muted-foreground font-bold">/day</span>
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-center justify-between border-t border-border/20 pt-2.5 mt-1 text-[10px] font-bold">
-                <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase border ${
+              <div className="flex items-center justify-between border-t border-border/10 pt-3 mt-1 text-[10px] font-bold">
+                <span className={`px-2 py-0.5 rounded-full text-[9px] uppercase font-black border ${
                   item.isAvailable 
-                    ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/15' 
-                    : 'bg-rose-500/10 text-rose-600 border-rose-500/15'
+                    ? 'bg-emerald-50 text-emerald-600 border-emerald-25' 
+                    : 'bg-rose-50 text-rose-600 border-rose-25'
                 }`}>
                   {item.isAvailable ? 'Listed Available' : 'Inactive / Booked'}
                 </span>
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => onEditListing(item._id)}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-card hover:bg-muted text-muted-foreground hover:text-foreground border border-border/40 rounded-lg transition-all duration-200 cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-muted/65 hover:bg-muted text-muted-foreground hover:text-foreground border border-border/60 rounded-xl transition-all duration-200 cursor-pointer text-[10px]"
                   >
                     <Pencil className="h-3 w-3 text-primary" />
                     Edit
                   </button>
                   <button
                     onClick={() => handleDeleteListing(item._id)}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 hover:border-rose-500/30 border border-rose-500/15 rounded-lg transition-all duration-200 cursor-pointer"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:border-rose-300 border border-rose-200 rounded-xl transition-all duration-200 cursor-pointer text-[10px]"
                   >
                     <Trash2 className="h-3 w-3" />
                     Delete

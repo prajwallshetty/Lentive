@@ -5,27 +5,27 @@
 
 
 :root {
-  --background: #f0f4f2;
-  --foreground: #0f1412;
+  --background: #f6faf8;
+  --foreground: #091a13;
   --card: #ffffff;
-  --card-foreground: #0f1412;
+  --card-foreground: #091a13;
   --popover: #ffffff;
-  --popover-foreground: #0f1412;
-  --primary: #006c49;
+  --popover-foreground: #091a13;
+  --primary: #059669; /* Emerald 600 */
   --primary-foreground: #ffffff;
-  --secondary: #1d4d3c;
+  --secondary: #064e3b; /* Emerald 900 */
   --secondary-foreground: #ffffff;
-  --muted: #e6ede9;
-  --muted-foreground: #475a51;
-  --accent: #10b981;
-  --accent-foreground: #002113;
-  --destructive: #ba1a1a;
+  --muted: #edf4f0;
+  --muted-foreground: #4b6b5d;
+  --accent: #10b981; /* Emerald 500 */
+  --accent-foreground: #022c22;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #c8d6cf;
-  --input: #e2ebe6;
-  --ring: #006c49;
-  --radius: 1.5rem;
-  --accent-glow: rgba(16, 185, 129, 0.15);
+  --border: #e0eae4;
+  --input: #ebf2ee;
+  --ring: #059669;
+  --radius: 1.25rem;
+  --accent-glow: rgba(16, 185, 129, 0.12);
 }
 
 @theme {

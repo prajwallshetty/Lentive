@@ -2,6 +2,7 @@ const express = require('express');
 const {
   register,
   login,
+  googleLogin,
   getMe,
   verifyEmail,
   resendVerification,
@@ -24,6 +25,7 @@ const router = express.Router();
 
 router.post('/register', validateRegister, register);
 router.post('/login', validateLogin, login);
+router.post('/google', googleLogin);
 router.get('/me', protect, getMe);
 router.put('/verify-document', protect, uploadDocument);
 router.put('/verify-driving-license', protect, uploadDrivingLicense);
@@ -33,6 +35,7 @@ router.get('/verifyemail/:verifytoken', verifyEmail);
 router.post('/resendverification', protect, resendVerification);
 router.post('/forgotpassword', validateForgotPassword, forgotPassword);
 router.put('/resetpassword/:resettoken', validateResetPassword, resetPassword);
+
 
 module.exports = router;
 
