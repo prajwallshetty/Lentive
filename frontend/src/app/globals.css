@@ -181,7 +181,7 @@ body {
 
 /* Mobile Floating Listings Carousel for Map */
 .mobile-map-carousel {
-  bottom: calc(136px + env(safe-area-inset-bottom));
+  bottom: calc(106px + env(safe-area-inset-bottom));
 }
 
 /* Glass card treatment */
