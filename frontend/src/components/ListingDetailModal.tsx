@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, ShieldCheck, MapPin, Star, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { formatCurrency } from '../lib/utils';
+import { X, Calendar, ShieldCheck, MapPin, Star, AlertCircle, CheckCircle2, Car, Bike, Footprints } from 'lucide-react';
+import { formatCurrency, predictTravelTimes } from '../lib/utils';
+import { useListingStore } from '../store/listingStore';
 import { api } from '../lib/api';
 import { useBookingStore } from '../store/bookingStore';
 import { usePaymentStore } from '../store/paymentStore';
@@ -31,6 +32,16 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
   const [showPaymentSimulator, setShowPaymentSimulator] = useState(false);
   const [pendingBooking, setPendingBooking] = useState<any>(null);
   const [pendingOrder, setPendingOrder] = useState<any>(null);
+
+  const { filters } = useListingStore();
+  const travel = listing.location && listing.location.coordinates
+    ? predictTravelTimes(
+        filters.coordinates[1],
+        filters.coordinates[0],
+        listing.location.coordinates[1],
+        listing.location.coordinates[0]
+      )
+    : null;
 
   const createBooking = useBookingStore((state) => state.createBooking);
   const createOrder = usePaymentStore((state) => state.createOrder);
@@ -265,6 +276,39 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
                 className="h-full w-full object-cover"
               />
             </div>
+
+            {/* Travel Transit Matrix */}
+            {travel && (
+              <div className="rounded-2xl border border-border/45 p-4 bg-muted/20 dark:bg-black/10">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground mb-3 flex justify-between">
+                  <span>Transit Duration Estimates</span>
+                  <span className="text-primary font-black">{travel.distance} away</span>
+                </h4>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="flex flex-col items-center gap-1.5 p-2 bg-white dark:bg-neutral-900 rounded-xl border border-border/45 shadow-xs">
+                    <div className="p-2 rounded-full bg-blue-500/10 text-blue-500">
+                      <Car className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wide">Drive / Cab</span>
+                    <span className="text-sm font-black text-foreground">{travel.driveMins} mins</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 p-2 bg-white dark:bg-neutral-900 rounded-xl border border-border/45 shadow-xs">
+                    <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-500">
+                      <Bike className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wide">Bicycle</span>
+                    <span className="text-sm font-black text-foreground">{travel.bikeMins} mins</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-1.5 p-2 bg-white dark:bg-neutral-900 rounded-xl border border-border/45 shadow-xs">
+                    <div className="p-2 rounded-full bg-neutral-500/10 text-neutral-500">
+                      <Footprints className="h-5 w-5" />
+                    </div>
+                    <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wide">Walking</span>
+                    <span className="text-sm font-black text-foreground">{travel.walkMins} mins</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Description */}
             <div>

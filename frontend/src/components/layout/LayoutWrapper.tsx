@@ -21,6 +21,18 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
     return <>{children}</>;
   }
 
+  if (pathname === '/map') {
+    return (
+      <div className="h-screen w-screen flex flex-col bg-background text-foreground transition-all duration-300 relative overflow-hidden">
+        <Navbar />
+        <main className="flex-grow w-full h-full relative z-10">
+          {children}
+        </main>
+        <MobileNav />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground transition-all duration-300 relative overflow-hidden">
       {/* Top sticky/floating navbar */}

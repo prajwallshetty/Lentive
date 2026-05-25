@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Star, MapPin, Heart } from 'lucide-react';
-import { calculateDistance, formatCurrency } from '../lib/utils';
+import { predictTravelTimes, formatCurrency } from '../lib/utils';
 import { MockLocation } from '../lib/constants';
 
 interface ListingCardProps {
@@ -15,15 +15,15 @@ export default function ListingCard({ listing, currentLocation, onSelect }: List
   const [isFavorite, setIsFavorite] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Calculate distance from simulated user location to listing coordinates
-  const distanceStr = listing.location && listing.location.coordinates
-    ? calculateDistance(
+  // Calculate travel predictions from simulated user location to listing coordinates
+  const travel = listing.location && listing.location.coordinates
+    ? predictTravelTimes(
         currentLocation.coordinates[1],
         currentLocation.coordinates[0],
         listing.location.coordinates[1],
         listing.location.coordinates[0]
       )
-    : '';
+    : null;
 
   // Get first image or fallback
   const displayImage = listing.images && listing.images.length > 0
@@ -88,10 +88,12 @@ export default function ListingCard({ listing, currentLocation, onSelect }: List
           <div className="flex items-center gap-1.5 mt-1 text-[11px] text-muted-foreground">
             <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
             <span className="truncate max-w-[130px]">{listing.address.split(',')[0]}</span>
-            {distanceStr && (
+            {travel && (
               <>
                 <span className="text-[10px] text-muted-foreground/50">•</span>
-                <span className="font-extrabold text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-md border border-primary/15">{distanceStr}</span>
+                <span className="font-extrabold text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-md border border-primary/15">{travel.distance}</span>
+                <span className="text-[10px] text-muted-foreground/50">•</span>
+                <span className="text-[9px] font-bold text-muted-foreground">🚗 {travel.driveMins}m</span>
               </>
             )}
           </div>

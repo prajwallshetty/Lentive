@@ -7,11 +7,11 @@ import { useAuth } from '../../../context/AuthContext';
 import { useBookingStore } from '../../../store/bookingStore';
 import { usePaymentStore } from '../../../store/paymentStore';
 import { useToast } from '../../../context/ToastContext';
-import { formatCurrency, calculateDistance } from '../../../lib/utils';
+import { formatCurrency, predictTravelTimes } from '../../../lib/utils';
 import { useListingStore } from '../../../store/listingStore';
 import { MOCK_LOCATIONS } from '../../../lib/constants';
 import { ListingDetailSkeleton } from '../../../components/ui/Skeletons';
-import { Calendar, ShieldCheck, MapPin, Star, AlertCircle, CheckCircle2, MessageSquare, ArrowLeft, ArrowRight, Shield } from 'lucide-react';
+import { Calendar, ShieldCheck, MapPin, Star, AlertCircle, CheckCircle2, MessageSquare, ArrowLeft, ArrowRight, Shield, Car, Bike, Footprints } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ListingDetailPage() {
@@ -272,19 +272,19 @@ export default function ListingDetailPage() {
     );
   }
 
-  // Calculate distance from simulated coordinates
+  // Calculate travel predictions from simulated coordinates
   const currentLocation = MOCK_LOCATIONS.find(
     (loc) => loc.coordinates[0] === filters.coordinates[0] && loc.coordinates[1] === filters.coordinates[1]
   ) || MOCK_LOCATIONS[0];
 
-  const distanceStr = listing.location?.coordinates
-    ? calculateDistance(
+  const travel = listing.location?.coordinates
+    ? predictTravelTimes(
         currentLocation.coordinates[1],
         currentLocation.coordinates[0],
         listing.location.coordinates[1],
         listing.location.coordinates[0]
       )
-    : '';
+    : null;
 
   const displayImage = listing.images && listing.images.length > 0
     ? listing.images[0]
@@ -321,6 +321,39 @@ export default function ListingDetailPage() {
             </span>
           </div>
 
+          {/* Travel Transit Matrix */}
+          {travel && (
+            <div className="rounded-2xl border border-border/45 p-4 bg-muted/20 dark:bg-black/10">
+              <h4 className="font-bold text-xs uppercase tracking-wider text-muted-foreground mb-3 flex justify-between">
+                <span>Transit Duration Estimates</span>
+                <span className="text-primary font-black">{travel.distance} away</span>
+              </h4>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="flex flex-col items-center gap-1.5 p-2 bg-white dark:bg-neutral-900 rounded-xl border border-border/45 shadow-xs">
+                  <div className="p-2 rounded-full bg-blue-500/10 text-blue-500">
+                    <Car className="h-5 w-5" />
+                  </div>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wide">Drive / Cab</span>
+                  <span className="text-sm font-black text-foreground">{travel.driveMins} mins</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5 p-2 bg-white dark:bg-neutral-900 rounded-xl border border-border/45 shadow-xs">
+                  <div className="p-2 rounded-full bg-emerald-500/10 text-emerald-500">
+                    <Bike className="h-5 w-5" />
+                  </div>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wide">Bicycle</span>
+                  <span className="text-sm font-black text-foreground">{travel.bikeMins} mins</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5 p-2 bg-white dark:bg-neutral-900 rounded-xl border border-border/45 shadow-xs">
+                  <div className="p-2 rounded-full bg-neutral-500/10 text-neutral-500">
+                    <Footprints className="h-5 w-5" />
+                  </div>
+                  <span className="text-[10px] font-black text-muted-foreground uppercase tracking-wide">Walking</span>
+                  <span className="text-sm font-black text-foreground">{travel.walkMins} mins</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Heading Section */}
           <div>
             <h1 className="text-3xl font-black tracking-tight text-foreground leading-tight">{listing.title}</h1>
@@ -330,9 +363,9 @@ export default function ListingDetailPage() {
                 <MapPin className="h-3.5 w-3.5 text-primary" />
                 <span>{listing.address}</span>
               </div>
-              {distanceStr && (
+              {travel && (
                 <span className="font-extrabold text-[10px] text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/15">
-                  {distanceStr} away
+                  {travel.distance} away
                 </span>
               )}
               {listing.ratings?.count > 0 && (

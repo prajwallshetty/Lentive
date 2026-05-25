@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Star, MapPin, Heart, ShieldCheck, ArrowUpRight } from 'lucide-react';
-import { calculateDistance, formatCurrency } from '../../lib/utils';
+import { predictTravelTimes, formatCurrency } from '../../lib/utils';
 import { useListingStore } from '../../store/listingStore';
 import { MOCK_LOCATIONS } from '../../lib/constants';
 
@@ -21,15 +21,15 @@ export default function ListingCard({ listing }: ListingCardProps) {
     (loc) => loc.coordinates[0] === filters.coordinates[0] && loc.coordinates[1] === filters.coordinates[1]
   ) || MOCK_LOCATIONS[0];
 
-  // Calculate distance from simulated user location to listing coordinates
-  const distanceStr = listing.location && listing.location.coordinates
-    ? calculateDistance(
+  // Calculate travel predictions from simulated user location to listing coordinates
+  const travel = listing.location && listing.location.coordinates
+    ? predictTravelTimes(
         currentLocation.coordinates[1],
         currentLocation.coordinates[0],
         listing.location.coordinates[1],
         listing.location.coordinates[0]
       )
-    : '';
+    : null;
 
   // Get first image or fallback
   const displayImage = listing.images && listing.images.length > 0
@@ -99,10 +99,12 @@ export default function ListingCard({ listing }: ListingCardProps) {
           <div className="flex items-center gap-1 mt-1 text-[11px] text-muted-foreground">
             <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
             <span className="truncate max-w-[130px] font-semibold">{listing.address.split(',')[0]}</span>
-            {distanceStr && (
+            {travel && (
               <>
                 <span className="text-[10px] text-muted-foreground/40 font-black">•</span>
-                <span className="font-black text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-md border border-primary/10">{distanceStr}</span>
+                <span className="font-black text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-md border border-primary/10">{travel.distance}</span>
+                <span className="text-[10px] text-muted-foreground/40 font-black">•</span>
+                <span className="text-[9px] font-bold text-muted-foreground">🚗 {travel.driveMins}m</span>
               </>
             )}
           </div>

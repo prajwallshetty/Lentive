@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { useListingStore } from '../../store/listingStore';
-import { LogOut, User, Settings, CreditCard, ClipboardList, MessageSquare, Menu, X, Search, Bell, Sparkles, Plus, ShieldCheck } from 'lucide-react';
+import { LogOut, User, Settings, CreditCard, ClipboardList, MessageSquare, Menu, X, Search, Bell, Sparkles, Plus, ShieldCheck, Map } from 'lucide-react';
 import { api } from '../../lib/api';
 
 export default function Navbar() {
@@ -118,6 +118,15 @@ export default function Navbar() {
 
           {/* Actions & Profiles */}
           <div className="flex items-center gap-2.5">
+            {/* Map Explorer Link */}
+            <Link
+              href="/map"
+              className="text-foreground hover:bg-muted p-2 rounded-full transition-all active:scale-90 cursor-pointer flex items-center justify-center border border-border/20 bg-white"
+              aria-label="Map View"
+            >
+              <Map className="h-4.5 w-4.5 text-muted-foreground hover:text-primary transition-colors" />
+            </Link>
+
             {/* Messages Link */}
             {user && (
               <Link
@@ -328,6 +337,14 @@ export default function Navbar() {
                 >
                   <Search className="h-4.5 w-4.5" />
                   Advanced Search
+                </Link>
+                <Link
+                  href="/map"
+                  onClick={() => setShowMobileDrawer(false)}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-extrabold hover:bg-muted ${pathname === '/map' ? 'text-primary bg-primary/5' : 'text-foreground'}`}
+                >
+                  <Map className="h-4.5 w-4.5" />
+                  Interactive Map
                 </Link>
 
                 {user && (

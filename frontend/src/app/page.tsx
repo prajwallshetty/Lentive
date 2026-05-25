@@ -7,7 +7,7 @@ import { MOCK_LOCATIONS } from '../lib/constants';
 import ListingCard from '../components/listing/ListingCard';
 import CategoryBar from '../components/CategoryBar';
 import { ListingGridSkeleton } from '../components/ui/Skeletons';
-import { Search, MapPin, Shield, Compass, Sparkles, Mail, Plus, Handshake, ArrowRight } from 'lucide-react';
+import { Search, MapPin, Shield, Compass, Sparkles, Mail, Plus, Handshake, ArrowRight, Map } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -232,6 +232,17 @@ export default function Home() {
           Post an Item
         </span>
       </Link>
+
+      {/* Floating Map View Button */}
+      <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-40">
+        <Link
+          href="/map"
+          className="flex items-center gap-2 bg-foreground text-background dark:bg-foreground dark:text-background px-5 py-3 rounded-full shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 font-extrabold text-xs tracking-wider uppercase border border-border/10 cursor-pointer"
+        >
+          <Map className="h-4.5 w-4.5" />
+          <span>Show Map</span>
+        </Link>
+      </div>
 
     </div>
   );
