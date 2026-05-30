@@ -18,15 +18,22 @@ export default function SearchPage() {
   }, []);
 
   const handleLocationChange = (locIndex: number) => {
+    if (locIndex === -1) {
+      setFilters({ coordinates: null });
+      return;
+    }
     const selectedLoc = MOCK_LOCATIONS[locIndex];
     if (selectedLoc) {
       setFilters({ coordinates: selectedLoc.coordinates });
     }
   };
 
-  const activeLocation = MOCK_LOCATIONS.find(
-    (loc) => loc.coordinates[0] === filters.coordinates[0] && loc.coordinates[1] === filters.coordinates[1]
-  ) || MOCK_LOCATIONS[0];
+  const storeCoords = filters.coordinates;
+  const activeLocation = storeCoords
+    ? (MOCK_LOCATIONS.find(
+        (loc) => loc.coordinates[0] === storeCoords[0] && loc.coordinates[1] === storeCoords[1]
+      ) || MOCK_LOCATIONS[0])
+    : null;
 
   return (
     <div className="flex flex-col gap-6 w-full mt-20 pb-20 md:pb-6">
@@ -85,10 +92,11 @@ export default function SearchPage() {
                 Search Location
               </label>
               <select
-                value={MOCK_LOCATIONS.findIndex(l => l.coordinates[0] === filters.coordinates[0] && l.coordinates[1] === filters.coordinates[1])}
+                value={storeCoords ? MOCK_LOCATIONS.findIndex(l => l.coordinates[0] === storeCoords[0] && l.coordinates[1] === storeCoords[1]) : -1}
                 onChange={(e) => handleLocationChange(parseInt(e.target.value))}
                 className="w-full px-3 py-2.5 text-xs bg-muted/40 dark:bg-white/5 border border-border/40 dark:border-white/5 rounded-xl text-foreground font-semibold focus:outline-none focus:border-primary/50 cursor-pointer"
               >
+                <option value="-1">Worldwide (All)</option>
                 {MOCK_LOCATIONS.map((loc, idx) => (
                   <option key={idx} value={idx}>{loc.name}</option>
                 ))}
@@ -167,7 +175,13 @@ export default function SearchPage() {
           <h2 className="text-xl font-black text-foreground tracking-tight">Search Results</h2>
           <p className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
             <MapPin className="h-3 w-3 text-primary" />
-            Showing listings near <span className="font-extrabold text-foreground">{activeLocation.name.split(' ')[0]}</span> within <span className="font-extrabold text-foreground">{filters.distance}km</span>
+            {activeLocation ? (
+              <>
+                Showing listings near <span className="font-extrabold text-foreground">{activeLocation.name.split(' ')[0]}</span> within <span className="font-extrabold text-foreground">{filters.distance}km</span>
+              </>
+            ) : (
+              <span>Showing all listings worldwide</span>
+            )}
           </p>
         </div>
         {!loading && (

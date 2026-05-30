@@ -32,9 +32,12 @@ function DashboardContent() {
   }
 
   // Find active location object in constants based on current store coordinates
-  const currentLocation = MOCK_LOCATIONS.find(
-    (loc) => loc.coordinates[0] === filters.coordinates[0] && loc.coordinates[1] === filters.coordinates[1]
-  ) || MOCK_LOCATIONS[0];
+  const storeCoords = filters.coordinates;
+  const currentLocation = storeCoords
+    ? (MOCK_LOCATIONS.find(
+        (loc) => loc.coordinates[0] === storeCoords[0] && loc.coordinates[1] === storeCoords[1]
+      ) || MOCK_LOCATIONS[0])
+    : MOCK_LOCATIONS[0];
 
   return (
     <div className="w-full mt-16 pb-12">

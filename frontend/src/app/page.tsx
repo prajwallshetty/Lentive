@@ -33,9 +33,12 @@ export default function Home() {
     }
   };
 
-  const currentLocation = MOCK_LOCATIONS.find(
-    (loc) => loc.coordinates[0] === filters.coordinates[0] && loc.coordinates[1] === filters.coordinates[1]
-  ) || MOCK_LOCATIONS[0];
+  const storeCoords = filters.coordinates;
+  const currentLocation = storeCoords
+    ? (MOCK_LOCATIONS.find(
+        (loc) => loc.coordinates[0] === storeCoords[0] && loc.coordinates[1] === storeCoords[1]
+      ) || MOCK_LOCATIONS[0])
+    : null;
 
   return (
     <div className="flex flex-col gap-8 w-full mt-16">
@@ -113,7 +116,7 @@ export default function Home() {
           {/* Location Chip */}
           <div className="flex items-center gap-1.5 px-4 py-2.5 bg-muted rounded-xl md:rounded-full border border-border/20 text-xs font-bold text-foreground shrink-0 shadow-xs hover:bg-muted/80 transition cursor-pointer select-none">
             <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-            <span>{currentLocation.name.split(' ')[0]}</span>
+            <span>{currentLocation ? currentLocation.name.split(' ')[0] : 'All'}</span>
           </div>
 
           {/* Search Trigger CTA */}
@@ -147,7 +150,11 @@ export default function Home() {
         <div className="flex items-center justify-between mb-6 text-foreground">
           <div>
             <h3 className="text-xl font-extrabold tracking-tight text-foreground">Explore Nearby Rentals</h3>
-            <p className="text-[10px] text-muted-foreground font-semibold mt-1">Discover items available for pick up today near {currentLocation.name.split(',')[0]}</p>
+            <p className="text-[10px] text-muted-foreground font-semibold mt-1">
+              {currentLocation 
+                ? `Discover items available for pick up today near ${currentLocation.name.split(',')[0]}` 
+                : 'Discover items available for pick up today worldwide'}
+            </p>
           </div>
           {!loading && (
             <span className="text-xs font-bold text-muted-foreground bg-muted border border-border/30 px-3 py-1.5 rounded-full select-none shrink-0">

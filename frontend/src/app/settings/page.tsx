@@ -27,25 +27,31 @@ export default function SettingsPage() {
   const { showToast } = useToast();
   const { filters, setFilters } = useListingStore();
 
-  const [lng, setLng] = useState(filters.coordinates[0]);
-  const [lat, setLat] = useState(filters.coordinates[1]);
+  const [lng, setLng] = useState(filters.coordinates ? filters.coordinates[0] : 77.6412);
+  const [lat, setLat] = useState(filters.coordinates ? filters.coordinates[1] : 12.9719);
   const [distance, setDistance] = useState(filters.distance);
   const [selectedPreset, setSelectedPreset] = useState('');
 
   // Sync state with store on load
   useEffect(() => {
-    setLng(filters.coordinates[0]);
-    setLat(filters.coordinates[1]);
-    setDistance(filters.distance);
-    
-    // Check if current coordinates match a preset
-    const preset = LOCATION_PRESETS.find(
-      p => Math.abs(p.coordinates[0] - filters.coordinates[0]) < 0.0001 &&
-           Math.abs(p.coordinates[1] - filters.coordinates[1]) < 0.0001
-    );
-    if (preset) {
-      setSelectedPreset(preset.name);
+    if (filters.coordinates) {
+      setLng(filters.coordinates[0]);
+      setLat(filters.coordinates[1]);
+      
+      // Check if current coordinates match a preset
+      const preset = LOCATION_PRESETS.find(
+        p => Math.abs(p.coordinates[0] - (filters.coordinates ? filters.coordinates[0] : 0)) < 0.0001 &&
+             Math.abs(p.coordinates[1] - (filters.coordinates ? filters.coordinates[1] : 0)) < 0.0001
+      );
+      if (preset) {
+        setSelectedPreset(preset.name);
+      } else {
+        setSelectedPreset('');
+      }
+    } else {
+      setSelectedPreset('');
     }
+    setDistance(filters.distance);
   }, [filters]);
 
   const handleApplyLocation = (e: React.FormEvent) => {

@@ -12,6 +12,8 @@ import 'leaflet/dist/leaflet.css';
 
 interface MapComponentProps {
   center: [number, number]; // [lat, lng] for Leaflet
+  zoom?: number;
+  showRadius?: boolean;
   listings: any[];
   searchRadius?: number; // in km
   selectedListingId?: string | null;
@@ -30,6 +32,8 @@ function ChangeMapView({ center, zoom }: { center: [number, number]; zoom: numbe
 
 export default function MapComponent({
   center,
+  zoom = 13,
+  showRadius = true,
   listings,
   searchRadius = 10,
   selectedListingId = null,
@@ -78,12 +82,12 @@ export default function MapComponent({
     <div className="w-full h-full relative">
       <MapContainer
         center={center}
-        zoom={13}
+        zoom={zoom}
         style={{ width: '100%', height: '100%', zIndex: 1 }}
         scrollWheelZoom={true}
         zoomControl={false} // Custom zoom controls or placed on bottom right to prevent overlaying
       >
-        <ChangeMapView center={center} zoom={13} />
+        <ChangeMapView center={center} zoom={zoom} />
         
         {/* Map Tiles: Clean, modern light/dark mode tiles */}
         <TileLayer
@@ -103,17 +107,19 @@ export default function MapComponent({
         )}
 
         {/* Search Radius Circular Helper Overlay */}
-        <Circle
-          center={center}
-          radius={searchRadius * 1000} // Convert km to meters
-          pathOptions={{
-            color: 'var(--primary)',
-            fillColor: 'var(--primary)',
-            fillOpacity: 0.04,
-            weight: 1.5,
-            dashArray: '5, 10',
-          }}
-        />
+        {showRadius && (
+          <Circle
+            center={center}
+            radius={searchRadius * 1000} // Convert km to meters
+            pathOptions={{
+              color: 'var(--primary)',
+              fillColor: 'var(--primary)',
+              fillOpacity: 0.04,
+              weight: 1.5,
+              dashArray: '5, 10',
+            }}
+          />
+        )}
 
         {/* Nearby Listing Markers */}
         {listings.map((item) => {

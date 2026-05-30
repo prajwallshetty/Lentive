@@ -34,7 +34,7 @@ export default function ListingDetailModal({ listing, user, onClose, onBookingSu
   const [pendingOrder, setPendingOrder] = useState<any>(null);
 
   const { filters } = useListingStore();
-  const travel = listing.location && listing.location.coordinates
+  const travel = filters.coordinates && listing.location && listing.location.coordinates
     ? predictTravelTimes(
         filters.coordinates[1],
         filters.coordinates[0],

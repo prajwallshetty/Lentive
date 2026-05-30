@@ -17,12 +17,15 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const { filters } = useListingStore();
 
   // Find active location object in constants based on current store coordinates
-  const currentLocation = MOCK_LOCATIONS.find(
-    (loc) => loc.coordinates[0] === filters.coordinates[0] && loc.coordinates[1] === filters.coordinates[1]
-  ) || MOCK_LOCATIONS[0];
+  const storeCoords = filters.coordinates;
+  const currentLocation = storeCoords
+    ? (MOCK_LOCATIONS.find(
+        (loc) => loc.coordinates[0] === storeCoords[0] && loc.coordinates[1] === storeCoords[1]
+      ) || MOCK_LOCATIONS[0])
+    : null;
 
   // Calculate travel predictions from simulated user location to listing coordinates
-  const travel = listing.location && listing.location.coordinates
+  const travel = currentLocation && listing.location && listing.location.coordinates
     ? predictTravelTimes(
         currentLocation.coordinates[1],
         currentLocation.coordinates[0],
@@ -104,7 +107,10 @@ export default function ListingCard({ listing }: ListingCardProps) {
                 <span className="text-[10px] text-muted-foreground/40 font-black">•</span>
                 <span className="font-black text-[9px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-md border border-primary/10">{travel.distance}</span>
                 <span className="text-[10px] text-muted-foreground/40 font-black">•</span>
-                <span className="text-[9px] font-bold text-muted-foreground">🚗 {travel.driveMins}m</span>
+                <span className="text-[9px] font-bold text-muted-foreground flex items-center gap-1">
+                  <span className="text-emerald-600">🚶 {travel.walkMins}m</span>
+                  <span>🚗 {travel.driveMins}m</span>
+                </span>
               </>
             )}
           </div>

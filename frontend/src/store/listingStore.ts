@@ -6,7 +6,7 @@ interface ListingFilters {
   category: string;
   query: string;
   distance: number; // in km
-  coordinates: [number, number]; // [lng, lat]
+  coordinates: [number, number] | null; // [lng, lat]
   minPrice: number;
   maxPrice: number;
 }
@@ -31,7 +31,7 @@ const defaultFilters: ListingFilters = {
   category: 'All',
   query: '',
   distance: 10, // 10 km default radius
-  coordinates: [77.6412, 12.9719], // Default Indiranagar, Bengaluru [lng, lat]
+  coordinates: null, // Default null for worldwide listings
   minPrice: 0,
   maxPrice: 50000,
 };
@@ -79,15 +79,20 @@ export const useListingStore = create<ListingState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const { filters } = get();
-      const res = await api.listings.getAll({
-        lng: filters.coordinates[0],
-        lat: filters.coordinates[1],
-        distance: filters.distance,
+      const params: any = {
         category: filters.category,
         query: filters.query,
         minPrice: filters.minPrice > 0 ? filters.minPrice : undefined,
         maxPrice: filters.maxPrice < 50000 ? filters.maxPrice : undefined,
-      });
+      };
+
+      if (filters.coordinates && Array.isArray(filters.coordinates) && filters.coordinates.length === 2) {
+        params.lng = filters.coordinates[0];
+        params.lat = filters.coordinates[1];
+        params.distance = filters.distance;
+      }
+
+      const res = await api.listings.getAll(params);
       if (res.success) {
         set({ listings: res.listings, loading: false });
       } else {

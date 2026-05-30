@@ -273,11 +273,14 @@ export default function ListingDetailPage() {
   }
 
   // Calculate travel predictions from simulated coordinates
-  const currentLocation = MOCK_LOCATIONS.find(
-    (loc) => loc.coordinates[0] === filters.coordinates[0] && loc.coordinates[1] === filters.coordinates[1]
-  ) || MOCK_LOCATIONS[0];
+  const storeCoords = filters.coordinates;
+  const currentLocation = storeCoords
+    ? (MOCK_LOCATIONS.find(
+        (loc) => loc.coordinates[0] === storeCoords[0] && loc.coordinates[1] === storeCoords[1]
+      ) || MOCK_LOCATIONS[0])
+    : null;
 
-  const travel = listing.location?.coordinates
+  const travel = currentLocation && listing.location?.coordinates
     ? predictTravelTimes(
         currentLocation.coordinates[1],
         currentLocation.coordinates[0],

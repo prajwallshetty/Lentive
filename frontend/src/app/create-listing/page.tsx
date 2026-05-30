@@ -28,9 +28,12 @@ export default function CreateListingPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // Get current location
-  const currentLocation = MOCK_LOCATIONS.find(
-    (loc) => loc.coordinates[0] === filters.coordinates[0] && loc.coordinates[1] === filters.coordinates[1]
-  ) || MOCK_LOCATIONS[0];
+  const storeCoords = filters.coordinates;
+  const currentLocation = storeCoords
+    ? (MOCK_LOCATIONS.find(
+        (loc) => loc.coordinates[0] === storeCoords[0] && loc.coordinates[1] === storeCoords[1]
+      ) || MOCK_LOCATIONS[0])
+    : MOCK_LOCATIONS[0];
 
   // Route protection & initialize address
   useEffect(() => {

@@ -28,10 +28,33 @@ export default function MapPage() {
   const [locating, setLocating] = useState(false);
   const [searchVal, setSearchVal] = useState(filters.query);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Trigger search on component load
   useEffect(() => {
-    setFilters({ coordinates: filters.coordinates });
+    if (typeof window === 'undefined') return;
+
+    // Fetch initial listings worldwide immediately on load
+    setFilters({ coordinates: null });
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([latitude, longitude]);
+          setFilters({ coordinates: [longitude, latitude] });
+        },
+        (error) => {
+          console.log('Background geolocation not granted or error:', error);
+          // Already loaded worldwide listings, so no further action needed
+        },
+        { enableHighAccuracy: true, timeout: 5000 }
+      );
+    }
   }, []);
 
   // Request browser geolocation on click
@@ -67,10 +90,23 @@ export default function MapPage() {
 
   // Center coordinate mapping for leaflet is [lat, lng]
   // In store, coordinates are [lng, lat] (GeoJSON format)
-  const mapCenter: [number, number] = [filters.coordinates[1], filters.coordinates[0]];
+  const mapCenter: [number, number] = filters.coordinates
+    ? [filters.coordinates[1], filters.coordinates[0]]
+    : [20, 0]; // Default to world view
+
+  if (!mounted) {
+    return (
+      <div className="w-full h-screen flex flex-col items-center justify-center bg-background gap-3">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+        <p className="text-xs font-extrabold text-muted-foreground uppercase tracking-widest">
+          Loading Map Explorer...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full h-screen flex flex-col pt-[80px] md:pt-[96px] overflow-hidden bg-background relative z-0">
+    <div className="w-full h-screen flex flex-col pt-0 md:pt-[96px] overflow-hidden bg-background relative z-0">
       
       {/* Desktop Search & Utility Bar: Hidden on Mobile to prevent duplicate inputs */}
       <div className="hidden md:flex bg-white dark:bg-neutral-900 border-b border-border/80 dark:border-white/5 py-3 px-6 justify-between items-center shrink-0">
@@ -79,9 +115,9 @@ export default function MapPage() {
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </Link>
           <div>
-            <h1 className="font-extrabold text-lg text-foreground tracking-tight leading-tight">Explore Hyperlocal Listings</h1>
+            <h1 className="font-extrabold text-lg text-foreground tracking-tight leading-tight">Explore Listings</h1>
             <p className="text-[10px] uppercase font-black text-muted-foreground tracking-wider">
-              Radius: {filters.distance} km • {listings.length} nearby rentals
+              {filters.coordinates ? `Radius: ${filters.distance} km • ${listings.length} nearby rentals` : `Showing Worldwide • ${listings.length} rentals`}
             </p>
           </div>
         </div>
@@ -99,11 +135,24 @@ export default function MapPage() {
             />
           </form>
 
+          {/* Worldwide Button */}
+          {filters.coordinates && (
+            <button
+              onClick={() => {
+                setUserLocation(null);
+                setFilters({ coordinates: null });
+              }}
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-muted hover:bg-muted/80 text-foreground border border-border/80 rounded-full text-xs font-black uppercase tracking-wider transition-all select-none active:scale-95 cursor-pointer"
+            >
+              <span>Show Worldwide</span>
+            </button>
+          )}
+
           {/* Locate Button */}
           <button
             onClick={handleLocateUser}
             disabled={locating}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-primary/10 text-primary border border-primary/10 hover:bg-primary/20 rounded-full text-xs font-black uppercase tracking-wider transition-all select-none active:scale-95 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-primary/10 text-primary border border-primary/10 hover:bg-primary/20 rounded-full text-xs font-black uppercase tracking-wider transition-all select-none active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             {locating ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -185,7 +234,7 @@ export default function MapPage() {
                 const isSelected = selectedListingId === item._id;
                 const itemLng = item.location?.coordinates?.[0];
                 const itemLat = item.location?.coordinates?.[1];
-                const travel = itemLat && itemLng
+                const travel = filters.coordinates && itemLat && itemLng
                   ? predictTravelTimes(mapCenter[0], mapCenter[1], itemLat, itemLng)
                   : null;
 
@@ -200,7 +249,7 @@ export default function MapPage() {
                     }}
                     className={`p-3 rounded-2xl border transition-all duration-300 cursor-pointer flex gap-3 active:scale-[0.98] ${
                       isSelected
-                        ? 'border-primary bg-primary/5 shadow-md'
+                        ? 'border-primary bg-primary/5'
                         : 'border-border/60 hover:border-primary/40 hover:bg-muted/10'
                     }`}
                   >
@@ -234,9 +283,10 @@ export default function MapPage() {
                             <span className="text-[9px] font-black text-foreground bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">
                               {travel.distance}
                             </span>
-                            <span className="block text-[7px] text-muted-foreground font-extrabold uppercase mt-0.5">
-                              🚗 {travel.driveMins} mins
-                            </span>
+                            <div className="flex flex-col text-[7px] text-muted-foreground font-extrabold uppercase items-end mt-1 gap-0.5">
+                              <span className="flex items-center gap-0.5 text-emerald-600">🚶 {travel.walkMins}m</span>
+                              <span className="flex items-center gap-0.5">🚗 {travel.driveMins}m</span>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -252,6 +302,8 @@ export default function MapPage() {
         <div className="absolute inset-0 md:relative md:flex-1 h-full z-0">
           <MapComponent
             center={mapCenter}
+            zoom={filters.coordinates ? 13 : 2}
+            showRadius={!!filters.coordinates}
             listings={listings}
             searchRadius={filters.distance}
             selectedListingId={selectedListingId}
@@ -263,7 +315,7 @@ export default function MapPage() {
         {/* MOBILE LAYOUT FLOATING OVERLAYS (md:hidden) */}
         
         {/* Mobile Top Floating Filter Capsule */}
-        <div className="md:hidden absolute top-4 left-4 right-4 z-10 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-3 rounded-2xl border border-border/40 shadow-xl flex flex-col gap-2.5 transition-all duration-300">
+        <div className="md:hidden absolute top-25 left-4 right-4 z-10 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-3 rounded-2xl border border-border/40 shadow-xl flex flex-col gap-2.5 transition-all duration-300">
           <div className="flex items-center gap-2">
             <Link href="/" className="p-1.5 hover:bg-muted rounded-full transition-colors active:scale-90">
               <ArrowLeft className="h-4.5 w-4.5 text-foreground" />
@@ -280,11 +332,24 @@ export default function MapPage() {
               />
             </form>
 
+            {/* Worldwide Button */}
+            {filters.coordinates && (
+              <button
+                onClick={() => {
+                  setUserLocation(null);
+                  setFilters({ coordinates: null });
+                }}
+                className="px-2.5 py-2 bg-muted hover:bg-muted/80 text-foreground border border-border rounded-full transition-all active:scale-90 text-[8px] font-black uppercase shrink-0 cursor-pointer"
+              >
+                World
+              </button>
+            )}
+
             {/* GPS Button */}
             <button
               onClick={handleLocateUser}
               disabled={locating}
-              className="p-2 bg-primary/10 text-primary border border-primary/10 hover:bg-primary/20 rounded-full transition-all active:scale-90 disabled:opacity-50"
+              className="p-2 bg-primary/10 text-primary border border-primary/10 hover:bg-primary/20 rounded-full transition-all active:scale-90 disabled:opacity-50 cursor-pointer"
             >
               {locating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -358,7 +423,7 @@ export default function MapPage() {
         <div className="md:hidden fixed mobile-map-carousel left-0 right-0 z-10 pointer-events-none">
           <div className="flex gap-3 overflow-x-auto hide-scrollbar px-4 py-2 snap-x snap-mandatory scroll-px-4 pointer-events-auto">
             {listings.length === 0 ? (
-              <div className="snap-center shrink-0 w-[290px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-4 rounded-2xl border border-border/40 shadow-xl text-center space-y-1">
+              <div className="snap-center shrink-0 w-[290px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-4 rounded-2xl border border-border/40 text-center space-y-1">
                 <p className="font-extrabold text-xs text-foreground">No listings nearby</p>
                 <p className="text-[10px] text-muted-foreground uppercase font-semibold">Try increasing search radius or adjust keywords.</p>
               </div>
@@ -367,7 +432,7 @@ export default function MapPage() {
                 const isSelected = selectedListingId === item._id;
                 const itemLng = item.location?.coordinates?.[0];
                 const itemLat = item.location?.coordinates?.[1];
-                const travel = itemLat && itemLng
+                const travel = filters.coordinates && itemLat && itemLng
                   ? predictTravelTimes(mapCenter[0], mapCenter[1], itemLat, itemLng)
                   : null;
 
@@ -380,7 +445,7 @@ export default function MapPage() {
                         setFilters({ coordinates: [itemLng, itemLat] });
                       }
                     }}
-                    className={`snap-center shrink-0 w-[290px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-2.5 rounded-2xl border flex gap-3 shadow-xl active:scale-[0.98] transition-all duration-300 ${
+                    className={`snap-center shrink-0 w-[290px] bg-white/95 dark:bg-neutral-900/95 backdrop-blur-md p-2.5 rounded-2xl border flex gap-3 active:scale-[0.98] transition-all duration-300 ${
                       isSelected ? 'border-primary' : 'border-border/40'
                     }`}
                   >
@@ -397,8 +462,12 @@ export default function MapPage() {
                       <div className="flex items-end justify-between">
                         <span className="text-xs font-black text-primary">{formatCurrency(item.pricePerDay)}/day</span>
                         {travel && (
-                          <span className="text-[8px] font-extrabold text-muted-foreground flex items-center gap-0.5">
-                            <Car className="h-3 w-3 text-primary" /> {travel.driveMins}m drive ({travel.distance})
+                          <span className="text-[8px] font-extrabold text-muted-foreground flex items-center gap-1.5 bg-muted/40 px-1.5 py-0.5 rounded-md border border-border/30">
+                            <span>{travel.distance}</span>
+                            <span className="w-1 h-1 rounded-full bg-border" />
+                            <span className="text-emerald-600">🚶 {travel.walkMins}m</span>
+                            <span className="w-1 h-1 rounded-full bg-border" />
+                            <span>🚗 {travel.driveMins}m</span>
                           </span>
                         )}
                       </div>
